@@ -102,13 +102,19 @@
         <div class="stage-title">
           <div class="stage-meta"><p class="eyebrow" id="stage-number">1학년 · 1-1</p><span id="battle-status" class="live">자동 전투 중</span></div>
           <h2 id="battle-title">신발장 입구</h2>
-          <div class="kill-bar" id="kill-bar" aria-hidden="true"><i id="kill-fill"></i><span id="kill-text">처치 0/18</span><b>BOSS</b></div>
         </div>
         <div class="hud-buttons">
           <button class="round-button sound-button" id="sound" type="button" aria-label="전투 효과음" aria-pressed="true"><svg aria-hidden="true"><use href="#i-note"/></svg></button>
           <button class="round-button" id="profile-button" type="button" aria-label="캐릭터 설정"><svg aria-hidden="true"><use href="#i-user"/></svg></button>
           <button class="round-button" id="help" type="button" aria-label="게임 도움말"><svg aria-hidden="true"><use href="#i-help"/></svg></button>
         </div>
+      </div>
+
+      <div class="status-line">
+        <div class="kill-bar" id="kill-bar" aria-hidden="true"><i id="kill-fill"></i><span id="kill-text">처치 0/18</span><b>BOSS</b></div>
+        <div class="chip timer-chip" id="dungeon-timer" hidden><i class="fill" id="dungeon-timer-fill"></i><svg aria-hidden="true"><use href="#i-bolt"/></svg><b id="dungeon-timer-text"></b><span class="sr-only" id="dungeon-timer-title"></span></div>
+        <div class="chip farm-chip" id="farm" hidden><i class="fill" id="farm-fill"></i><svg aria-hidden="true"><use href="#i-refresh"/></svg><b id="farm-title"></b><small id="farm-progress"></small><button id="retry-map" type="button">재도전</button></div>
+        <div class="chip phase-chip" id="pattern" hidden><i class="fill" id="pattern-fill"></i><svg aria-hidden="true"><use href="#i-shield"/></svg><b id="pattern-title"></b><span class="sr-only" id="pattern-hint"></span></div>
       </div>
 
       <div class="health-row">
@@ -130,12 +136,6 @@
       <div class="round-result" id="round-result" hidden></div>
       <div class="levelup" id="levelup" aria-hidden="true" hidden><b>LEVEL UP!</b><span id="levelup-text"></span></div>
 
-      <div class="arena-overlays">
-        <div class="pattern-strip dungeon-strip" id="dungeon-timer" hidden><span class="pattern-icon" aria-hidden="true"><svg><use href="#i-key"/></svg></span><div><b id="dungeon-timer-title"></b><small id="dungeon-timer-text"></small></div><i id="dungeon-timer-fill"></i></div>
-        <div class="pattern-strip" id="pattern" hidden><span class="pattern-icon" aria-hidden="true"><svg><use href="#i-shield"/></svg></span><div><b id="pattern-title"></b><small id="pattern-hint"></small></div><i id="pattern-fill"></i></div>
-        <div class="farm-strip" id="farm" hidden><span class="farm-icon" aria-hidden="true"><svg><use href="#i-refresh"/></svg></span><div><b id="farm-title"></b><small id="farm-progress"></small></div><button id="retry-map" type="button">지금 재도전</button></div>
-        <div class="loot-offer" id="first-loot" hidden><span class="loot-icon" aria-hidden="true"><svg><use href="#i-gift"/></svg></span><div><small>첫 장비 획득!</small><b>별무늬 손목띠 <em>공격력 +4</em></b></div><button type="button" id="equip-first">바로 장착</button></div>
-      </div>
 
       <div class="battle-actions">
         <button type="button" id="skill" class="skill"><span class="charge-fill" id="charge-fill"></span><span class="skill-icon" id="skill-icon" aria-hidden="true">➤</span><span class="skill-copy"><b id="skill-name">쏜살 돌진</b><small id="skill-detail">공격으로 충전</small></span><strong id="charge-text">0%</strong></button>
@@ -146,6 +146,7 @@
     </section>
 
     <div class="quest-bar">
+      <div class="loot-offer" id="first-loot" hidden><span class="loot-icon" aria-hidden="true"><svg><use href="#i-gift"/></svg></span><div><small>첫 장비 획득!</small><b>별무늬 손목띠 <em>공격력 +4</em></b></div><button type="button" id="equip-first">바로 장착</button></div>
       <div class="objective">
         <span class="objective-icon" aria-hidden="true"><svg><use href="#i-flag"/></svg></span>
         <div><small id="objective-label">다음 목표</small><b id="objective-title"></b><p id="objective-reward"></p></div>

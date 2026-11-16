@@ -351,7 +351,10 @@ function renderDungeonTimer() {
   const left = Math.max(0, state.dungeon ? state.dungeon.time : state.bossTime);
   const total = state.dungeon ? DUNGEON_TIME : BOSS_TIME;
   setText('dungeon-timer-title', state.dungeon ? `${DUNGEONS[state.dungeon.id].name} Lv.${state.dungeon.level}` : `보스 도전 · ${currentEnemy(state)}`);
-  setText('dungeon-timer-text', state.dungeon ? `남은 시간 ${Math.ceil(left)}초 · 졸개를 치우고 던전 보스를 이기세요` : `남은 시간 ${Math.ceil(left)}초 · 시간 안에 못 이기면 반복 수련`);
+  const left2 = Math.ceil(left);
+  setText('dungeon-timer-text', state.dungeon
+    ? `던전 남은 ${left2}초${state.front?.leader ? ' · 보스!' : ` · 졸개 ${aliveBehind(state) + 1}`}`
+    : `보스 도전 · 남은 ${left2}초`);
   $('dungeon-timer-fill').style.width = `${left / total * 100}%`;
   $('dungeon-timer').classList.toggle('hurry', left < 8);
   $('dungeon-timer').classList.toggle('boss-timer', boss);
@@ -363,7 +366,7 @@ function renderKills() {
   $('kill-fill').style.width = `${done / total * 100}%`;
   setText('kill-text', state.dungeon ? `졸개 ${aliveBehind(state) + (state.front?.leader ? 0 : 1)}명` : boss ? '보스 도전!' : `처치 ${done}/${total}`);
   $('kill-bar').classList.toggle('boss', boss);
-  $('kill-bar').hidden = Boolean(state.dungeon);
+  $('kill-bar').hidden = Boolean(state.dungeon) || (boss && !state.roundEnd) || Boolean(state.farm || state.roundEnd?.nextFarm);
   const pan = state.dungeon ? 50 : [8, 36, 64, 92][state.wave] ?? 50;
   $('arena').style.setProperty('--pan', `${pan}%`);
 }
@@ -473,8 +476,9 @@ function renderFarm() {
   const farm = afterRound || state.farm;
   $('farm').hidden = !farm;
   if (!farm) return;
-  $('farm-title').textContent = `${mapCode(state.map)} 반복 수련`;
-  $('farm-progress').textContent = !afterRound ? '수련 완료 · 같은 장소에 다시 도전해요.' : `수련 ${farm.wins} / ${FARM_WINS}승 · 코인, 경험치, 장비 보상`;
+  setText('farm-title', `${mapCode(state.map)} 반복 수련`);
+  setText('farm-progress', !afterRound ? '완료!' : `${farm.wins}/${FARM_WINS}승`);
+  $('farm-fill').style.width = `${(!afterRound ? 1 : farm.wins / FARM_WINS) * 100}%`;
   $('retry-map').disabled = Boolean(state.roundEnd || !state.farm);
 }
 
@@ -499,6 +503,7 @@ function renderPattern() {
   const [title, hint] = DAON_TEXT[phase];
   $('pattern-title').textContent = title;
   $('pattern-hint').textContent = hint;
+  $('pattern').title = hint;
   $('pattern-fill').style.width = `${clamp(state.bossTimer / BOSS_PHASES[phase].duration * 100, 0, 100)}%`;
 }
 

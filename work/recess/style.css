@@ -668,3 +668,35 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .fighter.rival.minion .sprite { max-height: 122px; }
 .fighter.rival.minion { justify-content: flex-start; }
 @media (max-height: 700px) { .fighter.rival.minion .sprite { max-height: 96px; } }
+
+/* ── 상태 줄: 캐릭터를 가리지 않게 제목 아래 한 줄로 ── */
+.status-line { display: flex; align-items: center; gap: 6px; min-width: 0; padding: 5px 10px 0; }
+.status-line .kill-bar { flex: 1 1 auto; width: auto; max-width: 260px; margin-top: 0; height: 18px; }
+.chip { position: relative; overflow: hidden; display: flex; align-items: center; gap: 4px; flex: 0 0 auto; height: 20px; padding: 0 3px 0 6px; border-radius: 10px; border: 1.5px solid rgba(255, 255, 255, .8); background: rgba(14, 8, 28, .78); color: #fff; font-size: 10px; white-space: nowrap; }
+.chip > * { position: relative; }
+.chip .fill { position: absolute; inset: 0 auto 0 0; width: 0; background: rgba(124, 199, 255, .45); transition: width .2s linear; }
+.chip svg { flex: 0 0 auto; width: 12px; height: 12px; }
+.chip b { font-weight: 700; text-shadow: 0 1px 0 #24133f, 1px 0 0 #24133f, -1px 0 0 #24133f; }
+.chip small { color: #fff3c2; font-size: 10px; font-weight: 700; }
+.timer-chip, .farm-chip { flex: 1 1 auto; max-width: 260px; padding-right: 8px; }
+.timer-chip .fill { background: linear-gradient(90deg, rgba(124, 199, 255, .55), rgba(183, 228, 255, .45)); }
+.timer-chip.boss-timer { border-color: #ffb48a; }
+.timer-chip.boss-timer .fill { background: linear-gradient(90deg, rgba(255, 106, 74, .7), rgba(255, 168, 90, .55)); }
+.timer-chip.hurry { animation: blink .6s ease-in-out infinite; }
+.farm-chip { padding-right: 2px; border-color: #8fe0d8; }
+.farm-chip .fill { background: rgba(43, 138, 138, .65); }
+.farm-chip b { overflow: hidden; text-overflow: ellipsis; }
+.farm-chip button { flex: 0 0 auto; margin-left: auto; height: 15px; padding: 0 7px; border: 0; border-radius: 8px; background: linear-gradient(var(--gold-hi), var(--gold)); color: #4a2a00; font-size: 10px; font-weight: 700; line-height: 15px; }
+.farm-chip button:disabled { background: rgba(255, 255, 255, .25); color: rgba(255, 255, 255, .6); }
+.phase-chip { border-color: #b79bff; }
+.phase-chip .fill { background: rgba(183, 155, 255, .5); }
+.phase-chip[data-phase='guard'] { border-color: #7cc7ff; }
+.phase-chip[data-phase='guard'] .fill { background: rgba(124, 199, 255, .55); }
+.phase-chip[data-phase='counter'] { border-color: #ff9a6b; animation: blink .5s ease-in-out infinite; }
+.phase-chip[data-phase='counter'] .fill { background: rgba(255, 120, 60, .6); }
+.phase-chip[data-phase='open'], .phase-chip[data-phase='broken'] { border-color: #7be0a6; }
+.phase-chip[data-phase='open'] .fill, .phase-chip[data-phase='broken'] .fill { background: rgba(60, 190, 120, .55); }
+/* 첫 장비 알림은 목표 띠 위에(전투 화면 밖) */
+.quest-bar { position: relative; }
+.quest-bar .loot-offer { position: absolute; inset: 5px 8px; z-index: 3; }
+@media (max-height: 700px) { .status-line { padding-top: 3px; } .chip, .status-line .kill-bar { height: 16px; } }
