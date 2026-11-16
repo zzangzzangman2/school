@@ -41,6 +41,13 @@
       <symbol id="i-fast" viewBox="0 0 24 24"><path d="M3 5l8 7-8 7zM12 5l8 7-8 7z"/></symbol>
       <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4.5"/><path d="M11.2 11.8 20 3M16.5 6.5l2.5 2.5M14 9l2 2"/></symbol>
       <symbol id="i-run" viewBox="0 0 24 24"><circle cx="14.5" cy="4.5" r="2"/><path d="M6 21l3.5-5.5 3 2.5v3M5 11l3-3.5h5l2.5 3.5 3.5 1M10.5 15.5 9.5 9"/></symbol>
+      <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></symbol>
+      <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="m3.5 7 8.5 6.5L20.5 7"/></symbol>
+      <symbol id="i-shop" viewBox="0 0 24 24"><path d="M3.5 9.5 5 4h14l1.5 5.5M3.5 9.5h17v1a3 3 0 0 1-5.7 1.3 3 3 0 0 1-5.6 0A3 3 0 0 1 3.5 10.5z"/><path d="M5 13v7h14v-7M10 20v-4h4v4"/></symbol>
+      <symbol id="i-crown" viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/><path d="M5 19h14"/></symbol>
+      <symbol id="i-megaphone" viewBox="0 0 24 24"><path d="M3 10v4h3l9 5V5L6 10z"/><path d="M18.5 9a4 4 0 0 1 0 6M6 14l1.5 5h3L9 15"/></symbol>
+      <symbol id="i-tray" viewBox="0 0 24 24"><path d="M3 15h18M5 15a7 7 0 0 1 14 0M12 6v2M3 18.5h18"/></symbol>
+      <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.6"/><path d="M15.5 14.2A5 5 0 0 1 21 19"/></symbol>
       <symbol id="i-school" viewBox="0 0 24 24"><path d="M3 21h18M5 21V10l7-5 7 5v11M9.5 21v-5h5v5M10 10.5h4"/><path d="M12 5V2.5h3"/></symbol>
       <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4M8.5 14.5l2.2 2.2 4.8-4.7"/></symbol>
       <symbol id="st-eraser" viewBox="0 0 24 24"><path d="M3.5 15.5 12 7l7 7-6 6H8z"/><path d="M8.5 10.5l7 7"/></symbol>
@@ -87,14 +94,15 @@
         <div class="hud-profile">
           <span class="lv-badge"><small>Lv</small><b id="level">1</b></span>
           <span class="hud-id">
-            <b class="hud-name" id="hero-label">새봄</b>
+            <span class="hud-nameline"><b class="hud-name" id="hero-label">새봄</b><em class="hud-tier" id="hud-tier">새내기</em></span>
             <span class="hud-power" title="전투력"><svg aria-hidden="true"><use href="#i-bolt"/></svg><span class="sr-only">전투력</span><b id="power">87</b></span>
           </span>
           <div class="experience" role="progressbar" aria-label="레벨 경험치" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="xp-fill"></i></div>
         </div>
         <div class="wallet" aria-label="보유 재화">
           <span class="money" title="코인"><i class="cur coin" aria-hidden="true"></i><span class="sr-only">코인</span><b id="coins">12</b></span>
-          <span class="money" title="천 조각"><i class="cur patch" aria-hidden="true"></i><span class="sr-only">천 조각</span><b id="patches">0</b></span>
+          <span class="money patch-money" title="천 조각"><i class="cur patch" aria-hidden="true"></i><span class="sr-only">천 조각</span><b id="patches">0</b></span>
+          <button type="button" class="money gem-money" id="gem-button" aria-label="보석 상점 열기"><i class="cur gem" aria-hidden="true"></i><b id="gems">0</b><span class="plus" aria-hidden="true">+</span></button>
         </div>
       </header>
 
@@ -104,9 +112,10 @@
           <h2 id="battle-title">신발장 입구</h2>
         </div>
         <div class="hud-buttons">
-          <button class="round-button sound-button" id="sound" type="button" aria-label="전투 효과음" aria-pressed="true"><svg aria-hidden="true"><use href="#i-note"/></svg></button>
-          <button class="round-button" id="profile-button" type="button" aria-label="캐릭터 설정"><svg aria-hidden="true"><use href="#i-user"/></svg></button>
-          <button class="round-button" id="help" type="button" aria-label="게임 도움말"><svg aria-hidden="true"><use href="#i-help"/></svg></button>
+          <button class="round-button" id="map-button" type="button" aria-label="학교 지도"><svg aria-hidden="true"><use href="#i-map"/></svg></button>
+          <button class="round-button" id="shop-button" type="button" aria-label="상점"><svg aria-hidden="true"><use href="#i-shop"/></svg><i class="notification" id="shop-dot" hidden></i></button>
+          <button class="round-button" id="mail-button" type="button" aria-label="우편함"><svg aria-hidden="true"><use href="#i-mail"/></svg><i class="notification count" id="mail-dot" hidden></i></button>
+          <button class="round-button" id="menu-button" type="button" aria-label="설정"><svg aria-hidden="true"><use href="#i-gear"/></svg></button>
         </div>
       </div>
 
@@ -128,6 +137,7 @@
 
       <div class="fight">
         <div class="snacks" id="snacks" aria-label="매점 간식 버프"></div>
+        <div class="allies" id="allies" aria-hidden="true"></div>
         <div class="fighter player" id="player"><div class="sprite" id="player-sprite" data-sprite="boy" aria-hidden="true"></div><div class="shadow"></div></div>
         <div></div>
         <div class="fighter rival" id="rival"><div class="sprite" id="rival-sprite" data-sprite="rival1" aria-hidden="true"></div><div class="shadow"></div></div>
@@ -139,7 +149,7 @@
 
       <div class="battle-actions">
         <button type="button" id="skill" class="skill"><span class="charge-fill" id="charge-fill"></span><span class="skill-icon" id="skill-icon" aria-hidden="true">➤</span><span class="skill-copy"><b id="skill-name">쏜살 돌진</b><small id="skill-detail">공격으로 충전</small></span><strong id="charge-text">0%</strong></button>
-        <button type="button" id="skill-picker" class="advance skill-picker" aria-haspopup="dialog"><svg aria-hidden="true"><use href="#i-swap"/></svg><span>스킬 변경</span></button>
+        <div class="actives" id="actives" aria-label="액티브 스킬"></div>
         <button type="button" id="speed" class="advance speed" aria-label="2배속" aria-pressed="false"><b id="speed-label">x1</b><span>배속</span></button>
         <button type="button" id="advance" class="advance" role="switch" aria-checked="true"><span class="switch"></span><span>자동 진격</span></button>
       </div>
@@ -170,10 +180,52 @@
       </section>
 
       <section class="view" id="view-training" aria-labelledby="training-title" hidden>
+        <div class="subtabs" id="growth-tabs" role="tablist" aria-label="성장 메뉴">
+          <button type="button" role="tab" data-sub="train" aria-selected="true">훈련</button>
+          <button type="button" role="tab" data-sub="skills" aria-selected="false">스킬</button>
+          <button type="button" role="tab" data-sub="tier" aria-selected="false">승급<i class="notification" id="tier-dot" hidden></i></button>
+          <button type="button" role="tab" data-sub="academy" aria-selected="false">학원<i class="notification" id="academy-dot" hidden></i></button>
+        </div>
+        <div class="subpanel" data-panel="train">
         <div class="section-head"><div><h2 id="training-title">훈련</h2><p>꾹 누르고 있으면 연속으로 올라가요.</p></div><div class="buy-mode" id="buy-mode" role="group" aria-label="한 번에 올릴 횟수"><button type="button" data-buy="1" aria-pressed="true">x1</button><button type="button" data-buy="10" aria-pressed="false">x10</button><button type="button" data-buy="max" aria-pressed="false">MAX</button></div></div>
         <div class="stack" id="training-list"></div>
         <div class="section-head sub"><div><h3 class="subhead">오늘의 시간표</h3><p class="muted" id="class-note">1학년 반장에게 이기면 과목을 고를 수 있어요.</p></div></div>
         <div class="stack" id="class-list"></div>
+        </div>
+        <div class="subpanel" data-panel="skills" hidden>
+          <div class="section-head"><div><h2>액티브 스킬</h2><p>승급할 때마다 한 칸씩 열리고, 켜 두면 자동으로 써요.</p></div><button type="button" class="auto-skill small" id="auto-actives" role="switch" aria-checked="true"><span>자동</span><span class="switch"></span></button></div>
+          <div class="stack" id="active-list"></div>
+          <div class="section-head sub"><div><h3 class="subhead">필살기</h3><p>공격으로 기력을 모아 쓰는 큰 기술이에요.</p></div><button type="button" id="skill-picker" class="pill-button" aria-haspopup="dialog">스킬 변경</button></div>
+          <div class="stack" id="ultimate-card"></div>
+        </div>
+        <div class="subpanel" data-panel="tier" hidden>
+          <div class="tier-card" id="tier-card"></div>
+          <div class="section-head sub"><div><h3 class="subhead">승급 단계</h3><p>승급할 때마다 공격력·체력 ×1.3, 2·4단계에서 동료 칸이 하나씩 늘어요.</p></div></div>
+          <ol class="tier-list" id="tier-list"></ol>
+        </div>
+        <div class="subpanel" data-panel="academy" hidden>
+          <div class="prestige-card">
+            <div class="prestige-art" aria-hidden="true"><svg><use href="#i-school"/></svg></div>
+            <div class="prestige-copy"><small id="prestige-stats"></small><b>전학 가기</b><p id="prestige-gain"></p></div>
+            <button type="button" class="prestige-button" id="prestige-button">전학</button>
+          </div>
+          <div class="section-head sub"><div><h3 class="subhead">방과 후 학원</h3><p>명예 배지로 배운 능력은 전학 가도 그대로예요.</p></div><span class="pill badge-pill"><i class="cur badge" aria-hidden="true"></i>배지 <b id="badge-count">0</b></span></div>
+          <div class="stack" id="perk-list"></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-party" aria-labelledby="party-title" hidden>
+        <div class="section-head"><div><h2 id="party-title">동료</h2><p>출전한 친구가 함께 싸워요. 갖고만 있어도 공격력이 올라요.</p></div><span class="pill" id="party-owned"></span></div>
+        <div class="party-slots" id="party-slots"></div>
+        <div class="section-head sub"><div><h3 class="subhead">반 친구들</h3><p id="party-summary"></p></div><button type="button" class="pill-button" id="go-recruit">동료 모집</button></div>
+        <div class="mate-grid" id="mate-grid"></div>
+      </section>
+
+      <section class="view" id="view-shop" aria-labelledby="shop-title" hidden>
+        <div class="section-head"><div><h2 id="shop-title">매점 상점</h2><p>보석으로 뽑기권·모집권·열쇠를 살 수 있어요.</p></div><span class="pill gem-pill"><i class="cur gem" aria-hidden="true"></i>보석 <b id="shop-gems">0</b></span></div>
+        <div class="shop-grid" id="shop-list"></div>
+        <div class="section-head sub"><div><h3 class="subhead">특별 상품</h3><p>결제 기능은 준비 중이에요.</p></div></div>
+        <div class="stack" id="cash-list"></div>
       </section>
 
       <section class="view" id="view-bag" aria-labelledby="bag-title" hidden>
@@ -184,18 +236,16 @@
       </section>
 
       <section class="view" id="view-grades" aria-labelledby="grades-title" hidden>
-        <div class="prestige-card">
-          <div class="prestige-art" aria-hidden="true"><svg><use href="#i-school"/></svg></div>
-          <div class="prestige-copy"><small id="prestige-stats"></small><b>전학 가기</b><p id="prestige-gain"></p></div>
-          <button type="button" class="prestige-button" id="prestige-button">전학</button>
-        </div>
-        <div class="section-head sub"><div><h2 id="grades-title">학교 지도</h2><p>6-3 보스를 이기면 다음 년차로 넘어가요.</p></div><span class="pill" id="grade-count"></span></div>
+        <div class="section-head"><div><h2 id="grades-title">학교 지도</h2><p>6-3 보스를 이기면 다음 년차로 넘어가요.</p></div><span class="pill" id="grade-count"></span></div>
         <div class="stack" id="grade-list"></div>
-        <div class="section-head sub"><div><h3 class="subhead">방과 후 학원</h3><p>명예 배지로 배운 능력은 전학 가도 그대로예요.</p></div><span class="pill badge-pill"><i class="cur badge" aria-hidden="true"></i>배지 <b id="badge-count">0</b></span></div>
-        <div class="stack" id="perk-list"></div>
       </section>
 
       <section class="view" id="view-gacha" aria-labelledby="gacha-title" hidden>
+        <div class="subtabs" id="gacha-tabs" role="tablist" aria-label="뽑기 종류">
+          <button type="button" role="tab" data-sub="stickers" aria-selected="true">스티커</button>
+          <button type="button" role="tab" data-sub="recruit" aria-selected="false">동료 모집<i class="notification" id="recruit-dot" hidden></i></button>
+        </div>
+        <div class="subpanel" data-panel="stickers">
         <div class="section-head"><div><h2 id="gacha-title">문방구 스티커 뽑기</h2><p>모은 스티커는 갖고만 있어도 능력치가 올라요.</p></div><span class="pill ticket-pill"><i class="cur ticket" aria-hidden="true"></i>뽑기권 <b id="ticket-count">0</b>장</span></div>
         <div class="gacha-banner">
           <div class="gacha-copy"><small>문방구 신상 입고!</small><b>황금 샤프 <em>전설</em></b><p>10회 뽑기는 희귀 이상 1장 확정</p></div>
@@ -205,6 +255,16 @@
         <p class="gacha-rates" id="gacha-rates"></p>
         <div class="section-head sub"><div><h3 class="subhead">스티커 도감</h3><p id="sticker-summary"></p></div><span class="pill" id="sticker-count"></span></div>
         <div class="sticker-grid" id="sticker-grid"></div>
+        </div>
+        <div class="subpanel" data-panel="recruit" hidden>
+          <div class="section-head"><div><h2>반 친구 모집</h2><p>모은 친구는 동료 탭에서 출전시킬 수 있어요.</p></div><span class="pill ticket-pill"><i class="cur recruit" aria-hidden="true"></i>모집권 <b id="recruit-count">0</b>장</span></div>
+          <div class="gacha-banner recruit-banner">
+            <div class="gacha-copy"><small>전설 동료 등장!</small><b>임원 보미 <em>전설</em></b><p>10회 모집은 희귀 이상 1명 확정</p></div>
+            <div class="gacha-art" aria-hidden="true"><span class="sprite mate-art" data-sprite="mob8"></span></div>
+          </div>
+          <div class="gacha-buttons" id="recruit-buttons"></div>
+          <p class="gacha-rates" id="recruit-rates"></p>
+        </div>
       </section>
 
       <section class="view" id="view-activities" aria-labelledby="activities-title" hidden>
@@ -212,6 +272,8 @@
         <ol class="attendance" id="attendance"></ol>
         <div class="section-head sub"><div><h3 class="subhead">일일 미션</h3><p>매일 자정에 새로 바뀌어요.</p></div></div>
         <div class="stack" id="daily-list"></div>
+        <div class="section-head sub"><div><h3 class="subhead">성장 패스</h3><p id="pass-note">최고 기록 맵 3개마다 한 칸씩 보상이 열려요.</p></div><button type="button" class="pill-button" id="pass-claim">모두 받기</button></div>
+        <ol class="pass-track" id="pass-track"></ol>
         <div class="section-head sub"><div><h3 class="subhead">쉬는 시간 업적</h3><p>대결·맵 탐방·장비 수집으로 보상을 모아요.</p></div></div>
         <div class="stack" id="mission-list"></div>
       </section>
@@ -219,17 +281,17 @@
 
     <nav class="bottom-nav" aria-label="게임 메뉴">
       <button type="button" data-view="battle" aria-current="page"><svg class="nav-icon" aria-hidden="true"><use href="#i-swords"/></svg>대결<i class="notification" id="battle-dot" hidden></i></button>
-      <button type="button" data-view="training"><svg class="nav-icon" aria-hidden="true"><use href="#i-dumbbell"/></svg>훈련<i class="notification" id="training-dot" hidden></i></button>
+      <button type="button" data-view="training"><svg class="nav-icon" aria-hidden="true"><use href="#i-dumbbell"/></svg>성장<i class="notification" id="training-dot" hidden></i></button>
+      <button type="button" data-view="party"><svg class="nav-icon" aria-hidden="true"><use href="#i-users"/></svg>동료<i class="notification" id="party-dot" hidden></i></button>
       <button type="button" data-view="bag"><svg class="nav-icon" aria-hidden="true"><use href="#i-bag"/></svg>가방<i class="notification" id="bag-dot" hidden></i></button>
       <button type="button" data-view="gacha"><svg class="nav-icon" aria-hidden="true"><use href="#i-ticket"/></svg>뽑기<i class="notification" id="gacha-dot" hidden></i></button>
-      <button type="button" data-view="grades"><svg class="nav-icon" aria-hidden="true"><use href="#i-map"/></svg>지도<i class="notification" id="grades-dot" hidden></i></button>
       <button type="button" data-view="activities"><svg class="nav-icon" aria-hidden="true"><use href="#i-star"/></svg>목표<i class="notification" id="mission-dot" hidden></i></button>
     </nav>
     <div class="toast" id="toast" role="status" hidden></div>
   </div>
 
   <dialog id="dialog">
-    <div class="dialog-icon" aria-hidden="true" id="dialog-icon">✦</div><h2 id="dialog-title"></h2><div id="dialog-content"></div><form method="dialog"><button class="confirm">좋아요</button></form>
+    <div class="dialog-icon" aria-hidden="true" id="dialog-icon">✦</div><h2 id="dialog-title"></h2><div id="dialog-content"></div><button type="button" class="confirm gold" id="offline-double" hidden>보석 50으로 코인 2배</button><form method="dialog"><button class="confirm">좋아요</button></form>
   </dialog>
   <dialog id="gacha-dialog" class="gacha-dialog" aria-labelledby="gacha-result-title">
     <h2 id="gacha-result-title">뽑기 결과</h2>
@@ -251,6 +313,20 @@
     <ol class="attendance compact" id="attend-dialog-list"></ol>
     <form method="dialog"><button class="confirm" id="attend-dialog-claim">출석하고 받기</button></form>
   </dialog>
+  <dialog id="settings-dialog" aria-labelledby="settings-title">
+    <div class="dialog-icon" aria-hidden="true"><svg><use href="#i-gear"/></svg></div><h2 id="settings-title">설정</h2>
+    <div class="settings-list">
+      <button class="setting-row sound-button" id="sound" type="button" aria-label="전투 효과음" aria-pressed="true"><svg aria-hidden="true"><use href="#i-note"/></svg><span>전투 효과음</span><b class="switch"></b></button>
+      <button class="setting-row" id="profile-button" type="button" aria-label="캐릭터 설정"><svg aria-hidden="true"><use href="#i-user"/></svg><span>캐릭터·닉네임 바꾸기</span><b>›</b></button>
+      <button class="setting-row" id="help" type="button" aria-label="게임 도움말"><svg aria-hidden="true"><use href="#i-help"/></svg><span>게임 도움말</span><b>›</b></button>
+    </div>
+    <form method="dialog"><button class="confirm">닫기</button></form>
+  </dialog>
+  <dialog id="mail-dialog" aria-labelledby="mail-title">
+    <div class="dialog-icon" aria-hidden="true"><svg><use href="#i-mail"/></svg></div><h2 id="mail-title">우편함</h2><p id="mail-note"></p>
+    <ul class="mail-list" id="mail-list"></ul>
+    <div class="dialog-actions"><form method="dialog"><button class="confirm ghost-light">닫기</button></form><button type="button" class="confirm gold" id="mail-claim-all">모두 받기</button></div>
+  </dialog>
   <dialog id="skill-dialog" aria-labelledby="skill-dialog-title">
     <div class="dialog-icon" aria-hidden="true"><svg><use href="#i-swords"/></svg></div><h2 id="skill-dialog-title">전투 스킬</h2><p>스킬 하나를 장착하세요. 전투 중에도 바꿀 수 있어요.</p>
     <div class="stack" id="skill-choices"></div>
@@ -260,6 +336,7 @@
   <noscript>게임을 실행하려면 브라우저에서 JavaScript를 켜 주세요.</noscript>
   <script src="game.js"></script>
   <script src="wardrobe.js"></script>
+  <script src="meta-ui.js"></script>
   <script src="ui.js"></script>
 </body>
 </html>

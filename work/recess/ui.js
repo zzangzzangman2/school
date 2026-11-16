@@ -81,6 +81,7 @@ function showDialog(title, paragraphs, icon) {
   $('dialog-title').textContent = title;
   setIcon($('dialog-icon'), icon);
   $('dialog-content').classList.remove('reward-lines');
+  $('offline-double').hidden = true;
   $('dialog-content').replaceChildren(...paragraphs.map(text => {
     const paragraph = document.createElement('p');
     paragraph.textContent = text;
@@ -166,6 +167,8 @@ function combatEvent(type, event) {
   if (type === 'finish' && event.result === 'win' && (event.boss || event.reward)) playSound('win');
   if (type === 'finish' && event.result === 'win') flyCoins(event.boss ? 6 : 2);
   if (type === 'kill') flyCoins(1);
+  if (type === 'ally') onAlly(event);
+  if (type === 'active') onActive(event);
   if (type === 'splash' && !reducedMotion.matches) {
     $('pack').classList.remove('hit');
     void $('pack').offsetWidth;
@@ -268,9 +271,11 @@ function catchUp(seconds) {
   if (state.level > before.level) details.push(`레벨 ${before.level} → ${state.level}`);
   if (state.tickets > before.tickets) details.push(`뽑기권 +${state.tickets - before.tickets}`);
   if (state.bag.length > before.bag) details.push(`새 장비 ${state.bag.length - before.bag}개가 가방에 있어요.`);
+  const gained = state.coins - before.coins;
   queuePopup(() => {
     showDialog('쉬는 시간 보상', details, '#i-gift');
     $('dialog-content').classList.add('reward-lines');
+    offerOfflineDouble(gained);
   });
 }
 
@@ -350,10 +355,10 @@ function renderDungeonTimer() {
   if (!active) return;
   const left = Math.max(0, state.dungeon ? state.dungeon.time : state.bossTime);
   const total = state.dungeon ? DUNGEON_TIME : BOSS_TIME;
-  setText('dungeon-timer-title', state.dungeon ? `${DUNGEONS[state.dungeon.id].name} Lv.${state.dungeon.level}` : `보스 도전 · ${currentEnemy(state)}`);
+  setText('dungeon-timer-title', state.dungeon ? `${dungeonInfo(state.dungeon.id).name} Lv.${state.dungeon.level}` : `보스 도전 · ${currentEnemy(state)}`);
   const left2 = Math.ceil(left);
   setText('dungeon-timer-text', state.dungeon
-    ? `던전 남은 ${left2}초${state.front?.leader ? ' · 보스!' : ` · 졸개 ${aliveBehind(state) + 1}`}`
+    ? (state.dungeon.id === 'trial' ? `승급 시험 남은 ${left2}초` : `던전 남은 ${left2}초${state.front?.leader ? ' · 보스!' : ` · 졸개 ${aliveBehind(state) + 1}`}`)
     : `보스 도전 · 남은 ${left2}초`);
   $('dungeon-timer-fill').style.width = `${left / total * 100}%`;
   $('dungeon-timer').classList.toggle('hurry', left < 8);
@@ -374,8 +379,8 @@ function renderKills() {
 function renderBattle() {
   const map = MAPS[state.map];
   const gradeNumber = gradeIndex(state.map) + 1;
-  const dungeon = state.dungeon ? DUNGEONS[state.dungeon.id] : null;
-  setText('stage-number', dungeon ? `던전 · Lv.${state.dungeon.level}` : `${state.cycle + 1}년차 ${gradeNumber}학년 · ${mapCode(state.map)}`);
+  const dungeon = state.dungeon ? dungeonInfo(state.dungeon.id) : null;
+  setText('stage-number', dungeon ? (state.dungeon.id === 'trial' ? `승급 시험 · ${tierName(state.dungeon.level)}` : `던전 · Lv.${state.dungeon.level}`) : `${state.cycle + 1}년차 ${gradeNumber}학년 · ${mapCode(state.map)}`);
   setText('battle-title', dungeon ? dungeon.name : map.place);
   $('arena').dataset.map = dungeon ? (dungeon.background || dungeon.map + 1) : state.map + 1;
   $('arena').classList.toggle('dungeon-round', Boolean(dungeon));
@@ -763,6 +768,8 @@ function rewardChips(reward, unitCoins = true) {
   if (reward.coins) add('coin', unitCoins ? reward.coins * coinUnit(state) : reward.coins);
   if (reward.tickets) add('ticket', reward.tickets);
   if (reward.patches) add('patch', reward.patches);
+  if (reward.gems) add('gem', reward.gems);
+  if (reward.recruits) add('recruit', reward.recruits);
   if (reward.badges) add('badge', reward.badges);
   return wrap;
 }
@@ -853,7 +860,8 @@ function renderMissions() {
       state.missions[id]++;
       state.coins += coins;
       state.patches += patches;
-      message(`코인 +${coins} · 천 조각 +${patches}`);
+      state.gems += 10;
+      message(`코인 +${coins} · 천 조각 +${patches} · 보석 +10`);
       commit();
     }, {
       selected: ready && !allDone, disabled: !ready || allDone, kind: ready && !allDone ? 'claim' : '', tone: MISSION_TONES[id],
@@ -920,7 +928,7 @@ function doTransfer() {
   combatEvent('enter', {});
   renderedRound = '';
   previousObjective = '';
-  selectView('grades');
+  openView('training:academy');
   showDialog('새 학교 첫날!', [`${state.prestige.count}번째 전학이에요. 1년차 1-1 신발장 입구부터 다시 시작해요.`, `명예 배지 +${fmt(gain)}`, '아래 방과 후 학원에서 배지로 영구 능력치를 올리세요.'], '#i-star');
   $('dialog-content').classList.add('reward-lines');
   commit();
@@ -1051,6 +1059,7 @@ function pull(count, currency) {
   if (state.roundEnd?.result !== 'loss') state.hp = clamp(Math.round(ratio * maxHp(state)), 1, maxHp(state));
   refreshDay(state, todayKey());
   state.daily.pulls += count;
+  state.stats.pulls += count;
   lastPull = { count, currency };
   showGachaResults(results);
   commit();
@@ -1242,19 +1251,19 @@ function render() {
   $('bag-dot').hidden = !state.bag.some(id => gearScore(id) > gearScore(state.equipped[GEAR[id].slot]));
   const missionReady = Object.entries(MISSIONS).some(([id, mission]) => mission.value(state) >= nextMission(state, id).target);
   $('mission-dot').hidden = !(missionReady || state.attendance.last !== todayKey() || dailyReady());
-  $('training-dot').hidden = currentView === 'training' || !trainingReady();
+  $('training-dot').hidden = currentView === 'training' || !(trainingReady() || tierReady(state) || academyReady());
   $('gacha-dot').hidden = state.tickets < 1;
   refreshDay(state, todayKey());
   $('battle-dot').hidden = currentView === 'battle' || !Object.keys(DUNGEONS).some(id => dungeonUnlocked(state, id) && dungeonKeys(state, id) > 0);
   if (state.dungeonResult && state.dungeonResult.serial !== shownDungeonResult) {
     if (shownDungeonResult !== null) {
       const result = state.dungeonResult;
-      message(`${DUNGEONS[result.id].name} Lv.${result.level} ${result.sweep ? '소탕' : result.win ? '클리어' : result.reason === 'timeout' ? '시간 초과' : '실패'} · ${result.text}`);
+      message(`${dungeonInfo(result.id).name}${result.id === 'trial' ? '' : ` Lv.${result.level}`} ${result.sweep ? '소탕' : result.win ? '클리어' : result.reason === 'timeout' ? '시간 초과' : '실패'} · ${result.text}`);
     }
     shownDungeonResult = state.dungeonResult.serial;
   }
   const perkReady = Object.keys(PERKS).some(id => state.prestige.perks[id] < PERKS[id].cap && state.prestige.badges >= perkCost(state, id));
-  $('grades-dot').hidden = !(perkReady || (state.prestige.count === 0 && prestigeGain(state) > 0));
+  void perkReady;
   setText('speed-label', `x${state.speed}`);
   $('speed').classList.toggle('fast', state.speed === 2);
   $('speed').setAttribute('aria-pressed', String(state.speed === 2));
@@ -1262,14 +1271,18 @@ function render() {
   lastLevel = state.level;
   renderSnacks();
   renderBattle();
-  renderObjective();
+  renderMetaHud();
+  renderActives();
+  renderAllies();
   const viewModels = {
     battle: [state.log, state.dungeons, state.daily?.keys, Boolean(state.dungeon), state.totalClears, state.prestige.count, state.prestige.perks, state.stickers],
-    training: [state.coins, state.training, firstGradeWon(state), state.classId, buyMode],
+    training: [growthTab, Object.keys(TRAINING).map(id => { const plan = trainingPlan(id); return [plan.count, plan.total, state.coins >= plan.total]; }), state.training, firstGradeWon(state), state.classId, buyMode, state.tier, state.level, state.prestige, state.autoSkills, state.skillId, Boolean(state.dungeon), bestProgress(state)],
+    party: [state.companions, state.party, state.tier],
+    shop: [state.gems, state.daily?.shop, state.premium],
     bag: [state.bag, state.equipped, state.ranks, state.patches, gearFilter, state.profile.gender],
-    gacha: [state.tickets, state.coins, state.stickers, state.cleared],
+    gacha: [gachaTab, state.tickets, state.coins >= gachaCoinCost(1), state.coins >= gachaCoinCost(10), state.stickers, state.cleared, state.recruits, state.gems],
     grades: [state.map, state.cleared, state.cycle, state.prestige, state.level],
-    activities: [state.missions, state.wins, state.cleared, state.bag, state.patches, state.attendance, state.daily, todayKey()],
+    activities: [state.missions, state.wins, state.cleared, state.bag, state.patches, state.attendance, state.daily, todayKey(), state.pass, passTiers(state), state.premium.pass],
   };
   const fingerprint = JSON.stringify([currentView, viewModels[currentView]]);
   if (fingerprint === previousModel) return;
@@ -1282,11 +1295,16 @@ function render() {
       return li;
     }));
   }
-  if (currentView === 'training') renderTraining();
+  if (currentView === 'training') renderGrowth();
+  if (currentView === 'party') renderParty();
+  if (currentView === 'shop') renderShop();
   if (currentView === 'bag') renderBag();
-  if (currentView === 'gacha') renderGacha();
+  if (currentView === 'gacha') renderGachaView();
   if (currentView === 'grades') renderGrades();
-  if (currentView === 'activities') renderMissions();
+  if (currentView === 'activities') {
+    renderMissions();
+    renderPass();
+  }
 }
 
 function commit() { save(); render(); }
@@ -1389,6 +1407,7 @@ function start() {
   const snapshot = readSave();
   const restored = restore(snapshot);
   state = restored || newGame();
+  if (!restored) welcomeMail(state);
   if (restored) initialOffline = Math.max(0, (openedAt - snapshot.when) / 1000);
   document.addEventListener('pointerdown', unlockAudio);
   $('profile-form').addEventListener('submit', event => {
@@ -1409,7 +1428,7 @@ function start() {
   $('profile-button').addEventListener('click', showProfileEditor);
   $('cancel-profile').addEventListener('click', enterGame);
   document.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => selectView(button.dataset.view)));
-  $('objective-button').addEventListener('click', () => selectView('grades'));
+  bindMetaUI();
   $('skill').addEventListener('click', () => {
     if (!activateSkill(state, combatEvent)) return;
     commit();

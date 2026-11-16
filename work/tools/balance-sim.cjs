@@ -31,6 +31,9 @@ const DAY = HOURS * 3600;
 const state = g.newGame();
 state.profile = { name: 'sim', gender: 'boy' };
 state.tickets = 10;
+state.gems = 300;
+state.recruits = 5;
+state.stats.pulls = 0;
 
 let time = 0;
 let lastClearAt = 0;
@@ -50,17 +53,26 @@ function snacksActive(on) {
   for (const id of ['choco', 'banana', 'berry']) state.snacks[id] = on ? 600 : 0;
 }
 
-function dps() {
+function dps(crowd = false) {
   const crit = g.critChance(state);
   const avg = (3 * (1 + crit * 0.8) + 2.2) / 4;
-  return g.attack(state) * avg / g.interval(state);
+  const tier = state.tier;
+  const cheer = tier >= 2 ? 1 + 0.5 * 6 / 15 : 1;
+  const sprint = tier >= 4 ? 1 + 0.5 * 6 / 18 : 1;
+  const attackNow = g.attack(state);
+  const player = attackNow * avg / g.interval(state) * sprint;
+  let allies = 0;
+  for (let slot = 0; slot < g.partySlots(state); slot++) if (state.party[slot]) allies += attackNow * g.allyPower(state, state.party[slot]) / g.ALLY_INTERVAL;
+  const pencil = tier >= 1 ? attackNow * 2 * (1 + 0.15 * Math.max(0, tier - 1)) / 8 * (crowd ? 3 : 1) : 0;
+  return (player + allies + pencil) * cheer;
 }
+function effectiveHp() { return g.maxHp(state) * (state.tier >= 3 ? 1.35 : 1); }
 
 function fight(map, wave, hpNow, easy = 0) {
   return withFight(map, wave, () => {
     state.farm = easy ? { cap: 0, easy, wins: 0 } : null;
     const hp = g.enemyMaxHp(state);
-    const ttk = hp / dps();
+    const ttk = hp / dps(wave < g.BOSS_WAVE);
     const grade = Math.floor(map / g.MAPS_PER_GRADE);
     const every = 1.65 - grade * 0.06 + 0.25;
     const hits = ttk <= 1.35 ? 0 : Math.floor((ttk - 1.35) / every) + 1;
@@ -69,7 +81,7 @@ function fight(map, wave, hpNow, easy = 0) {
     const crowd = wave < g.BOSS_WAVE;
     const damage = hits * baseHit(map, wave) * 0.64 ** easy * (crowd ? 0.73 : 1);
     const inTime = crowd || easy || ttk <= g.BOSS_TIME;
-    return { win: damage < hpNow && inTime, time: Math.min(ttk, crowd ? Infinity : g.BOSS_TIME) + 1.35 + (crowd ? 0.9 : 0), damage };
+    return { win: damage < hpNow * (state.tier >= 3 ? 1.35 : 1) && inTime, time: Math.min(ttk, crowd ? Infinity : g.BOSS_TIME) + 1.35 + (crowd ? 0.9 : 0), damage };
   });
 }
 
@@ -81,7 +93,31 @@ function canClearDungeon(id, level) {
   const total = g.atProgress(reached, 'hp') * dungeon.hp;
   const ttk = total / dps() + 4 * 0.3 + 1;
   const damage = (ttk / 1.9) * g.atProgress(reached, 'hit') * dungeon.hit * 0.75;
-  return ttk <= g.DUNGEON_TIME && damage < g.maxHp(state);
+  return ttk <= g.DUNGEON_TIME && damage < effectiveHp();
+}
+
+function tryPromote() {
+  while (g.tierReady(state)) {
+    const reach = g.tierReq(state.tier + 1);
+    const total = g.atProgress(reach, 'hp') * 2.6;
+    const ttk = total / dps() + 1;
+    const damage = (ttk / 1.9) * g.atProgress(reach, 'hit') * 1.15;
+    if (ttk > g.DUNGEON_TIME || damage >= effectiveHp()) return;
+    state.tier++;
+  }
+}
+
+function spendGems() {
+  while (true) {
+    const done = g.questState(state);
+    if (!done.done) break;
+    g.claimQuest(state);
+  }
+  g.claimPass(state);
+  while (state.gems >= 900) { state.gems -= 900; state.recruits += 10; }
+  while (state.recruits >= 10) { state.recruits -= 10; g.recruit(state, 10, rng); }
+  const owned = Object.keys(state.companions).sort((a, b) => g.allyPower(state, b) - g.allyPower(state, a));
+  state.party = [0, 1, 2].map(slot => (slot < g.partySlots(state) ? owned[slot] || null : null));
 }
 
 function runDungeons() {
@@ -196,7 +232,7 @@ function upgradeGear() {
 }
 
 function pullAll() {
-  while (state.tickets >= 10) { state.tickets -= 10; g.pullStickers(state, 10, rng); }
+  while (state.tickets >= 10) { state.tickets -= 10; g.pullStickers(state, 10, rng); state.stats.pulls += 10; }
 }
 
 function buyPerks() {
@@ -227,7 +263,10 @@ function maybeTransfer() {
 }
 
 function daily() {
-  // 출석(7일 평균) + 일일 미션 보상
+  // 출석(7일 평균) + 일일 미션 보상 + 매일 무료 상점
+  state.gems += 36;
+  state.tickets += 1;
+  state.recruits += 1;
   state.tickets += 18 / 7 + 9;
   state.patches += 2 + 6 / 7;
   state.tickets = Math.floor(state.tickets);
@@ -250,6 +289,8 @@ function record(day) {
     '누적배지': state.prestige.earned,
     '스티커평균Lv': (stickerLevels.reduce((a, b) => a + b, 0) / stickerLevels.length).toFixed(1),
     '던전Lv': Object.values(state.dungeons).join('/'),
+    '승급': state.tier,
+    '동료Lv': state.party.filter(Boolean).map(id => g.companionLevel(state, id)).join('/'),
     '코인': g.fmt(state.coins),
   });
 }
@@ -261,6 +302,8 @@ while (time < total) {
   buyTraining();
   upgradeGear();
   pullAll();
+  spendGems();
+  tryPromote();
   const result = attemptMap();
   time += result.time;
   if (!result.ok) {

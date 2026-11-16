@@ -45,7 +45,7 @@ with sync_playwright() as playwright:
     assert 'data:image/webp' in first_art
     phone.screenshot(path=str(root / 'work' / 'recess-v2-battle.png'))
 
-    phone.get_by_role('button', name='훈련', exact=True).click()
+    phone.get_by_role('button', name='성장', exact=True).click()
     expect(phone.get_by_role('button', name='힘 훈련, 코인 22개')).to_be_disabled()
     phone.clock.run_for(7500)
     phone.get_by_role('button', name='힘 훈련, 코인 22개').click()
@@ -57,7 +57,7 @@ with sync_playwright() as playwright:
     phone.clock.run_for(9500)
     expect(phone.get_by_role('heading', name='1층 복도')).to_be_visible()
     assert phone.locator('.arena-art').evaluate('e => getComputedStyle(e).backgroundImage') != first_art
-    phone.get_by_role('button', name='지도', exact=True).click()
+    phone.get_by_role('button', name='학교 지도', exact=True).click()
     expect(phone.get_by_text('1 / 18 완료')).to_be_visible()
     assert phone.locator('.map-thumb').count() == 18
     assert phone.locator('.map-thumb').evaluate_all("items => new Set(items.map(e => getComputedStyle(e).getPropertyValue('--map-image'))).size") == 18
@@ -69,6 +69,7 @@ with sync_playwright() as playwright:
     phone.get_by_role('switch', name='자동 진격').click()
     expect(phone.get_by_role('switch', name='자동 진격')).to_have_attribute('aria-checked', 'false')
 
+    phone.get_by_role('button', name='설정', exact=True).click()
     phone.get_by_role('button', name='캐릭터 설정').click()
     expect(phone.get_by_role('radio', name='여학생')).to_be_checked()
     phone.get_by_role('radio', name='남학생').check()
@@ -133,7 +134,7 @@ with sync_playwright() as playwright:
     small.goto(target)
     assert small.evaluate('document.documentElement.scrollWidth === innerWidth')
     choose(small, '여학생', '봄달봄달봄달봄달봄달봄달')
-    small.get_by_role('button', name='지도', exact=True).click()
+    small.get_by_role('button', name='학교 지도', exact=True).click()
     assert small.evaluate('document.documentElement.scrollWidth === innerWidth')
     expect(small.locator('.grade-group')).to_have_count(6)
     chrome.close()

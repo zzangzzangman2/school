@@ -64,7 +64,7 @@ const MAX_RANK = 30;
 const RANK_BONUS = 0.03;
 // ── 장기 성장: 6-3을 깨면 다음 년차로 넘어가며 적·보상이 지수적으로 커진다 ──
 // 2년차부터는 맵 하나 넘어갈 때마다 아래 비율로 이어서 커진다(1년차 마지막 보스 기준).
-const GROWTH = { hp: 1.23, hit: 1.22, coin: 1.25, xp: 1.03 };
+const GROWTH = { hp: 1.24, hit: 1.23, coin: 1.25, xp: 1.03 };
 const MILESTONE = 25;
 const COST_TAIL = 1.05;
 const GRADE_SCALING = [
@@ -125,14 +125,14 @@ const SNACKS = {
 const SNACK_TIME = 15 * 60;
 const SNACK_MAX = 60 * 60;
 const WELCOME_TICKETS = 10;
-const ATTENDANCE = [{ tickets: 3 }, { coins: 20 }, { patches: 2 }, { tickets: 5 }, { coins: 40 }, { patches: 4 }, { tickets: 10, coins: 60 }];
+const ATTENDANCE = [{ tickets: 3, gems: 20 }, { coins: 20, gems: 20 }, { patches: 2, gems: 20 }, { tickets: 5, gems: 30 }, { coins: 40, gems: 30 }, { patches: 4, gems: 30 }, { tickets: 10, coins: 60, gems: 100 }];
 const DAILY_MISSIONS = {
   wins: { name: '대결 20번 이기기', target: 20, value: state => state.wins - state.daily.baseWins, reward: { tickets: 2 } },
   trains: { name: '훈련 10번 하기', target: 10, value: state => state.daily.trains, reward: { coins: 12 } },
   pulls: { name: '스티커 5번 뽑기', target: 5, value: state => state.daily.pulls, reward: { patches: 2 } },
   snacks: { name: '매점 간식 2번 먹기', target: 2, value: state => state.daily.snacks, reward: { tickets: 2 } },
   dungeons: { name: '던전 3번 하기', target: 3, value: state => state.daily.dungeons || 0, reward: { tickets: 2 } },
-  all: { name: '일일 미션 모두 완료', target: 5, value: state => state.daily.claimed.filter(id => id !== 'all').length, reward: { tickets: 5 } },
+  all: { name: '일일 미션 모두 완료', target: 5, value: state => state.daily.claimed.filter(id => id !== 'all').length, reward: { tickets: 5, gems: 30 } },
 };
 
 // ── 무리 전투: 1~3번째 대결은 친구 둘 + 무리 대장, 4번째는 1:1 보스전 ──
@@ -160,6 +160,80 @@ const DUNGEON_PACK = [
 ];
 const DUNGEON_KEYS = 2;
 const DUNGEON_TIME = 30;
+
+// ── 승급: 시험(1:1, 30초)을 통과하면 공격력·체력 ×1.5, 스킬 칸·동료 칸이 열린다. 전학해도 유지 ──
+const TIERS = ['새내기', '모범생', '선도부', '학급 반장', '학년 대표', '학생회 임원', '학생회장', '전교 회장', '명예 졸업생'];
+const TIER_MULT = 1.3;
+const EXAMINERS = [
+  ['선도부장 선배', 'boss1'], ['반장 회의 의장', 'boss2'], ['학년 대표 선배', 'boss3'], ['학생회 총무', 'boss4'],
+  ['학생회 부회장', 'boss5'], ['학생회장 선배', 'boss6'], ['전교 회장 선배', 'dboss-sports'], ['졸업생 대표', 'dboss-quiz'],
+];
+const TRIAL = { name: '승급 시험', minion: '시험 감독', reward: 'tier', hp: 2.6, hit: 1.15, background: 'd-ticket', map: 9, solo: true };
+
+// ── 동료: 반 친구들이 내 편에서 함께 싸운다(모집권으로 모집, 겹치면 레벨 업, 보유 효과) ──
+const COMPANIONS = {
+  mob1: { name: '노란 모자 도윤', rarity: 'common' },
+  mob2: { name: '분홍 원피스 서아', rarity: 'common' },
+  mob3: { name: '축구왕 이안', rarity: 'uncommon' },
+  mob4: { name: '줄넘기 지유', rarity: 'uncommon' },
+  mob5: { name: '리코더 시온', rarity: 'rare' },
+  mob6: { name: '체육복 아린', rarity: 'rare' },
+  mob7: { name: '농구부 태양', rarity: 'epic' },
+  mob8: { name: '임원 보미', rarity: 'legend' },
+};
+const ALLY_POWER = { common: 0.12, uncommon: 0.16, rare: 0.24, epic: 0.36, legend: 0.5 };
+const ALLY_OWNED = { common: 0.01, uncommon: 0.015, rare: 0.02, epic: 0.03, legend: 0.05 };
+const ALLY_INTERVAL = 1.6;
+
+// ── 액티브 스킬: 승급할 때마다 한 칸씩 열리고, 쿨타임이 돌면 자동으로 쓴다 ──
+const ACTIVE = {
+  pencil: { name: '필통 던지기', tier: 1, cd: 8, desc: '앞 상대와 뒤 무리 모두에게 큰 피해' },
+  cheer: { name: '응원 함성', tier: 2, cd: 15, dur: 6, desc: '6초 동안 나와 동료 공격력 1.5배' },
+  lunch: { name: '급식 충전', tier: 3, cd: 12, desc: '체력 35% 회복' },
+  sprint: { name: '체육 대장', tier: 4, cd: 18, dur: 6, desc: '6초 동안 공격 속도 1.5배' },
+};
+
+// ── 보석(유료 재화 자리)·상점·우편·퀘스트·성장 패스 ──
+const SHOP = {
+  daily: { name: '매일 무료 선물', desc: '뽑기권 1 · 동료 모집권 1', price: 0, limit: 1, reward: { tickets: 1, recruits: 1 } },
+  tickets10: { name: '스티커 뽑기권 10장', price: 300, reward: { tickets: 10 } },
+  recruit1: { name: '동료 모집권 1장', price: 100, reward: { recruits: 1 } },
+  recruit10: { name: '동료 모집권 10장', price: 900, reward: { recruits: 10 }, tag: '10% 할인' },
+  keys: { name: '던전 열쇠 세트', desc: '모든 던전 열쇠 +1', price: 100, limit: 2, reward: { keys: 1 } },
+  coinbox: { name: '코인 상자', desc: '대결 약 600번 분량', price: 150, reward: { coinUnits: 600 } },
+  patches: { name: '천 조각 꾸러미', price: 80, reward: { patches: 20 } },
+  snacks: { name: '매점 간식 세트', desc: '세 가지 간식 15분씩', price: 60, reward: { snacks: 1 } },
+};
+// 캐시 상품: 결제 연결 전까지 '준비 중'. 결제가 끝나면 grantPurchase(state, id)만 부르면 된다.
+const CASH = {
+  starter: { name: '입학 축하 패키지', price: '₩1,100', desc: '보석 300 · 동료 모집권 10 · 뽑기권 20', reward: { gems: 300, recruits: 10, tickets: 20 }, once: true },
+  monthly: { name: '급식 월정액 30일', price: '₩5,500', desc: '즉시 보석 300 + 30일 동안 매일 보석 100', reward: { gems: 300, monthly: 30 } },
+  pass: { name: '프리미엄 성장 패스', price: '₩9,900', desc: '성장 패스 프리미엄 칸 보상 열기', reward: { premiumPass: true }, once: true },
+  adfree: { name: '간식 무제한', price: '₩6,600', desc: '매점 간식을 최대 3시간까지 쌓기', reward: { adFree: true }, once: true },
+  gems1: { name: '보석 주머니', price: '₩3,300', desc: '보석 330', reward: { gems: 330 } },
+  gems2: { name: '보석 상자', price: '₩33,000', desc: '보석 3,800', reward: { gems: 3800 } },
+};
+const OFFLINE_DOUBLE_GEMS = 50;
+const PASS_STEP = 3;
+const QUEST_VALUE = {
+  best: state => Math.max(state.prestige.best, progress(state)),
+  power: state => state.training.power,
+  health: state => state.training.health,
+  level: state => state.level,
+  pulls: state => state.stats.pulls,
+  recruits: state => state.stats.recruits,
+  dungeons: state => state.stats.dungeons,
+  tier: state => state.tier,
+  transfer: state => state.prestige.count,
+  party: state => state.party.filter(Boolean).length,
+};
+const QUEST_SCRIPT = [
+  ['power', 3, 20], ['best', 1, 20], ['health', 3, 20], ['pulls', 10, 30], ['recruits', 1, 30], ['party', 1, 30],
+  ['best', 3, 30], ['level', 5, 30], ['power', 10, 40], ['dungeons', 1, 40], ['best', 4, 40], ['tier', 1, 60],
+  ['health', 10, 40], ['best', 6, 50], ['recruits', 5, 50], ['tier', 2, 60], ['transfer', 1, 80], ['party', 2, 50],
+  ['best', 9, 60], ['dungeons', 5, 60], ['power', 25, 60], ['tier', 3, 80], ['best', 12, 60], ['pulls', 50, 60],
+];
+const QUEST_LOOP = ['best', 'power', 'health', 'level', 'pulls', 'dungeons', 'recruits'];
 
 // ── 환생: 전학 → 명예 배지 → 방과 후 학원(영구 강화) ──
 const PRESTIGE_UNLOCK = 6;
@@ -212,6 +286,9 @@ function newGame() {
 function freshState() {
   return {
     dungeons: Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, 0])), dungeon: null, dungeonResult: null, front: null, pack: [],
+    gems: 0, recruits: 0, companions: {}, party: [null, null, null], allyTimers: [1.1, 1.5, 1.9], tier: 0,
+    cooldowns: {}, buffs: {}, autoSkills: true, quest: 0, stats: { pulls: 0, recruits: 0, dungeons: 0 },
+    pass: { free: 0, premium: 0 }, premium: { pass: false, adFree: false, monthly: 0, bought: {} }, mail: [], mailSeq: 0,
     profile: null, level: 1, xp: 0, coins: 12, map: 0, wave: 0, wins: 0,
     cleared: MAPS.map(() => false), training: { power: 0, health: 0, speed: 0, focus: 0 },
     tickets: WELCOME_TICKETS, stickers: {}, snacks: { choco: 0, banana: 0, berry: 0 }, speed: 1,
@@ -283,7 +360,8 @@ function transfer(state) {
   const reached = progress(state);
   const keep = {};
   for (const key of ['profile', 'wins', 'bag', 'equipped', 'ranks', 'patches', 'missions', 'classId', 'autoNext', 'autoSkill', 'skillId', 'sound',
-    'tickets', 'stickers', 'snacks', 'speed', 'attendance', 'daily', 'totalClears', 'dungeons', 'dungeonResult']) keep[key] = state[key];
+    'tickets', 'stickers', 'snacks', 'speed', 'attendance', 'daily', 'totalClears', 'dungeons', 'dungeonResult',
+    'gems', 'recruits', 'companions', 'party', 'tier', 'autoSkills', 'quest', 'stats', 'pass', 'premium', 'mail', 'mailSeq']) keep[key] = state[key];
   const before = state.prestige;
   Object.assign(state, newGame(), keep);
   state.prestige = { ...before, count: before.count + 1, badges: before.badges + gain, earned: before.earned + gain, best: Math.max(before.best, reached) };
@@ -295,7 +373,9 @@ function critChance(state) { return Math.min(0.6, (state.training.focus || 0) * 
 function coinUnit(state) { return Math.round((8 + 6 * gradeIndex(state.map) + 2 * (state.map % MAPS_PER_GRADE)) * cycleScale(state, 'coin')); }
 function pullCost(state) { return Math.round(30 * 1.22 ** clearedCount(state) * cycleScale(state, 'coin')); }
 function statBonus(state, stat) {
-  return (1 + stickerBonus(state, stat) + (stat === 'attack' || stat === 'hp' ? rankBonus(state) : 0)) * perkMultiplier(state, stat);
+  const body = stat === 'attack' || stat === 'hp';
+  const additive = 1 + stickerBonus(state, stat) + (body ? rankBonus(state) : 0) + (stat === 'attack' ? companionOwned(state) : 0);
+  return additive * perkMultiplier(state, stat) * (body ? TIER_MULT ** (state.tier || 0) : 1);
 }
 function maxHp(state) {
   const health = state.training.health;
@@ -309,7 +389,7 @@ function attack(state) {
 }
 function enemyHit(state) {
   const base = state.dungeon
-    ? atProgress(dungeonProgress(state.dungeon.level), 'hit') * DUNGEONS[state.dungeon.id].hit
+    ? atProgress(dungeonReach(state), 'hit') * dungeonInfo(state.dungeon.id).hit
     : MAPS[state.map].hit[state.wave] * GRADE_SCALING[gradeIndex(state.map)].attack * cycleScale(state, 'hit');
   return base * (state.front?.hit ?? 1) * (1 + GANG_UP * aliveBehind(state));
 }
@@ -332,15 +412,21 @@ function todayKey(date = new Date()) {
 }
 function refreshDay(state, today) {
   if (!state.daily || state.daily.date !== today) {
-    state.daily = { date: today, baseWins: state.wins, trains: 0, pulls: 0, snacks: 0, dungeons: 0, claimed: [],
+    const first = !state.daily;
+    state.daily = { date: today, baseWins: state.wins, trains: 0, pulls: 0, snacks: 0, dungeons: 0, claimed: [], shop: {},
       keys: Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, DUNGEON_KEYS])) };
+    if (!first && state.premium?.monthly > 0) {
+      state.premium.monthly--;
+      sendMail(state, '급식 월정액 오늘의 보석', { gems: 100 }, `남은 기간 ${state.premium.monthly}일`);
+    }
   }
 }
 function grant(state, reward) {
-  const given = { coins: (reward.coins || 0) * coinUnit(state), tickets: reward.tickets || 0, patches: reward.patches || 0 };
+  const given = { coins: (reward.coins || 0) * coinUnit(state), tickets: reward.tickets || 0, patches: reward.patches || 0, gems: reward.gems || 0 };
   state.coins += given.coins;
   state.tickets += given.tickets;
   state.patches += given.patches;
+  state.gems = (state.gems || 0) + given.gems;
   return given;
 }
 function rollRarity(rng) {
@@ -369,7 +455,7 @@ function pullStickers(state, count, rng = Math.random) {
   return results;
 }
 function waveHp(state) {
-  if (state.dungeon) return atProgress(dungeonProgress(state.dungeon.level), 'hp') * DUNGEONS[state.dungeon.id].hp;
+  if (state.dungeon) return atProgress(dungeonReach(state), 'hp') * dungeonInfo(state.dungeon.id).hp;
   const hp = MAPS[state.map].hp[state.wave] * GRADE_SCALING[gradeIndex(state.map)].hp * cycleScale(state, 'hp');
   return hp * 0.64 ** (state.farm?.easy || 0);
 }
@@ -386,6 +472,10 @@ function makeMobs(state) {
   const full = waveHp(state);
   const key = mobKey(state);
   const make = (slot, name, sprite) => ({ name, share: slot.share, hit: slot.hit, sprite, leader: Boolean(slot.leader), key, max: Math.max(1, Math.round(full * slot.share)) });
+  if (state.dungeon?.id === 'trial') {
+    const [name, sprite] = EXAMINERS[(state.dungeon.level - 1) % EXAMINERS.length];
+    return [make({ share: 1, hit: 1, leader: true }, name, sprite)];
+  }
   if (state.dungeon) {
     const dungeon = DUNGEONS[state.dungeon.id];
     return DUNGEON_PACK.map((slot, index) => make(slot, slot.leader ? dungeon.boss : `${dungeon.minion} ${index + 1}`, slot.leader ? dungeon.sprite : dungeon.minionSprites[index % dungeon.minionSprites.length]));
@@ -403,6 +493,8 @@ function atProgress(reached, kind) {
   return baseValue(map, kind) * cycleScale({ cycle: Math.floor(reached / MAPS.length), map }, kind);
 }
 function dungeonProgress(level) { return 3 * level - 1; }
+function dungeonInfo(id) { return id === 'trial' ? TRIAL : DUNGEONS[id]; }
+function dungeonReach(state) { return state.dungeon.id === 'trial' ? tierReq(state.dungeon.level) : dungeonProgress(state.dungeon.level); }
 function dungeonUnlocked(state, id) {
   return DUNGEONS[id].unlock === 'transfer' ? state.prestige.count > 0 : (state.totalClears >= 3 || state.prestige.count > 0);
 }
@@ -446,6 +538,7 @@ function sweepDungeon(state, id) {
   if (!best || state.dungeon || dungeonKeys(state, id) <= 0) return null;
   state.daily.keys[id]--;
   state.daily.dungeons = (state.daily.dungeons || 0) + 1;
+  state.stats.dungeons++;
   const reward = grantDungeon(state, id, best);
   state.dungeonResult = { id, level: best, win: true, sweep: true, text: rewardLine(reward), serial: (state.dungeonResult?.serial || 0) + 1 };
   return reward;
@@ -453,14 +546,21 @@ function sweepDungeon(state, id) {
 function leaveDungeon(state, win, emit, reason = '') {
   const { id, level } = state.dungeon;
   let text = '열쇠는 그대로예요.';
-  if (win) {
+  if (id === 'trial') {
+    text = '레벨을 더 올리고 다시 도전해요.';
+    if (win) {
+      state.tier = Math.max(state.tier, level);
+      text = `${tierName(state.tier)} 승급! 공격력·체력 ×${TIER_MULT}`;
+    }
+  } else if (win) {
+    state.stats.dungeons++;
     state.daily.keys[id]--;
     state.daily.dungeons = (state.daily.dungeons || 0) + 1;
     state.dungeons[id] = Math.max(state.dungeons[id] || 0, level);
     text = rewardLine(grantDungeon(state, id, level));
   }
   state.dungeonResult = { id, level, win, reason, text, serial: (state.dungeonResult?.serial || 0) + 1 };
-  record(state, `${DUNGEONS[id].name} Lv.${level} ${win ? '클리어!' : reason === 'timeout' ? '시간 초과' : '실패'} · ${text}`);
+  record(state, `${dungeonInfo(id).name} ${id === 'trial' ? '' : `Lv.${level} `}${win ? '통과!' : reason === 'timeout' ? '시간 초과' : '실패'} · ${text}`);
   finishRound(state, win ? 'win' : 'loss', state.map, state.wave, 1.5, emit, null, state.farm);
   state.roundEnd.leaveDungeon = true;
 }
@@ -579,6 +679,7 @@ function win(state, emit) {
     if (progress(state) + 1 > (state.prestige?.best || 0)) {
       const tickets = isGradeFinal(map) ? 5 : 2;
       state.tickets += tickets;
+      if (isGradeFinal(map)) state.gems = (state.gems || 0) + 20;
       record(state, `최고 기록 보스 격파 · 뽑기권 +${tickets}`);
     }
   }
@@ -654,7 +755,7 @@ function strike(state, move, emit) {
   const chance = move === 'attack' && !blocked ? critChance(state) : 0;
   const lucky = chance > 0 && Math.random() < chance;
   if (lucky) multiplier *= 1.8;
-  const damage = Math.round(attack(state) * multiplier);
+  const damage = Math.round(attack(state) * multiplier * buffMult(state));
   const amount = Math.min(state.enemyHp, Math.max(1, damage));
   let overflow = Math.max(0, damage - state.enemyHp);
   state.enemyHp -= amount;
@@ -663,31 +764,11 @@ function strike(state, move, emit) {
     record(state, '종소리 반격으로 다온의 방어를 깼어요!');
   }
   emit?.('impact', { side: 'player', move, amount, blocked, breaks, lucky });
-  if (SKILLS[move] && state.pack?.length) {
-    // 스킬은 뒤에 선 상대까지 맞힌다
-    const splash = Math.max(1, Math.round(damage * SPLASH));
-    for (const mob of state.pack) if (mob.hp > 0) mob.hp = Math.max(0, mob.hp - splash);
-    emit?.('splash', { amount: splash });
-    state.pack = state.pack.filter(mob => {
-      if (mob.hp > 0) return true;
-      if (!state.dungeon) mobReward(state, mob, emit);
-      return false;
-    });
-  }
+  // 필살기는 뒤에 선 상대까지 맞힌다
+  if (SKILLS[move]) sweepPack(state, Math.max(1, Math.round(damage * SPLASH)), emit);
   if (!SKILLS[move]) state.charge = Math.min(100, state.charge + (state.classId === 'music' ? 27 : 18));
   // 넘친 피해는 다음 상대에게 이어진다(관통). 약한 친구 여럿을 한 번에 쓰러뜨릴 수 있다.
-  while (state.enemyHp <= 0) {
-    if (!aliveBehind(state)) {
-      win(state, emit);
-      return;
-    }
-    nextMob(state, emit);
-    if (overflow <= 0) return;
-    const pierce = Math.min(state.enemyHp, overflow);
-    state.enemyHp -= pierce;
-    overflow -= pierce;
-    emit?.('pierce', { amount: pierce });
-  }
+  resolveKills(state, overflow, emit);
 }
 
 function rivalStrike(state, move, emit) {
@@ -713,7 +794,7 @@ function queuePlayer(state, move, emit) {
   const skill = SKILLS[move];
   const windup = skill?.windup ?? 0.2;
   if (skill) state.charge -= skill.cost;
-  state.nextAttack = interval(state);
+  state.nextAttack = interval(state) / (state.buffs?.sprint > 0 ? 1.5 : 1);
   state.playerMove = { move, left: windup };
   emit?.('windup', { side: 'player', move, windup });
 }
@@ -732,6 +813,10 @@ function autoSkillTarget(state) {
 }
 
 function step(state, emit) {
+  if (state.cooldowns) {
+    for (const id of Object.keys(state.cooldowns)) if (state.cooldowns[id] > 0) state.cooldowns[id] = Math.max(0, state.cooldowns[id] - STEP);
+    for (const id of Object.keys(state.buffs)) if (state.buffs[id] > 0) state.buffs[id] = Math.max(0, state.buffs[id] - STEP);
+  }
   if (state.snacks) {
     const used = STEP / (state.speed || 1);
     for (const id of Object.keys(SNACKS)) if (state.snacks[id] > 0) state.snacks[id] = Math.max(0, state.snacks[id] - used);
@@ -776,6 +861,20 @@ function step(state, emit) {
     }
   }
 
+  // 동료가 각자 박자에 맞춰 공격한다
+  if (state.party) {
+    for (let slot = 0; slot < partySlots(state); slot++) {
+      if (!state.party[slot]) continue;
+      state.allyTimers[slot] = (state.allyTimers[slot] ?? ALLY_INTERVAL) - STEP;
+      if (state.allyTimers[slot] > 0) continue;
+      state.allyTimers[slot] = ALLY_INTERVAL;
+      allyStrike(state, slot, emit);
+      if (state.roundEnd || state.pause > 0) return;
+    }
+    autoCast(state, emit);
+    if (state.roundEnd || state.pause > 0) return;
+  }
+
   const daon = isDaon(state);
   if (daon) {
     state.bossTimer -= STEP;
@@ -818,6 +917,246 @@ function simulate(state, seconds, emit) {
   for (let index = 0; index < ticks; index++) step(state, emit);
 }
 
+// ── 승급 ──
+function tierName(tier) { return tier < TIERS.length ? TIERS[tier] : `${TIERS[TIERS.length - 1]} ${tier - TIERS.length + 2}성`; }
+function tierReq(tier) { return tier <= 6 ? Math.round(8 * 1.7 ** (tier - 1)) : 114 + 40 * (tier - 6); }
+function tierLevel(tier) { return 10 * tier; }
+function bestProgress(state) { return Math.max(state.prestige.best, progress(state)); }
+function tierReady(state) {
+  const next = state.tier + 1;
+  return bestProgress(state) >= tierReq(next) && state.level >= tierLevel(next);
+}
+function enterTrial(state) {
+  if (!tierReady(state) || state.dungeon || state.roundEnd?.leaveDungeon) return false;
+  if (state.roundEnd) {
+    const end = state.roundEnd;
+    state.farm = end.nextFarm;
+    state.map = end.nextMap;
+    state.wave = end.nextWave;
+    state.roundEnd = null;
+  }
+  state.dungeon = { id: 'trial', level: state.tier + 1, time: DUNGEON_TIME };
+  state.hp = maxHp(state);
+  openFight(state, state.map, state.wave, 0.6);
+  return true;
+}
+
+// ── 동료 ──
+function companionLevel(state, id) {
+  const copies = state.companions?.[id] || 0;
+  return Math.min(100, Math.floor((Math.sqrt(8 * copies + 1) - 1) / 2));
+}
+function companionOwned(state) {
+  return Object.entries(COMPANIONS).reduce((sum, [id, mate]) => sum + ALLY_OWNED[mate.rarity] * companionLevel(state, id), 0);
+}
+function partySlots(state) { return 1 + (state.tier >= 2 ? 1 : 0) + (state.tier >= 4 ? 1 : 0); }
+function allyPower(state, id) { return ALLY_POWER[COMPANIONS[id].rarity] * (1 + 0.15 * (companionLevel(state, id) - 1)); }
+function allyDamage(state, id) { return attack(state) * allyPower(state, id); }
+function recruit(state, count, rng = Math.random) {
+  const results = [];
+  const rank = rarity => RARITY_ORDER.indexOf(rarity);
+  for (let index = 0; index < count; index++) {
+    let rarity = rollRarity(rng);
+    if (count >= 10 && index === count - 1 && rank(rarity) < rank('rare') && !results.some(result => rank(result.rarity) >= rank('rare'))) rarity = 'rare';
+    const pool = Object.keys(COMPANIONS).filter(id => COMPANIONS[id].rarity === rarity);
+    const id = pool[Math.floor(rng() * pool.length)];
+    const before = companionLevel(state, id);
+    state.companions[id] = (state.companions[id] || 0) + 1;
+    const after = companionLevel(state, id);
+    results.push({ id, rarity, isNew: before === 0, leveled: before > 0 && after > before, level: after });
+  }
+  state.stats.recruits += count;
+  if (!state.party.some(Boolean)) {
+    const best = Object.keys(state.companions).sort((a, b) => allyPower(state, b) - allyPower(state, a))[0];
+    if (best) state.party[0] = best;
+  }
+  return results;
+}
+function setParty(state, slot, id) {
+  if (slot < 0 || slot >= partySlots(state)) return false;
+  if (id && !companionLevel(state, id)) return false;
+  state.party = state.party.map(other => (other === id ? null : other));
+  state.party[slot] = id;
+  return true;
+}
+function buffMult(state) { return state.buffs?.cheer > 0 ? 1.5 : 1; }
+
+// 앞 상대가 쓰러지면 다음 상대로, 넘친 피해는 이어서(관통). 무리가 다 쓰러지면 승리.
+function resolveKills(state, overflow, emit) {
+  while (state.enemyHp <= 0) {
+    if (!aliveBehind(state)) {
+      win(state, emit);
+      return;
+    }
+    nextMob(state, emit);
+    if (overflow <= 0) return;
+    const pierce = Math.min(state.enemyHp, overflow);
+    state.enemyHp -= pierce;
+    overflow -= pierce;
+    emit?.('pierce', { amount: pierce });
+  }
+}
+function sweepPack(state, amount, emit) {
+  if (!state.pack?.length) return;
+  for (const mob of state.pack) if (mob.hp > 0) mob.hp = Math.max(0, mob.hp - amount);
+  emit?.('splash', { amount });
+  state.pack = state.pack.filter(mob => {
+    if (mob.hp > 0) return true;
+    if (!state.dungeon) mobReward(state, mob, emit);
+    return false;
+  });
+}
+function allyStrike(state, slot, emit) {
+  const id = state.party[slot];
+  let damage = Math.round(allyDamage(state, id) * buffMult(state));
+  if (guarding(state)) damage = Math.round(damage * 0.23);
+  damage = Math.max(1, damage);
+  const amount = Math.min(state.enemyHp, damage);
+  const overflow = Math.max(0, damage - state.enemyHp);
+  state.enemyHp -= amount;
+  emit?.('ally', { slot, id, amount });
+  resolveKills(state, overflow, emit);
+}
+
+// ── 액티브 스킬 ──
+function skillUnlocked(state, id) { return state.tier >= ACTIVE[id].tier; }
+function skillPower(state) { return 2 * (1 + 0.15 * Math.max(0, state.tier - 1)); }
+function castSkill(state, id, emit) {
+  if (!skillUnlocked(state, id) || (state.cooldowns[id] || 0) > 0 || state.roundEnd || state.pause > 0) return false;
+  state.cooldowns[id] = ACTIVE[id].cd;
+  if (id === 'pencil') {
+    const damage = Math.max(1, Math.round(attack(state) * skillPower(state) * buffMult(state) * (guarding(state) ? 0.23 : 1)));
+    const amount = Math.min(state.enemyHp, damage);
+    const overflow = Math.max(0, damage - state.enemyHp);
+    state.enemyHp -= amount;
+    emit?.('active', { id, amount });
+    sweepPack(state, damage, emit);
+    resolveKills(state, overflow, emit);
+  } else if (id === 'lunch') {
+    const heal = Math.round(maxHp(state) * 0.35);
+    state.hp = Math.min(maxHp(state), state.hp + heal);
+    emit?.('active', { id, amount: heal });
+  } else {
+    state.buffs[id] = ACTIVE[id].dur;
+    emit?.('active', { id });
+  }
+  return true;
+}
+function autoCast(state, emit) {
+  if (!state.autoSkills || state.roundEnd || state.pause > 0) return;
+  for (const id of Object.keys(ACTIVE)) {
+    if (!skillUnlocked(state, id) || (state.cooldowns[id] || 0) > 0) continue;
+    if (id === 'lunch' && state.hp > maxHp(state) * 0.6) continue;
+    if (castSkill(state, id, emit)) return;
+  }
+}
+
+// ── 보상 지급 공통 ──
+function grantAny(state, reward) {
+  const given = {};
+  const add = (key, value) => { if (value) given[key] = (given[key] || 0) + value; };
+  if (reward.coins) { state.coins += reward.coins; add('coins', reward.coins); }
+  if (reward.coinUnits) { const coins = reward.coinUnits * coinUnit(state); state.coins += coins; add('coins', coins); }
+  if (reward.gems) { state.gems += reward.gems; add('gems', reward.gems); }
+  if (reward.tickets) { state.tickets += reward.tickets; add('tickets', reward.tickets); }
+  if (reward.recruits) { state.recruits += reward.recruits; add('recruits', reward.recruits); }
+  if (reward.patches) { state.patches += reward.patches; add('patches', reward.patches); }
+  if (reward.badges) { state.prestige.badges += reward.badges; state.prestige.earned += reward.badges; add('badges', reward.badges); }
+  if (reward.keys && state.daily?.keys) { for (const id of Object.keys(state.daily.keys)) state.daily.keys[id] += reward.keys; add('keys', reward.keys); }
+  if (reward.snacks) { for (const id of Object.keys(SNACKS)) state.snacks[id] = Math.min(snackMax(state), state.snacks[id] + SNACK_TIME); add('snacks', 1); }
+  if (reward.premiumPass) state.premium.pass = true;
+  if (reward.adFree) state.premium.adFree = true;
+  if (reward.monthly) state.premium.monthly += reward.monthly;
+  return given;
+}
+function snackMax(state) { return state.premium?.adFree ? 3 * SNACK_MAX : SNACK_MAX; }
+function giftLine(given) {
+  const names = { coins: '코인', gems: '보석', tickets: '뽑기권', recruits: '동료 모집권', patches: '천 조각', badges: '명예 배지', keys: '던전 열쇠', snacks: '간식 세트' };
+  return Object.entries(given).map(([key, value]) => `${names[key]} +${fmt(value)}`).join(' · ');
+}
+
+// ── 우편 ──
+function sendMail(state, title, reward, body = '') {
+  state.mailSeq = (state.mailSeq || 0) + 1;
+  state.mail.unshift({ id: state.mailSeq, title, body, reward, at: Date.now() });
+  state.mail.length = Math.min(60, state.mail.length);
+}
+function welcomeMail(state) {
+  sendMail(state, '입학 축하 선물', { gems: 300, recruits: 5 }, '해솔초등학교에 온 걸 환영해요! 동료 모집권으로 친구를 불러 보세요.');
+}
+function claimMail(state, id = null) {
+  const picked = state.mail.filter(mail => id === null || mail.id === id);
+  const total = {};
+  for (const mail of picked) for (const [key, value] of Object.entries(grantAny(state, mail.reward))) total[key] = (total[key] || 0) + value;
+  state.mail = state.mail.filter(mail => !picked.includes(mail));
+  return total;
+}
+
+// ── 상점·캐시 ──
+function shopLeft(state, id) {
+  const item = SHOP[id];
+  if (!item.limit) return Infinity;
+  return item.limit - (state.daily?.shop?.[id] || 0);
+}
+function buyShop(state, id) {
+  const item = SHOP[id];
+  if (!item || shopLeft(state, id) <= 0 || state.gems < item.price) return null;
+  state.gems -= item.price;
+  if (item.limit) state.daily.shop[id] = (state.daily.shop[id] || 0) + 1;
+  return grantAny(state, item.reward);
+}
+function cashAvailable(state, id) { return !(CASH[id].once && state.premium.bought[id]); }
+function grantPurchase(state, id) {
+  const item = CASH[id];
+  if (!item || !cashAvailable(state, id)) return null;
+  state.premium.bought[id] = (state.premium.bought[id] || 0) + 1;
+  sendMail(state, `${item.name} 구매 보상`, item.reward, '구매해 주셔서 고마워요!');
+  return true;
+}
+
+// ── 퀘스트 가이드 ──
+function questAt(index) {
+  if (index < QUEST_SCRIPT.length) {
+    const [kind, target, gems] = QUEST_SCRIPT[index];
+    return { kind, target, gems };
+  }
+  const step = index - QUEST_SCRIPT.length;
+  const round = Math.floor(step / QUEST_LOOP.length) + 1;
+  const kind = QUEST_LOOP[step % QUEST_LOOP.length];
+  const target = {
+    best: 12 + round * 4, power: 25 + round * 10, health: 20 + round * 10, level: 20 + round * 8,
+    pulls: 50 + round * 30, dungeons: 5 + round * 4, recruits: 5 + round * 5,
+  }[kind];
+  return { kind, target, gems: Math.min(150, 50 + round * 5) };
+}
+function questState(state) {
+  const quest = questAt(state.quest);
+  const value = QUEST_VALUE[quest.kind](state);
+  return { ...quest, value, done: value >= quest.target };
+}
+function claimQuest(state) {
+  const quest = questState(state);
+  if (!quest.done) return null;
+  state.gems += quest.gems;
+  state.quest++;
+  return quest;
+}
+
+// ── 성장 패스: 최고 기록 맵 3개마다 한 칸 ──
+function passTiers(state) { return Math.floor(bestProgress(state) / PASS_STEP); }
+function passReward(step, premium) {
+  if (premium) return step % 5 === 0 ? { gems: 120, recruits: 3 } : { gems: 60, recruits: 1 };
+  return step % 5 === 0 ? { gems: 40, tickets: 5 } : { gems: 20 };
+}
+function claimPass(state) {
+  const tiers = passTiers(state);
+  const total = {};
+  const merge = given => { for (const [key, value] of Object.entries(given)) total[key] = (total[key] || 0) + value; };
+  while (state.pass.free < tiers) merge(grantAny(state, passReward(++state.pass.free, false)));
+  while (state.premium.pass && state.pass.premium < tiers) merge(grantAny(state, passReward(++state.pass.premium, true)));
+  return total;
+}
+
 function migrateFeatures(s) {
   const count = value => Number.isSafeInteger(value) && value >= 0;
   if (s.training && typeof s.training === 'object' && s.training.focus === undefined) s.training.focus = 0;
@@ -840,9 +1179,26 @@ function migrateFeatures(s) {
   const dungeons = s.dungeons && typeof s.dungeons === 'object' ? s.dungeons : {};
   s.dungeons = Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, count(dungeons[id]) ? dungeons[id] : 0]));
   const active = s.dungeon;
-  if (!(active && Object.hasOwn(DUNGEONS, active.id) && count(active.level) && active.level >= 1 && Number.isFinite(active.time))) s.dungeon = null;
-  if (!s.dungeonResult || typeof s.dungeonResult !== 'object' || !Object.hasOwn(DUNGEONS, s.dungeonResult.id)) s.dungeonResult = null;
+  if (!(active && (Object.hasOwn(DUNGEONS, active.id) || active.id === 'trial') && count(active.level) && active.level >= 1 && Number.isFinite(active.time))) s.dungeon = null;
+  if (!s.dungeonResult || typeof s.dungeonResult !== 'object' || !(Object.hasOwn(DUNGEONS, s.dungeonResult.id) || s.dungeonResult.id === 'trial')) s.dungeonResult = null;
   if (!count(s.cycle)) s.cycle = 0;
+  const fresh = freshState();
+  const isObject = value => value && typeof value === 'object' && !Array.isArray(value);
+  const hadMail = Array.isArray(s.mail);
+  for (const key of ['gems', 'recruits', 'tier', 'quest', 'mailSeq']) if (!count(s[key])) s[key] = fresh[key];
+  for (const key of ['companions', 'cooldowns', 'buffs']) if (!isObject(s[key])) s[key] = {};
+  s.companions = Object.fromEntries(Object.keys(COMPANIONS).filter(id => count(s.companions[id]) && s.companions[id] > 0).map(id => [id, s.companions[id]]));
+  s.party = Array.isArray(s.party) ? [0, 1, 2].map(index => (Object.hasOwn(s.companions, s.party[index]) ? s.party[index] : null)) : [null, null, null];
+  s.allyTimers = [1.1, 1.5, 1.9];
+  if (typeof s.autoSkills !== 'boolean') s.autoSkills = true;
+  s.stats = isObject(s.stats) ? s.stats : {};
+  for (const key of ['pulls', 'recruits', 'dungeons']) if (!count(s.stats[key])) s.stats[key] = 0;
+  s.pass = isObject(s.pass) ? { free: count(s.pass.free) ? s.pass.free : 0, premium: count(s.pass.premium) ? s.pass.premium : 0 } : { free: 0, premium: 0 };
+  const premium = isObject(s.premium) ? s.premium : {};
+  s.premium = { pass: premium.pass === true, adFree: premium.adFree === true, monthly: count(premium.monthly) ? premium.monthly : 0, bought: isObject(premium.bought) ? premium.bought : {} };
+  s.mail = hadMail ? s.mail.filter(mail => mail && count(mail.id) && typeof mail.title === 'string' && isObject(mail.reward)).slice(0, 60) : [];
+  if (s.daily && !isObject(s.daily.shop)) s.daily.shop = {};
+  if (!hadMail) sendMail(s, '새 기능 업데이트 선물', { gems: 500, recruits: 10 }, '승급·동료·스킬·상점이 생겼어요. 동료 모집권으로 친구를 불러 보세요!');
   if (!Number.isFinite(s.bossTime) || s.bossTime > BOSS_TIME) s.bossTime = BOSS_TIME;
   if (!count(s.totalClears)) s.totalClears = Array.isArray(s.cleared) ? s.cleared.filter(Boolean).length : 0;
   const prestige = s.prestige && typeof s.prestige === 'object' ? s.prestige : {};
@@ -941,6 +1297,8 @@ if (typeof module !== 'undefined') {
     newGame, simulate, restore, trainingCost, maxHp, attack, enemyMaxHp, openFight, activateSkill, gearStats, nextMission, MAPS, GEAR, SLOTS, MAP_REWARDS, BOSS_REWARDS, TRAINING, SKILLS, makeProfile,
     trainingCostAt, enemyHit, winCoins, winXp, interval, critChance, prestigeGain, transfer, perkCost, PERKS, pullStickers, pullCost, progress, xpTarget,
     GROWTH, MAX_RANK, BOSS_WAVE, MAPS_PER_GRADE, fmt, STICKERS, DROP_WINS,
-    DUNGEONS, DUNGEON_PACK, PACK, SPLASH, GANG_UP, BOSS_TIME, killProgress, DUNGEON_TIME, DUNGEON_KEYS, dungeonReward, dungeonProgress, atProgress, dungeonUnlocked, refreshDay, enterDungeon, sweepDungeon, makeMobs,
+    DUNGEONS, DUNGEON_PACK, PACK, SPLASH, GANG_UP, BOSS_TIME, killProgress,
+    TIERS, TIER_MULT, tierReq, tierLevel, tierReady, enterTrial, COMPANIONS, ALLY_POWER, ALLY_INTERVAL, companionLevel, allyPower, partySlots, recruit, setParty,
+    ACTIVE, castSkill, SHOP, CASH, buyShop, grantPurchase, claimMail, sendMail, welcomeMail, questState, claimQuest, passTiers, claimPass, grantAny, bestProgress, DUNGEON_TIME, DUNGEON_KEYS, dungeonReward, dungeonProgress, atProgress, dungeonUnlocked, refreshDay, enterDungeon, sweepDungeon, makeMobs,
   };
 }

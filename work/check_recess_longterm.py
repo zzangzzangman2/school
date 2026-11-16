@@ -53,7 +53,8 @@ with sync_playwright() as playwright:
     expect(page.get_by_role('button', name='매점 쟁탈전 Lv.2 도전')).to_be_disabled()
 
     # 전학: 배지를 받고 1년차 Lv.1로 돌아가며, 방과 후 학원을 배울 수 있는지
-    page.get_by_role('button', name='지도', exact=True).click()
+    page.get_by_role('button', name='성장', exact=True).click()
+    page.get_by_role('tab', name='학원').click()
     expect(page.locator('#prestige-gain')).to_contain_text('명예 배지 +')
     page.get_by_role('button', name='전학', exact=True).click()
     page.get_by_role('button', name='전학 가기').click()

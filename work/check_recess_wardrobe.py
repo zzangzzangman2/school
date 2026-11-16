@@ -95,6 +95,7 @@ with sync_playwright() as playwright:
     source_page.goto((folder / 'recess-king' / 'index.html').as_uri())
     expect(source_page.locator('#player-sprite canvas')).to_be_visible()
     assert source_page.evaluate('document.documentElement.scrollWidth === innerWidth')
+    source_page.get_by_role('button', name='설정', exact=True).click()
     source_page.get_by_role('button', name='캐릭터 설정').click()
     source_page.get_by_role('radio', name='여학생').check()
     source_page.get_by_role('button', name='저장하고 돌아가기').click()
