@@ -1,0 +1,946 @@
+'use strict';
+
+const MAPS_PER_GRADE = 3;
+const GRADE_COUNT = 6;
+const MAPS = [
+  { place: '신발장 입구', names: ['민준', '소민', '지우', '신발장 지킴이 솔'], hp: [24, 30, 38, 61], hit: [3, 3, 4, 6] },
+  { place: '1층 복도', names: ['가온', '여름', '시우', '복도 왕 민서'], hp: [40, 48, 58, 87], hit: [4, 5, 6, 8] },
+  { place: '1학년 교실', names: ['해준', '로아', '우빈', '반장 다온'], hp: [54, 64, 80, 245], hit: [5, 6, 8, 13] },
+  { place: '중앙 계단', names: ['유나', '준서', '승아', '계단 대표 준영'], hp: [80, 99, 118, 167], hit: [8, 10, 12, 15] },
+  { place: '급식실 앞', names: ['은재', '예나', '도율', '급식 당번 이솔'], hp: [115, 134, 158, 215], hit: [11, 12, 15, 19] },
+  { place: '급식실 홀', names: ['수호', '우주', '윤슬', '반장 유찬'], hp: [145, 172, 200, 275], hit: [13, 15, 18, 23] },
+  { place: '학교 텃밭', names: ['지한', '하린', '이준', '텃밭 대표 별이'], hp: [190, 226, 261, 342], hit: [17, 19, 21, 26] },
+  { place: '구름다리', names: ['태인', '유리', '한결', '구름다리 대장 온유'], hp: [246, 284, 330, 425], hit: [20, 22, 25, 31] },
+  { place: '도서실', names: ['유민', '주리', '민재', '대표 채원'], hp: [300, 349, 399, 515], hit: [23, 26, 29, 39] },
+  { place: '음악실', names: ['주원', '세아', '지호', '합주부장 리우'], hp: [380, 432, 490, 630], hit: [28, 31, 35, 43] },
+  { place: '미술실', names: ['서준', '나윤', '현준', '그림부장 리나'], hp: [467, 530, 595, 755], hit: [33, 36, 40, 49] },
+  { place: '과학실', names: ['희수', '민지', '시온', '대표 은우'], hp: [560, 630, 710, 895], hit: [38, 41, 47, 57] },
+  { place: '체육 창고', names: ['하람', '서윤', '태오', '장비부장 도담'], hp: [685, 770, 858, 1050], hit: [44, 48, 53, 64] },
+  { place: '실내 체육관', names: ['윤재', '미루', '수안', '체육부장 규리'], hp: [805, 905, 1001, 1215], hit: [50, 54, 60, 72] },
+  { place: '야외 농구장', names: ['라온', '소이', '기태', '대표 나린'], hp: [950, 1060, 1175, 1415], hit: [56, 61, 68, 81] },
+  { place: '놀이터', names: ['현우', '다인', '건우', '놀이터 대장 나래'], hp: [1110, 1234, 1372, 1620], hit: [64, 69, 76, 90] },
+  { place: '운동장 트랙', names: ['하늘', '나현', '민성', '달리기 대표 유진'], hp: [1290, 1430, 1585, 1875], hit: [72, 78, 87, 102] },
+  { place: '운동장 결승선', names: ['도현', '지안', '아린', '운동장 대장 새봄'], hp: [1505, 1660, 1820, 2250], hit: [80, 88, 98, 115] },
+];
+
+const GEAR = {
+  basicTop: { name: '입학 후드', slot: 'top', starter: true },
+  basicBottom: { name: '입학 바지', slot: 'bottom', starter: true },
+  bag: { name: '입학 가방', slot: 'bag', hp: 4, starter: true },
+  basicShoes: { name: '입학 운동화', slot: 'shoes', starter: true },
+  pencil: { name: '새 연필', slot: 'accessory', attack: 1, starter: true },
+  wristband: { name: '별무늬 손목띠', slot: 'accessory', attack: 5 },
+  shoes: { name: '보라색 체육화', slot: 'shoes', hp: 18, style: 'violet' },
+  jersey: { name: '급식실 챔피언 띠', slot: 'accessory', attack: 13 },
+  jumper: { name: '줄무늬 점퍼', slot: 'top', hp: 43, style: 'crimson' },
+  gloves: { name: '별무늬 체육 장갑', slot: 'accessory', attack: 29 },
+  vest: { name: '체육관 팀 조끼', slot: 'top', hp: 79, style: 'indigo' },
+  badge: { name: '운동장 왕 배지', slot: 'accessory', attack: 54 },
+  mintHood: { name: '민트 후드', slot: 'top', hp: 10, attack: 2, style: 'mint' },
+  hallPants: { name: '복도 트레이닝 바지', slot: 'bottom', hp: 12, attack: 1, style: 'indigo' },
+  classBag: { name: '새싹 책가방', slot: 'bag', hp: 12, attack: 3, style: 'mint' },
+  stairShoes: { name: '귤빛 운동화', slot: 'shoes', hp: 20, attack: 2, style: 'orange' },
+  lunchTop: { name: '급식실 줄무늬 후드', slot: 'top', hp: 25, attack: 4, style: 'orange' },
+  lunchPants: { name: '식판 자수 바지', slot: 'bottom', hp: 25, attack: 4, style: 'graphite' },
+  gardenBag: { name: '텃밭 물뿌리개 가방', slot: 'bag', hp: 29, attack: 6, style: 'forest' },
+  bridgeShoes: { name: '구름다리 러닝화', slot: 'shoes', hp: 29, attack: 6, style: 'sky' },
+  libraryPants: { name: '도서부 남색 바지', slot: 'bottom', hp: 33, attack: 7, style: 'violet' },
+  musicBag: { name: '음표 스쿨백', slot: 'bag', hp: 38, attack: 9, style: 'pink' },
+  artTop: { name: '분필빛 활동복', slot: 'top', hp: 49, attack: 8, style: 'pink' },
+  labShoes: { name: '과학실 실습화', slot: 'shoes', hp: 41, attack: 11, style: 'forest' },
+  gymPants: { name: '체육부 바지', slot: 'bottom', hp: 47, attack: 13, style: 'forest' },
+  gymBag: { name: '체육관 더플백', slot: 'bag', hp: 48, attack: 13, style: 'sky' },
+  courtShoes: { name: '코트 농구화', slot: 'shoes', hp: 49, attack: 15, style: 'crimson' },
+  playTop: { name: '놀이터 레이싱 후드', slot: 'top', hp: 75, attack: 17, style: 'sky' },
+  trackPants: { name: '트랙 스프린트 바지', slot: 'bottom', hp: 59, attack: 18, style: 'crimson' },
+  finishBag: { name: '결승선 우승 가방', slot: 'bag', hp: 68, attack: 20, style: 'crimson' },
+};
+const SLOTS = { top: '상의', bottom: '하의', bag: '가방', shoes: '신발', accessory: '장신구' };
+const STARTER_GEAR = { top: 'basicTop', bottom: 'basicBottom', bag: 'bag', shoes: 'basicShoes', accessory: 'pencil' };
+const MAP_REWARDS = ['mintHood', 'hallPants', 'classBag', 'stairShoes', 'lunchTop', 'lunchPants', 'gardenBag', 'bridgeShoes', 'libraryPants', 'musicBag', 'artTop', 'labShoes', 'gymPants', 'gymBag', 'courtShoes', 'playTop', 'trackPants', 'finishBag'];
+const DROP_WINS = 4;
+const FARM_WINS = 3;
+const MAX_RANK = 30;
+const RANK_BONUS = 0.03;
+// ── 장기 성장: 6-3을 깨면 다음 년차로 넘어가며 적·보상이 지수적으로 커진다 ──
+// 2년차부터는 맵 하나 넘어갈 때마다 아래 비율로 이어서 커진다(1년차 마지막 보스 기준).
+const GROWTH = { hp: 1.23, hit: 1.22, coin: 1.25, xp: 1.03 };
+const MILESTONE = 25;
+const COST_TAIL = 1.05;
+const GRADE_SCALING = [
+  { hp: 1, attack: 1 }, { hp: 1.14, attack: 1.08 }, { hp: 1.24, attack: 1.20 },
+  { hp: 1.38, attack: 1.28 }, { hp: 1.49, attack: 1.36 }, { hp: 1.62, attack: 1.45 },
+];
+const MISSIONS = {
+  wins: { name: '쉬는 시간 단골', hint: '대결 승리', glyph: '✷', step: 8, value: state => state.wins },
+  clears: { name: '학교 탐방', hint: '맵 첫 클리어', glyph: '⚑', step: 2, value: state => state.totalClears ?? state.cleared.filter(Boolean).length },
+  closet: { name: '옷장 채우기', hint: '새 장비 수집', glyph: '✧', step: 3, value: state => state.bag.filter(id => !GEAR[id].starter).length },
+};
+const BOSS_REWARDS = ['shoes', 'jersey', 'jumper', 'gloves', 'vest', 'badge'];
+const TRAINING = {
+  power: { name: '힘 훈련', glyph: '✧', bonus: '공격력 +4', base: 22, cap: 1e9, scale: 1.16, milestone: true },
+  health: { name: '체력 훈련', glyph: '♥', bonus: '최대 체력 +15', base: 18, cap: 1e9, scale: 1.13, milestone: true },
+  speed: { name: '순발력 훈련', glyph: 'ϟ', bonus: '공격 간격 −0.04초', base: 31, cap: 11, scale: 1.31 },
+  focus: { name: '집중력 훈련', glyph: '◎', bonus: '치명타 확률 +1%', base: 45, cap: 30, scale: 1.2 },
+};
+const CLASSES = {
+  gym: { name: '체육', glyph: '↗', bonus: '공격 간격 18% 단축' },
+  math: { name: '수학', glyph: '+', bonus: '대결 코인 보상 25% 증가' },
+  music: { name: '음악', glyph: '♪', bonus: '필살기 충전량 50% 증가' },
+};
+const SKILLS = {
+  rush: { name: '쏜살 돌진', glyph: '➤', cost: 54, multiplier: 2.2, windup: 0.15, detail: '빠르게 충전돼요. 다온이 반격 뒤 빈틈을 보일 때 사용해 큰 피해를 줘요.' },
+  bell: { name: '종소리 반격', glyph: '✷', cost: 72, multiplier: 2.7, windup: 0.2, detail: '다온의 방어를 깨고 반격을 끊어요. 자동 사용은 방어할 때까지 기다려요.' },
+};
+// ── 방치형 기본 기능: 스티커 뽑기·도감, 매점 간식 버프, 출석, 일일 미션 ──
+const RARITIES = {
+  common: { name: '일반', weight: 58 },
+  uncommon: { name: '고급', weight: 27 },
+  rare: { name: '희귀', weight: 10.5 },
+  epic: { name: '영웅', weight: 3.8 },
+  legend: { name: '전설', weight: 0.7 },
+};
+const RARITY_ORDER = Object.keys(RARITIES);
+const STICKERS = {
+  eraser: { name: '말랑 지우개', rarity: 'common', stat: 'hp', value: 0.02 },
+  ruler: { name: '반짝이 자', rarity: 'common', stat: 'attack', value: 0.02 },
+  clip: { name: '무지개 클립', rarity: 'common', stat: 'coin', value: 0.03 },
+  notebook: { name: '줄무늬 공책', rarity: 'common', stat: 'xp', value: 0.03 },
+  crayon: { name: '12색 크레파스', rarity: 'uncommon', stat: 'attack', value: 0.03 },
+  stamp: { name: '참 잘했어요 도장', rarity: 'uncommon', stat: 'coin', value: 0.05 },
+  bandage: { name: '캐릭터 밴드', rarity: 'uncommon', stat: 'hp', value: 0.04 },
+  marble: { name: '왕구슬', rarity: 'rare', stat: 'crit', value: 0.015 },
+  slime: { name: '액체 괴물', rarity: 'rare', stat: 'attack', value: 0.05 },
+  whistle: { name: '체육 호루라기', rarity: 'epic', stat: 'attack', value: 0.07 },
+  captain: { name: '반장 배지', rarity: 'epic', stat: 'coin', value: 0.1 },
+  goldpen: { name: '황금 샤프', rarity: 'legend', stat: 'attack', value: 0.12 },
+};
+const STICKER_STATS = { attack: '공격력', hp: '체력', coin: '코인', xp: '경험치', crit: '치명타' };
+const STICKER_LEVELS = Array.from({ length: 100 }, (_, index) => (index + 1) * (index + 2) / 2);
+const SNACKS = {
+  choco: { name: '초코우유', stat: 'attack', bonus: 0.5, label: '공격력 +50%' },
+  banana: { name: '바나나우유', stat: 'coin', bonus: 1, label: '코인 2배' },
+  berry: { name: '딸기우유', stat: 'xp', bonus: 1, label: '경험치 2배' },
+};
+const SNACK_TIME = 15 * 60;
+const SNACK_MAX = 60 * 60;
+const WELCOME_TICKETS = 10;
+const ATTENDANCE = [{ tickets: 3 }, { coins: 20 }, { patches: 2 }, { tickets: 5 }, { coins: 40 }, { patches: 4 }, { tickets: 10, coins: 60 }];
+const DAILY_MISSIONS = {
+  wins: { name: '대결 20번 이기기', target: 20, value: state => state.wins - state.daily.baseWins, reward: { tickets: 2 } },
+  trains: { name: '훈련 10번 하기', target: 10, value: state => state.daily.trains, reward: { coins: 12 } },
+  pulls: { name: '스티커 5번 뽑기', target: 5, value: state => state.daily.pulls, reward: { patches: 2 } },
+  snacks: { name: '매점 간식 2번 먹기', target: 2, value: state => state.daily.snacks, reward: { tickets: 2 } },
+  dungeons: { name: '던전 3번 하기', target: 3, value: state => state.daily.dungeons || 0, reward: { tickets: 2 } },
+  all: { name: '일일 미션 모두 완료', target: 5, value: state => state.daily.claimed.filter(id => id !== 'all').length, reward: { tickets: 5 } },
+};
+
+// ── 무리 전투: 1~3번째 대결은 친구 둘 + 무리 대장, 4번째는 1:1 보스전 ──
+// 무리 전체 체력·보상 합은 예전 1:1 상대와 같다(share 합 1). 뒤에 선 상대 수만큼 앞 상대의 공격이 세진다(협공).
+// 무리 하나 = 친구 다섯(체력·보상 10%씩) + 대장(50%). 맵마다 무리 3개(18명)를 치우면 보스 도전.
+const PACK = [
+  { share: 0.1, hit: 0.35 }, { share: 0.1, hit: 0.35 }, { share: 0.1, hit: 0.35 }, { share: 0.1, hit: 0.35 }, { share: 0.1, hit: 0.35 },
+  { share: 0.5, hit: 1, leader: true },
+];
+const GANG_UP = 0.12;
+const SPLASH = 0.6;
+const BOSS_TIME = 40;
+const CLASSMATES = ['하준', '서아', '도윤', '지유', '이안', '하윤', '시온', '아린', '로운', '채아', '은호', '다은', '태양', '보미', '준호', '수아', '건희', '나연'];
+const MOB_SPRITES = ['mob1', 'mob2', 'mob3', 'mob4', 'mob5', 'mob6', 'mob7', 'mob8'];
+
+// ── 일일 던전: 하루 열쇠 2개, 30초 안에 졸개 셋과 던전 보스를 이기면 다음 단계 ──
+const DUNGEONS = {
+  coin: { name: '매점 쟁탈전', boss: '매점 줄서기 대장', minion: '새치기 친구', reward: 'coin', hp: 4, hit: 0.6, sprite: 'dboss-store', background: 'd-coin', minionSprites: ['mob1', 'mob2', 'mob3'], map: 5, unlock: 'clear' },
+  ticket: { name: '도서실 퀴즈왕', boss: '퀴즈 대장 책벌레', minion: '퀴즈 참가자', reward: 'ticket', hp: 2.4, hit: 1.5, sprite: 'dboss-quiz', background: 'd-ticket', minionSprites: ['mob4', 'mob5', 'mob8'], map: 9, unlock: 'clear' },
+  badge: { name: '전국 체력장', boss: '체력장 1등 선배', minion: '체력장 선배', reward: 'badge', hp: 3, hit: 1.3, sprite: 'dboss-sports', background: 'd-badge', minionSprites: ['mob3', 'mob6', 'mob7'], map: 17, unlock: 'transfer' },
+};
+const DUNGEON_PACK = [
+  { share: 0.08, hit: 0.3 }, { share: 0.08, hit: 0.3 }, { share: 0.08, hit: 0.3 }, { share: 0.08, hit: 0.3 }, { share: 0.08, hit: 0.3 },
+  { share: 0.6, hit: 1, leader: true },
+];
+const DUNGEON_KEYS = 2;
+const DUNGEON_TIME = 30;
+
+// ── 환생: 전학 → 명예 배지 → 방과 후 학원(영구 강화) ──
+const PRESTIGE_UNLOCK = 6;
+const PRESTIGE = { base: 3, growth: 1.05 };
+// 학원 효과는 레벨마다 곱해진다(×mult^레벨). 비용은 base × growth^레벨.
+const PERKS = {
+  power: { name: '태권도 학원', stat: 'attack', mult: 1.1, base: 3, growth: 1.15, cap: 1e9 },
+  health: { name: '수영 학원', stat: 'hp', mult: 1.1, base: 3, growth: 1.15, cap: 1e9 },
+  coin: { name: '용돈 인상', stat: 'coin', mult: 1.12, base: 4, growth: 1.16, cap: 1e9 },
+  xp: { name: '선행 학습', stat: 'xp', mult: 1.1, base: 4, growth: 1.18, cap: 1e9 },
+  offline: { name: '방과 후 교실', stat: 'offline', value: 3600, base: 10, growth: 3, cap: 4 },
+};
+const freshPrestige = () => ({ count: 0, badges: 0, earned: 0, best: 0, perks: Object.fromEntries(Object.keys(PERKS).map(id => [id, 0])) });
+
+const DAON_MAP = 2;
+const BOSS_PHASES = {
+  ready: { duration: 1.4, next: 'guard' },
+  guard: { duration: 2.3, next: 'counter' },
+  counter: { duration: 0.65, next: 'open' },
+  open: { duration: 1.85, next: 'ready' },
+  broken: { duration: 2.25, next: 'ready' },
+};
+
+const STEP = 0.05;
+const OFFLINE_LIMIT = 4 * 3600;
+const SAVE_KEY = 'haesol-recess-king-v1';
+const BOSS_WAVE = 3;
+const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+const NUMBER_UNITS = ['', '만', '억', '조', '경', '해', '자', '양', '구', '간', '정', '재', '극', '항하사', '아승기', '나유타', '불가사의', '무량대수'];
+function fmt(value) {
+  const number = Math.floor(value);
+  if (!Number.isFinite(number)) return '∞';
+  if (Math.abs(number) < 100000) return number.toLocaleString('ko-KR');
+  const tier = Math.floor(Math.log10(Math.abs(number)) / 4);
+  if (tier >= NUMBER_UNITS.length) return number.toExponential(2).replace('e+', 'e');
+  const scaled = number / 10 ** (tier * 4);
+  const shown = scaled >= 1000 ? Math.floor(scaled).toLocaleString('ko-KR') : scaled >= 100 ? String(Math.floor(scaled)) : String(Math.floor(scaled * (scaled >= 10 ? 10 : 100)) / (scaled >= 10 ? 10 : 100));
+  return `${shown}${NUMBER_UNITS[tier]}`;
+}
+
+function newGame() {
+  const state = freshState();
+  const mobs = makeMobs(state);
+  state.front = mobs[0];
+  state.pack = mobs.slice(1).map(mob => ({ ...mob, hp: mob.max }));
+  state.enemyHp = state.front.max;
+  return state;
+}
+
+function freshState() {
+  return {
+    dungeons: Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, 0])), dungeon: null, dungeonResult: null, front: null, pack: [],
+    profile: null, level: 1, xp: 0, coins: 12, map: 0, wave: 0, wins: 0,
+    cleared: MAPS.map(() => false), training: { power: 0, health: 0, speed: 0, focus: 0 },
+    tickets: WELCOME_TICKETS, stickers: {}, snacks: { choco: 0, banana: 0, berry: 0 }, speed: 1,
+    attendance: { count: 0, last: '' }, daily: null, prestige: freshPrestige(), cycle: 0, totalClears: 0,
+    bag: Object.values(STARTER_GEAR), equipped: { ...STARTER_GEAR }, ranks: {}, patches: 0,
+    mapWins: MAPS.map(() => 0), missions: { wins: 0, clears: 0, closet: 0 }, farm: null,
+    classId: null, autoNext: true, autoSkill: true, skillId: 'rush', sound: true, charge: 0, hp: 84, enemyHp: MAPS[0].hp[0],
+    nextAttack: 0.65, nextEnemy: 1.5, pause: 0.2, tickRemainder: 0,
+    playerMove: null, enemyMove: null, roundEnd: null, bossPhase: 'ready', bossTimer: BOSS_PHASES.ready.duration,
+    log: ['입학 첫날. 신발장 입구에서 첫 대결이 시작됐어요.'],
+  };
+}
+
+function xpTarget(state) { return Math.round((24 + (state.level - 1) * 14) * 1.045 ** Math.max(0, state.level - 40)); }
+function gearStats(state, id) {
+  const item = GEAR[id];
+  const rank = state.ranks[id] || 0;
+  return { attack: item.attack ? item.attack + rank : 0, hp: item.hp ? item.hp + rank * 5 : 0 };
+}
+function outfitStat(state, key) { return Object.values(state.equipped).reduce((sum, id) => sum + gearStats(state, id)[key], 0); }
+function rankBonus(state) { return Object.values(state.equipped).reduce((sum, id) => sum + (state.ranks[id] || 0), 0) * RANK_BONUS; }
+function stickerLevel(state, id) {
+  const copies = state.stickers?.[id] || 0;
+  return Math.min(STICKER_LEVELS.length, Math.floor((Math.sqrt(8 * copies + 1) - 1) / 2));
+}
+function milestoneMultiplier(level) { return 2 ** Math.floor(level / MILESTONE); }
+function trainingCostAt(id, level) {
+  const info = TRAINING[id];
+  if (!info.milestone) return Math.ceil(info.base * info.scale ** level);
+  return Math.ceil(info.base * info.scale ** Math.min(level, MILESTONE) * COST_TAIL ** Math.max(0, level - MILESTONE));
+}
+function baseValue(map, kind) {
+  const grade = gradeIndex(map);
+  if (kind === 'hp') return MAPS[map].hp[BOSS_WAVE] * GRADE_SCALING[grade].hp;
+  if (kind === 'hit') return MAPS[map].hit[BOSS_WAVE] * GRADE_SCALING[grade].attack;
+  if (kind === 'coin') return 8 + 6 * grade + 2 * (map % MAPS_PER_GRADE);
+  return 8 + grade * 5;
+}
+function cycleScale(state, kind) {
+  const cycle = state.cycle || 0;
+  if (!cycle) return 1;
+  const last = MAPS.length - 1;
+  return baseValue(last, kind) * GROWTH[kind] ** (cycle * MAPS.length + state.map - last) / baseValue(state.map, kind);
+}
+function stickerBonus(state, stat) {
+  return Object.entries(STICKERS).reduce((sum, [id, sticker]) => sum + (sticker.stat === stat ? sticker.value * stickerLevel(state, id) : 0), 0);
+}
+function snackBonus(state, stat) {
+  return Object.entries(SNACKS).reduce((sum, [id, snack]) => sum + (snack.stat === stat && state.snacks?.[id] > 0 ? snack.bonus : 0), 0);
+}
+function perkBonus(state, stat) {
+  return Object.entries(PERKS).reduce((sum, [id, perk]) => sum + (perk.stat === stat && perk.value ? perk.value * (state.prestige?.perks[id] || 0) : 0), 0);
+}
+function perkMultiplier(state, stat) {
+  return Object.entries(PERKS).reduce((product, [id, perk]) => product * (perk.stat === stat && perk.mult ? perk.mult ** (state.prestige?.perks[id] || 0) : 1), 1);
+}
+function perkCost(state, id) { return Math.ceil(PERKS[id].base * PERKS[id].growth ** state.prestige.perks[id]); }
+function offlineLimit(state) { return OFFLINE_LIMIT + perkBonus(state, 'offline'); }
+function clearedCount(state) { return state.cleared.filter(Boolean).length; }
+function progress(state) { return (state.cycle || 0) * MAPS.length + clearedCount(state); }
+function prestigeGain(state) {
+  const reached = progress(state);
+  if (reached < PRESTIGE_UNLOCK) return 0;
+  return Math.floor(PRESTIGE.base * PRESTIGE.growth ** reached);
+}
+function transfer(state) {
+  const gain = prestigeGain(state);
+  if (!gain) return 0;
+  const reached = progress(state);
+  const keep = {};
+  for (const key of ['profile', 'wins', 'bag', 'equipped', 'ranks', 'patches', 'missions', 'classId', 'autoNext', 'autoSkill', 'skillId', 'sound',
+    'tickets', 'stickers', 'snacks', 'speed', 'attendance', 'daily', 'totalClears', 'dungeons', 'dungeonResult']) keep[key] = state[key];
+  const before = state.prestige;
+  Object.assign(state, newGame(), keep);
+  state.prestige = { ...before, count: before.count + 1, badges: before.badges + gain, earned: before.earned + gain, best: Math.max(before.best, reached) };
+  state.hp = maxHp(state);
+  state.log = [`${state.prestige.count}번째 전학! 새 학교 1-1 신발장 입구에서 다시 시작해요.`];
+  return gain;
+}
+function critChance(state) { return Math.min(0.6, (state.training.focus || 0) * 0.01 + stickerBonus(state, 'crit')); }
+function coinUnit(state) { return Math.round((8 + 6 * gradeIndex(state.map) + 2 * (state.map % MAPS_PER_GRADE)) * cycleScale(state, 'coin')); }
+function pullCost(state) { return Math.round(30 * 1.22 ** clearedCount(state) * cycleScale(state, 'coin')); }
+function statBonus(state, stat) {
+  return (1 + stickerBonus(state, stat) + (stat === 'attack' || stat === 'hp' ? rankBonus(state) : 0)) * perkMultiplier(state, stat);
+}
+function maxHp(state) {
+  const health = state.training.health;
+  const base = 80 + (state.level - 1) * 11 + health * 15 * milestoneMultiplier(health) + outfitStat(state, 'hp');
+  return Math.round(base * statBonus(state, 'hp'));
+}
+function attack(state) {
+  const power = state.training.power;
+  const base = 8 + (state.level - 1) * 3 + power * 4 * milestoneMultiplier(power) + outfitStat(state, 'attack');
+  return Math.round(base * statBonus(state, 'attack') * (1 + snackBonus(state, 'attack')));
+}
+function enemyHit(state) {
+  const base = state.dungeon
+    ? atProgress(dungeonProgress(state.dungeon.level), 'hit') * DUNGEONS[state.dungeon.id].hit
+    : MAPS[state.map].hit[state.wave] * GRADE_SCALING[gradeIndex(state.map)].attack * cycleScale(state, 'hit');
+  return base * (state.front?.hit ?? 1) * (1 + GANG_UP * aliveBehind(state));
+}
+function winCoins(state, firstBoss) {
+  const grade = gradeIndex(state.map);
+  const boss = state.wave === BOSS_WAVE;
+  const baseCoins = (8 + 6 * grade + 2 * (state.map % MAPS_PER_GRADE) + 2 * state.wave) * (boss ? 2 : 1);
+  const coinBonus = state.classId === 'math' ? 1.25 : 1;
+  const extra = statBonus(state, 'coin') * (1 + snackBonus(state, 'coin'));
+  return Math.round((baseCoins + (firstBoss ? 15 + 5 * grade : 0)) * coinBonus * extra * cycleScale(state, 'coin'));
+}
+function winXp(state) {
+  const grade = gradeIndex(state.map);
+  const boss = state.wave === BOSS_WAVE;
+  return Math.round((8 + grade * 5 + state.wave * 2) * (boss ? 2 : 1) * statBonus(state, 'xp') * (1 + snackBonus(state, 'xp')) * cycleScale(state, 'xp'));
+}
+
+function todayKey(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+function refreshDay(state, today) {
+  if (!state.daily || state.daily.date !== today) {
+    state.daily = { date: today, baseWins: state.wins, trains: 0, pulls: 0, snacks: 0, dungeons: 0, claimed: [],
+      keys: Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, DUNGEON_KEYS])) };
+  }
+}
+function grant(state, reward) {
+  const given = { coins: (reward.coins || 0) * coinUnit(state), tickets: reward.tickets || 0, patches: reward.patches || 0 };
+  state.coins += given.coins;
+  state.tickets += given.tickets;
+  state.patches += given.patches;
+  return given;
+}
+function rollRarity(rng) {
+  const total = Object.values(RARITIES).reduce((sum, rarity) => sum + rarity.weight, 0);
+  let roll = rng() * total;
+  for (const [id, rarity] of Object.entries(RARITIES)) {
+    roll -= rarity.weight;
+    if (roll < 0) return id;
+  }
+  return 'common';
+}
+function pullStickers(state, count, rng = Math.random) {
+  const results = [];
+  const rank = rarity => RARITY_ORDER.indexOf(rarity);
+  for (let index = 0; index < count; index++) {
+    let rarity = rollRarity(rng);
+    const lastOfTen = count >= 10 && index === count - 1;
+    if (lastOfTen && rank(rarity) < rank('rare') && !results.some(result => rank(result.rarity) >= rank('rare'))) rarity = 'rare';
+    const pool = Object.keys(STICKERS).filter(id => STICKERS[id].rarity === rarity);
+    const id = pool[Math.floor(rng() * pool.length)];
+    const before = stickerLevel(state, id);
+    state.stickers[id] = (state.stickers[id] || 0) + 1;
+    const after = stickerLevel(state, id);
+    results.push({ id, rarity, isNew: before === 0, leveled: before > 0 && after > before, level: after });
+  }
+  return results;
+}
+function waveHp(state) {
+  if (state.dungeon) return atProgress(dungeonProgress(state.dungeon.level), 'hp') * DUNGEONS[state.dungeon.id].hp;
+  const hp = MAPS[state.map].hp[state.wave] * GRADE_SCALING[gradeIndex(state.map)].hp * cycleScale(state, 'hp');
+  return hp * 0.64 ** (state.farm?.easy || 0);
+}
+function enemyMaxHp(state) { return state.front?.max ?? Math.max(1, Math.round(waveHp(state))); }
+function rivalSprite(map, wave) {
+  const boss = wave === BOSS_WAVE;
+  if (boss && isGradeFinal(map)) return `boss${gradeIndex(map) + 1}`;
+  return boss ? 'rival4' : `rival${(map + wave) % 3 + 1}`;
+}
+function mobKey(state) {
+  return state.dungeon ? `d:${state.dungeon.id}:${state.dungeon.level}` : `${state.cycle || 0}:${state.map}:${state.wave}:${state.farm?.easy || 0}`;
+}
+function makeMobs(state) {
+  const full = waveHp(state);
+  const key = mobKey(state);
+  const make = (slot, name, sprite) => ({ name, share: slot.share, hit: slot.hit, sprite, leader: Boolean(slot.leader), key, max: Math.max(1, Math.round(full * slot.share)) });
+  if (state.dungeon) {
+    const dungeon = DUNGEONS[state.dungeon.id];
+    return DUNGEON_PACK.map((slot, index) => make(slot, slot.leader ? dungeon.boss : `${dungeon.minion} ${index + 1}`, slot.leader ? dungeon.sprite : dungeon.minionSprites[index % dungeon.minionSprites.length]));
+  }
+  const { map, wave } = state;
+  const leader = rivalSprite(map, wave);
+  if (wave === BOSS_WAVE) return [make({ share: 1, hit: 1, leader: true }, MAPS[map].names[wave], leader)];
+  return PACK.map((slot, index) => make(slot,
+    slot.leader ? MAPS[map].names[wave] : CLASSMATES[(map * 7 + wave * 3 + index) % CLASSMATES.length],
+    slot.leader ? leader : MOB_SPRITES[(map + wave * 2 + index) % MOB_SPRITES.length]));
+}
+function aliveBehind(state) { return state.pack?.filter(mob => mob.hp > 0).length || 0; }
+function atProgress(reached, kind) {
+  const map = reached % MAPS.length;
+  return baseValue(map, kind) * cycleScale({ cycle: Math.floor(reached / MAPS.length), map }, kind);
+}
+function dungeonProgress(level) { return 3 * level - 1; }
+function dungeonUnlocked(state, id) {
+  return DUNGEONS[id].unlock === 'transfer' ? state.prestige.count > 0 : (state.totalClears >= 3 || state.prestige.count > 0);
+}
+function dungeonReward(state, id, level) {
+  const reached = dungeonProgress(level);
+  if (id === 'coin') return { coins: Math.round(atProgress(reached, 'coin') * 300 * statBonus(state, 'coin')) };
+  if (id === 'ticket') return { tickets: 1 + Math.floor(level / 10) };
+  return { badges: Math.max(1, Math.floor(PRESTIGE.base * PRESTIGE.growth ** reached * 0.05)) };
+}
+function rewardLine(reward) {
+  return [reward.coins && `코인 +${fmt(reward.coins)}`, reward.tickets && `뽑기권 +${reward.tickets}`, reward.badges && `명예 배지 +${fmt(reward.badges)}`].filter(Boolean).join(' · ');
+}
+function grantDungeon(state, id, level) {
+  const reward = dungeonReward(state, id, level);
+  state.coins += reward.coins || 0;
+  state.tickets += reward.tickets || 0;
+  if (reward.badges) {
+    state.prestige.badges += reward.badges;
+    state.prestige.earned += reward.badges;
+  }
+  return reward;
+}
+function dungeonKeys(state, id) { return state.daily?.keys?.[id] ?? 0; }
+function enterDungeon(state, id) {
+  if (!dungeonUnlocked(state, id) || state.dungeon || state.roundEnd?.leaveDungeon || dungeonKeys(state, id) <= 0) return false;
+  if (state.roundEnd) {
+    // 끝난 대결의 다음 위치(다음 맵·년차·수련)를 먼저 확정하고 던전에 들어간다
+    const end = state.roundEnd;
+    state.farm = end.nextFarm;
+    state.map = end.nextMap;
+    state.wave = end.nextWave;
+    state.roundEnd = null;
+  }
+  state.dungeon = { id, level: (state.dungeons[id] || 0) + 1, time: DUNGEON_TIME };
+  state.hp = maxHp(state);
+  openFight(state, state.map, state.wave, 0.6);
+  return true;
+}
+function sweepDungeon(state, id) {
+  const best = state.dungeons[id] || 0;
+  if (!best || state.dungeon || dungeonKeys(state, id) <= 0) return null;
+  state.daily.keys[id]--;
+  state.daily.dungeons = (state.daily.dungeons || 0) + 1;
+  const reward = grantDungeon(state, id, best);
+  state.dungeonResult = { id, level: best, win: true, sweep: true, text: rewardLine(reward), serial: (state.dungeonResult?.serial || 0) + 1 };
+  return reward;
+}
+function leaveDungeon(state, win, emit, reason = '') {
+  const { id, level } = state.dungeon;
+  let text = '열쇠는 그대로예요.';
+  if (win) {
+    state.daily.keys[id]--;
+    state.daily.dungeons = (state.daily.dungeons || 0) + 1;
+    state.dungeons[id] = Math.max(state.dungeons[id] || 0, level);
+    text = rewardLine(grantDungeon(state, id, level));
+  }
+  state.dungeonResult = { id, level, win, reason, text, serial: (state.dungeonResult?.serial || 0) + 1 };
+  record(state, `${DUNGEONS[id].name} Lv.${level} ${win ? '클리어!' : reason === 'timeout' ? '시간 초과' : '실패'} · ${text}`);
+  finishRound(state, win ? 'win' : 'loss', state.map, state.wave, 1.5, emit, null, state.farm);
+  state.roundEnd.leaveDungeon = true;
+}
+function mobReward(state, mob, emit) {
+  const coins = Math.round(winCoins(state, false) * mob.share);
+  state.coins += coins;
+  state.xp += Math.round(winXp(state) * mob.share);
+  levelUps(state);
+  emit?.('kill', { coins, name: mob.name });
+}
+function levelUps(state) {
+  while (state.xp >= xpTarget(state)) {
+    state.xp -= xpTarget(state);
+    state.level++;
+    record(state, `레벨 ${state.level} 달성!`);
+  }
+}
+function nextMob(state, emit) {
+  if (!state.dungeon) mobReward(state, state.front, emit);
+  else emit?.('kill', { coins: 0, name: state.front.name });
+  const index = state.pack.findIndex(mob => mob.hp > 0);
+  const next = state.pack.splice(0, index + 1).pop();
+  const { hp, ...front } = next;
+  state.front = front;
+  state.enemyHp = hp;
+  state.enemyMove = null;
+  state.nextEnemy = front.leader ? 0.75 : 0.55;
+  state.pause = front.leader ? 0.3 : 0.12;
+}
+function killProgress(state) {
+  const total = (BOSS_WAVE) * PACK.length;
+  if (state.dungeon) return { done: 0, total };
+  if (state.wave >= BOSS_WAVE) return { done: total, total };
+  const left = aliveBehind(state) + (state.enemyHp > 0 ? 1 : 0);
+  return { done: state.wave * PACK.length + PACK.length - left, total };
+}
+function bossTimeout(state, emit) {
+  record(state, `${currentEnemy(state)} 보스전 시간 초과! 같은 맵에서 반복 수련해요.`);
+  finishRound(state, 'loss', state.map, 0, 1.65, emit, null, { cap: Math.min(1, Math.max(0, state.wave - 1)), easy: 0, wins: 0 });
+  state.roundEnd.timeout = true;
+}
+function nextMission(state, id) {
+  const tier = state.missions[id] + 1;
+  return { target: MISSIONS[id].step * tier, coins: 20 + 10 * tier, patches: 1 + Math.floor(tier / 4) };
+}
+function upgradeCost(state, id) { return 1 + (state.ranks[id] || 0); }
+function interval(state) { return (0.98 - state.training.speed * 0.04) * (state.classId === 'gym' ? 0.82 : 1); }
+function trainingCost(state, id) { return trainingCostAt(id, state.training[id]); }
+function gradeIndex(map) { return Math.floor(map / MAPS_PER_GRADE); }
+function mapCode(map) { return `${gradeIndex(map) + 1}-${map % MAPS_PER_GRADE + 1}`; }
+function isGradeFinal(map) { return (map + 1) % MAPS_PER_GRADE === 0; }
+function firstGradeWon(state) { return state.cleared[MAPS_PER_GRADE - 1]; }
+function unlocked(state, map) { return map === 0 || state.cleared[map - 1]; }
+function currentEnemy(state) { return state.front?.name ?? MAPS[state.map].names[state.wave]; }
+function isDaon(state) { return !state.dungeon && state.map === DAON_MAP && state.wave === BOSS_WAVE; }
+function guarding(state) { return isDaon(state) && ['guard', 'counter'].includes(state.bossPhase); }
+function opening(state) { return isDaon(state) && ['open', 'broken'].includes(state.bossPhase); }
+function canSkill(state) { return !state.roundEnd && state.pause <= 0 && !state.playerMove && state.charge >= SKILLS[state.skillId].cost; }
+
+function makeProfile(name, gender) {
+  if (typeof name !== 'string' || !['boy', 'girl'].includes(gender)) return null;
+  const nickname = name.trim();
+  if (!nickname || nickname.length > 12 || /[\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/u.test(nickname)) return null;
+  return { name: nickname, gender };
+}
+
+function record(state, message) {
+  state.log.unshift(message);
+  state.log.length = Math.min(3, state.log.length);
+}
+
+function openFight(state, map, wave, delay) {
+  state.map = map;
+  state.wave = wave;
+  const mobs = makeMobs(state);
+  state.front = mobs[0];
+  state.pack = mobs.slice(1).map(mob => ({ ...mob, hp: mob.max }));
+  state.enemyHp = state.front.max;
+  state.bossTime = BOSS_TIME;
+  state.nextAttack = 0.55;
+  state.nextEnemy = isDaon(state) ? 0.85 : 1.35;
+  state.pause = delay;
+  state.playerMove = null;
+  state.enemyMove = null;
+  state.roundEnd = null;
+  state.bossPhase = 'ready';
+  state.bossTimer = BOSS_PHASES.ready.duration;
+}
+
+function finishRound(state, result, nextMap, nextWave, wait, emit, reward = null, nextFarm = state.farm) {
+  state.playerMove = null;
+  state.enemyMove = null;
+  state.roundEnd = { result, nextMap, nextWave, wait, nextFarm };
+  emit?.('finish', { result, wait, reward, boss: state.wave === BOSS_WAVE });
+}
+
+function win(state, emit) {
+  if (state.dungeon) {
+    leaveDungeon(state, true, emit);
+    return;
+  }
+  const map = state.map;
+  const grade = gradeIndex(map);
+  const boss = state.wave === BOSS_WAVE;
+  const firstBoss = boss && !state.cleared[map];
+  const share = state.front?.share ?? 1;
+  const coins = Math.round(winCoins(state, firstBoss) * share);
+  state.wins++;
+  state.mapWins[map]++;
+  state.coins += coins;
+  state.xp += Math.round(winXp(state) * share);
+  emit?.('kill', { coins, name: currentEnemy(state) });
+  record(state, `${boss ? currentEnemy(state) : `${currentEnemy(state)} 무리`}에게 승리 · 코인 +${fmt(coins)}`);
+  if (firstBoss) {
+    state.totalClears = (state.totalClears || 0) + 1;
+    if (progress(state) + 1 > (state.prestige?.best || 0)) {
+      const tickets = isGradeFinal(map) ? 5 : 2;
+      state.tickets += tickets;
+      record(state, `최고 기록 보스 격파 · 뽑기권 +${tickets}`);
+    }
+  }
+
+  let reward = null;
+  const bossGear = firstBoss && isGradeFinal(map) ? BOSS_REWARDS[grade] : null;
+  const mapGear = state.mapWins[map] % DROP_WINS === 0 ? MAP_REWARDS[map] : null;
+  for (const id of [state.wins === 2 ? 'wristband' : null, bossGear, mapGear]) {
+    if (!id) continue;
+    if (state.bag.includes(id)) {
+      state.patches++;
+      record(state, '중복 장비 분해 · 강화 천 조각 +1');
+    } else {
+      state.bag.push(id);
+      reward = id;
+      record(state, `장비 획득 · ${GEAR[id].name}`);
+    }
+  }
+  while (state.xp >= xpTarget(state)) {
+    state.xp -= xpTarget(state);
+    state.level++;
+    state.hp = maxHp(state);
+    record(state, `레벨 ${state.level} 달성!`);
+  }
+
+  if (state.farm) {
+    const { wins, cap } = state.farm;
+    const retry = wins + 1 >= FARM_WINS;
+    const nextFarm = retry ? null : { ...state.farm, wins: wins + 1 };
+    const nextWave = retry ? 0 : (state.wave + 1) % (cap + 1);
+    state.hp = maxHp(state);
+    if (retry) record(state, '같은 맵에서 수련 3승. 다시 도전해요!');
+    finishRound(state, 'win', map, nextWave, 0.83, emit, reward, nextFarm);
+    return;
+  }
+
+  if (firstBoss && map === MAPS.length - 1) {
+    state.cycle = (state.cycle || 0) + 1;
+    state.cleared = MAPS.map(() => false);
+    state.hp = maxHp(state);
+    record(state, `${state.cycle}년차 졸업! ${state.cycle + 1}년차 1-1부터 더 강한 상대가 기다려요.`);
+    finishRound(state, 'win', 0, 0, 1.6, emit, reward);
+    return;
+  }
+  if (firstBoss) {
+    state.cleared[map] = true;
+    record(state, `${mapCode(map + 1)} ${MAPS[map + 1].place} 해금!`);
+  }
+  if (boss) {
+    const next = state.autoNext && map < MAPS.length - 1 ? map + 1 : map;
+    state.hp = maxHp(state);
+    finishRound(state, 'win', next, 0, 1.3, emit, reward);
+    return;
+  }
+  state.hp = Math.min(maxHp(state), state.hp + Math.ceil(maxHp(state) * 0.16));
+  finishRound(state, 'win', map, state.wave + 1, 0.83, emit, reward);
+}
+
+function changeBossPhase(state, phase, emit) {
+  state.bossPhase = phase;
+  state.bossTimer = BOSS_PHASES[phase].duration;
+  state.enemyMove = null;
+  if (phase === 'ready') state.nextEnemy = 0.7;
+  emit?.('boss', { phase });
+}
+
+function strike(state, move, emit) {
+  const blocked = guarding(state) && move !== 'bell';
+  const breaks = guarding(state) && move === 'bell';
+  let multiplier = SKILLS[move]?.multiplier ?? (move === 'crit' ? 1.55 : 1);
+  if (blocked) multiplier *= 0.23;
+  if (opening(state)) multiplier *= move === 'rush' ? 1.7 : 1.35;
+  const chance = move === 'attack' && !blocked ? critChance(state) : 0;
+  const lucky = chance > 0 && Math.random() < chance;
+  if (lucky) multiplier *= 1.8;
+  const damage = Math.round(attack(state) * multiplier);
+  const amount = Math.min(state.enemyHp, Math.max(1, damage));
+  let overflow = Math.max(0, damage - state.enemyHp);
+  state.enemyHp -= amount;
+  if (breaks) {
+    changeBossPhase(state, 'broken', emit);
+    record(state, '종소리 반격으로 다온의 방어를 깼어요!');
+  }
+  emit?.('impact', { side: 'player', move, amount, blocked, breaks, lucky });
+  if (SKILLS[move] && state.pack?.length) {
+    // 스킬은 뒤에 선 상대까지 맞힌다
+    const splash = Math.max(1, Math.round(damage * SPLASH));
+    for (const mob of state.pack) if (mob.hp > 0) mob.hp = Math.max(0, mob.hp - splash);
+    emit?.('splash', { amount: splash });
+    state.pack = state.pack.filter(mob => {
+      if (mob.hp > 0) return true;
+      if (!state.dungeon) mobReward(state, mob, emit);
+      return false;
+    });
+  }
+  if (!SKILLS[move]) state.charge = Math.min(100, state.charge + (state.classId === 'music' ? 27 : 18));
+  // 넘친 피해는 다음 상대에게 이어진다(관통). 약한 친구 여럿을 한 번에 쓰러뜨릴 수 있다.
+  while (state.enemyHp <= 0) {
+    if (!aliveBehind(state)) {
+      win(state, emit);
+      return;
+    }
+    nextMob(state, emit);
+    if (overflow <= 0) return;
+    const pierce = Math.min(state.enemyHp, overflow);
+    state.enemyHp -= pierce;
+    overflow -= pierce;
+    emit?.('pierce', { amount: pierce });
+  }
+}
+
+function rivalStrike(state, move, emit) {
+  const multiplier = move === 'counter' ? 2.65 : 1;
+  const easier = state.dungeon ? 1 : 0.64 ** (state.farm?.easy || 0);
+  const hit = enemyHit(state);
+  const amount = Math.min(state.hp, Math.max(1, Math.round(hit * multiplier * easier)));
+  state.hp -= amount;
+  emit?.('impact', { side: 'rival', move, amount });
+  if (state.hp <= 0 && state.dungeon) {
+    leaveDungeon(state, false, emit);
+    return;
+  }
+  if (state.hp <= 0) {
+    const farm = state.farm ? { ...state.farm, easy: Math.min(5, state.farm.easy + 1) }
+      : { cap: Math.min(1, Math.max(0, state.wave - 1)), easy: state.wave === 0 ? 1 : 0, wins: 0 };
+    record(state, `${currentEnemy(state)}에게 졌어요. 같은 맵에서 반복 수련을 시작해요.`);
+    finishRound(state, 'loss', state.map, 0, 1.65, emit, null, farm);
+  }
+}
+
+function queuePlayer(state, move, emit) {
+  const skill = SKILLS[move];
+  const windup = skill?.windup ?? 0.2;
+  if (skill) state.charge -= skill.cost;
+  state.nextAttack = interval(state);
+  state.playerMove = { move, left: windup };
+  emit?.('windup', { side: 'player', move, windup });
+}
+
+function activateSkill(state, emit) {
+  if (!canSkill(state)) return false;
+  queuePlayer(state, state.skillId, emit);
+  return true;
+}
+
+function autoSkillTarget(state) {
+  if (!isDaon(state)) return true;
+  if (state.skillId === 'rush') return opening(state) && state.bossTimer >= SKILLS.rush.windup;
+  if (!guarding(state)) return false;
+  return state.bossPhase === 'guard' || state.bossTimer > SKILLS.bell.windup + STEP;
+}
+
+function step(state, emit) {
+  if (state.snacks) {
+    const used = STEP / (state.speed || 1);
+    for (const id of Object.keys(SNACKS)) if (state.snacks[id] > 0) state.snacks[id] = Math.max(0, state.snacks[id] - used);
+  }
+  if (state.roundEnd) {
+    const end = state.roundEnd;
+    end.wait -= STEP;
+    if (end.wait <= 1e-8) {
+      if (end.result === 'loss' || end.leaveDungeon) state.hp = maxHp(state);
+      if (end.leaveDungeon) state.dungeon = null;
+      state.farm = end.nextFarm;
+      openFight(state, end.nextMap, end.nextWave, 0.19);
+      emit?.('enter', {});
+    }
+    return;
+  }
+  if (state.pause > 0) {
+    state.pause = Math.max(0, state.pause - STEP);
+    return;
+  }
+  if (state.dungeon) {
+    state.dungeon.time -= STEP;
+    if (state.dungeon.time <= 0) {
+      leaveDungeon(state, false, emit, 'timeout');
+      return;
+    }
+  } else if (!state.farm && state.wave === BOSS_WAVE) {
+    state.bossTime = (Number.isFinite(state.bossTime) ? state.bossTime : BOSS_TIME) - STEP;
+    if (state.bossTime <= 0) {
+      bossTimeout(state, emit);
+      return;
+    }
+  }
+  state.nextAttack -= STEP;
+  if (state.playerMove) {
+    state.playerMove.left -= STEP;
+    if (state.playerMove.left <= 1e-8) {
+      const { move } = state.playerMove;
+      state.playerMove = null;
+      strike(state, move, emit);
+      if (state.roundEnd) return;
+    }
+  }
+
+  const daon = isDaon(state);
+  if (daon) {
+    state.bossTimer -= STEP;
+    if (state.bossTimer <= 1e-8) {
+      const phase = state.bossPhase;
+      if (phase === 'counter') {
+        rivalStrike(state, 'counter', emit);
+        if (state.roundEnd) return;
+      }
+      changeBossPhase(state, BOSS_PHASES[phase].next, emit);
+    }
+  }
+
+  if (!daon || state.bossPhase === 'ready') {
+    state.nextEnemy -= STEP;
+    if (state.enemyMove) {
+      state.enemyMove.left -= STEP;
+      if (state.enemyMove.left <= 1e-8) {
+        state.enemyMove = null;
+        rivalStrike(state, 'attack', emit);
+        if (state.roundEnd) return;
+      }
+    } else if (state.nextEnemy <= 0) {
+      state.nextEnemy = 1.65 - gradeIndex(state.map) * 0.06;
+      state.enemyMove = { move: 'attack', left: 0.25 };
+      emit?.('windup', { side: 'rival', move: 'attack', windup: 0.25 });
+    }
+  }
+
+  if (state.nextAttack <= 0 && !state.playerMove) {
+    if (state.autoSkill && autoSkillTarget(state) && activateSkill(state, emit)) return;
+    queuePlayer(state, state.charge === 72 ? 'crit' : 'attack', emit);
+  }
+}
+
+function simulate(state, seconds, emit) {
+  const elapsed = seconds + state.tickRemainder;
+  const ticks = Math.floor((elapsed + 1e-8) / STEP);
+  state.tickRemainder = Math.max(0, elapsed - ticks * STEP);
+  for (let index = 0; index < ticks; index++) step(state, emit);
+}
+
+function migrateFeatures(s) {
+  const count = value => Number.isSafeInteger(value) && value >= 0;
+  if (s.training && typeof s.training === 'object' && s.training.focus === undefined) s.training.focus = 0;
+  if (!count(s.tickets)) s.tickets = WELCOME_TICKETS;
+  const stickers = s.stickers && typeof s.stickers === 'object' ? s.stickers : {};
+  s.stickers = Object.fromEntries(Object.keys(STICKERS).filter(id => count(stickers[id]) && stickers[id] > 0).map(id => [id, stickers[id]]));
+  const snacks = s.snacks && typeof s.snacks === 'object' ? s.snacks : {};
+  s.snacks = Object.fromEntries(Object.keys(SNACKS).map(id => [id, clamp(Number.isFinite(snacks[id]) ? snacks[id] : 0, 0, SNACK_MAX)]));
+  if (![1, 2].includes(s.speed)) s.speed = 1;
+  if (!s.attendance || !count(s.attendance.count) || typeof s.attendance.last !== 'string') s.attendance = { count: 0, last: '' };
+  const daily = s.daily;
+  const validDaily = daily && typeof daily.date === 'string' && count(daily.baseWins) && count(daily.trains) && count(daily.pulls)
+    && count(daily.snacks) && Array.isArray(daily.claimed) && daily.claimed.every(id => Object.hasOwn(DAILY_MISSIONS, id));
+  if (!validDaily) s.daily = null;
+  if (s.daily) {
+    if (!count(s.daily.dungeons)) s.daily.dungeons = 0;
+    const keys = s.daily.keys && typeof s.daily.keys === 'object' ? s.daily.keys : {};
+    s.daily.keys = Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, count(keys[id]) ? Math.min(keys[id], DUNGEON_KEYS) : DUNGEON_KEYS]));
+  }
+  const dungeons = s.dungeons && typeof s.dungeons === 'object' ? s.dungeons : {};
+  s.dungeons = Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, count(dungeons[id]) ? dungeons[id] : 0]));
+  const active = s.dungeon;
+  if (!(active && Object.hasOwn(DUNGEONS, active.id) && count(active.level) && active.level >= 1 && Number.isFinite(active.time))) s.dungeon = null;
+  if (!s.dungeonResult || typeof s.dungeonResult !== 'object' || !Object.hasOwn(DUNGEONS, s.dungeonResult.id)) s.dungeonResult = null;
+  if (!count(s.cycle)) s.cycle = 0;
+  if (!Number.isFinite(s.bossTime) || s.bossTime > BOSS_TIME) s.bossTime = BOSS_TIME;
+  if (!count(s.totalClears)) s.totalClears = Array.isArray(s.cleared) ? s.cleared.filter(Boolean).length : 0;
+  const prestige = s.prestige && typeof s.prestige === 'object' ? s.prestige : {};
+  const perks = prestige.perks && typeof prestige.perks === 'object' ? prestige.perks : {};
+  s.prestige = {
+    count: count(prestige.count) ? prestige.count : 0,
+    badges: count(prestige.badges) ? prestige.badges : 0,
+    earned: count(prestige.earned) ? prestige.earned : 0,
+    best: count(prestige.best) ? prestige.best : 0,
+    perks: Object.fromEntries(Object.keys(PERKS).map(id => [id, count(perks[id]) ? Math.min(perks[id], PERKS[id].cap) : 0])),
+  };
+}
+
+function restore(snapshot) {
+  if (!snapshot || ![1, 2, 3, 4, 5].includes(snapshot.version) || !Number.isFinite(snapshot.when)) return null;
+  const s = snapshot.state;
+  if (!s || !Array.isArray(s.cleared) || !Array.isArray(s.bag) || !Array.isArray(s.log)) return null;
+  migrateFeatures(s);
+  if (s.cleared.some(entry => typeof entry !== 'boolean') || s.bag.some(id => !Object.hasOwn(GEAR, id))) return null;
+  if (snapshot.version === 1) {
+    if (s.cleared.length !== GRADE_COUNT || !Number.isInteger(s.grade) || s.grade < 0 || s.grade >= GRADE_COUNT) return null;
+    const gradesCleared = s.cleared;
+    s.cleared = MAPS.map((_, index) => gradesCleared[gradeIndex(index)]);
+    s.profile = null;
+    openFight(s, s.grade * MAPS_PER_GRADE, 0, 0);
+    delete s.grade;
+  } else if (s.profile !== null) {
+    s.profile = makeProfile(s.profile?.name, s.profile?.gender);
+    if (!s.profile) return null;
+  }
+  if (s.cleared.length !== MAPS.length) return null;
+  if (!s.equipped || !s.training || ![null, ...Object.keys(CLASSES)].includes(s.classId) || typeof s.autoNext !== 'boolean') return null;
+  const fields = ['level', 'xp', 'coins', 'map', 'wave', 'wins', 'charge', 'hp', 'enemyHp', 'nextAttack', 'nextEnemy', 'pause', 'tickRemainder'];
+  if (fields.some(key => !Number.isFinite(s[key]))) return null;
+  if (!Number.isInteger(s.map) || !Number.isInteger(s.wave) || s.map < 0 || s.map >= MAPS.length || s.wave < 0 || s.wave > BOSS_WAVE) return null;
+  if (s.level < 1 || s.xp < 0 || s.coins < 0 || s.wins < 0 || !unlocked(s, s.map)) return null;
+  if (snapshot.version < 4) {
+    const old = s.equipped;
+    s.equipped = { ...STARTER_GEAR };
+    for (const id of [old.power, old.health]) if (s.bag.includes(id)) s.equipped[GEAR[id].slot] = id;
+    s.bag = [...new Set([...Object.values(STARTER_GEAR), ...s.bag])];
+    Object.assign(s, { ranks: {}, patches: 0, mapWins: MAPS.map(() => 0), missions: { wins: 0, clears: 0, closet: 0 }, farm: null });
+    if (snapshot.version > 1) s.enemyHp = Math.round(s.enemyHp / MAPS[s.map].hp[s.wave] * enemyMaxHp(s));
+  }
+  for (const slot of Object.keys(SLOTS)) {
+    if (!s.bag.includes(s.equipped[slot]) || GEAR[s.equipped[slot]]?.slot !== slot) return null;
+  }
+  s.equipped = Object.fromEntries(Object.keys(SLOTS).map(slot => [slot, s.equipped[slot]]));
+  const count = value => Number.isSafeInteger(value) && value >= 0;
+  if (!count(s.patches) || !Array.isArray(s.mapWins) || s.mapWins.length !== MAPS.length || !s.mapWins.every(count)
+      || !s.missions || !Object.keys(MISSIONS).every(id => count(s.missions[id])) || !s.ranks || typeof s.ranks !== 'object'
+      || Object.entries(s.ranks).some(([id, rank]) => !s.bag.includes(id) || !count(rank) || rank > MAX_RANK)) return null;
+  for (const id of Object.keys(TRAINING)) {
+    if (!Number.isInteger(s.training[id]) || s.training[id] < 0 || s.training[id] > TRAINING[id].cap) return null;
+  }
+  if (snapshot.version < 3) {
+    Object.assign(s, {
+      skillId: 'rush', autoSkill: true, sound: true, playerMove: null, enemyMove: null,
+      roundEnd: null, bossPhase: 'ready', bossTimer: BOSS_PHASES.ready.duration,
+    });
+  }
+  if (!Object.hasOwn(SKILLS, s.skillId) || !Object.hasOwn(BOSS_PHASES, s.bossPhase) || !Number.isFinite(s.bossTimer)) return null;
+  if (typeof s.autoSkill !== 'boolean' || typeof s.sound !== 'boolean') return null;
+  const validMove = move => move === null || (move && ['attack', 'crit', ...Object.keys(SKILLS)].includes(move.move) && Number.isFinite(move.left) && move.left > 0 && move.left <= 1);
+  if (!validMove(s.playerMove) || !validMove(s.enemyMove)) return null;
+  const end = s.roundEnd;
+  const validFarm = farm => farm === null || (farm && [0, 1].includes(farm.cap) && count(farm.easy) && farm.easy <= 5 && count(farm.wins) && farm.wins < FARM_WINS);
+  if (snapshot.version < 4 && end) end.nextFarm = null;
+  if (!validFarm(s.farm)) return null;
+  if (end !== null && (!end || !['win', 'loss'].includes(end.result) || !Number.isFinite(end.wait) || end.wait < 0 || end.wait > 2
+      || !Number.isInteger(end.nextMap) || end.nextMap < 0 || end.nextMap >= MAPS.length || !unlocked(s, end.nextMap)
+      || !Number.isInteger(end.nextWave) || end.nextWave < 0 || end.nextWave > BOSS_WAVE || !validFarm(end.nextFarm))) return null;
+  s.hp = clamp(s.hp, end?.result === 'loss' ? 0 : 1, maxHp(s));
+  // 무리 전투 이전: 앞 상대·뒤 상대 형식이 맞지 않으면 지금 상대를 혼자 남은 상대로 둔다
+  const validMob = mob => mob && typeof mob.name === 'string' && Number.isFinite(mob.share) && Number.isFinite(mob.hit) && Number.isFinite(mob.max) && mob.max >= 1;
+  if (!validMob(s.front) || s.front.key !== mobKey(s) || !Array.isArray(s.pack) || !s.pack.every(mob => validMob(mob) && Number.isFinite(mob.hp))) {
+    const mobs = makeMobs(s);
+    s.front = mobs[0];
+    s.pack = mobs.slice(1).map(mob => ({ ...mob, hp: mob.max }));
+  } else {
+    const roster = makeMobs(s);
+    for (const mob of [s.front, ...s.pack]) {
+      const art = roster.find(entry => entry.name === mob.name && entry.leader === mob.leader);
+      if (art) mob.sprite = art.sprite;
+    }
+  }
+  s.enemyHp = clamp(s.enemyHp, end?.result === 'win' ? 0 : 1, enemyMaxHp(s));
+  s.charge = clamp(s.charge, 0, 100);
+  s.tickRemainder = clamp(s.tickRemainder, 0, STEP);
+  s.log = s.log.filter(entry => typeof entry === 'string').slice(0, 3);
+  return s;
+}
+
+if (typeof module !== 'undefined') {
+  module.exports = {
+    newGame, simulate, restore, trainingCost, maxHp, attack, enemyMaxHp, openFight, activateSkill, gearStats, nextMission, MAPS, GEAR, SLOTS, MAP_REWARDS, BOSS_REWARDS, TRAINING, SKILLS, makeProfile,
+    trainingCostAt, enemyHit, winCoins, winXp, interval, critChance, prestigeGain, transfer, perkCost, PERKS, pullStickers, pullCost, progress, xpTarget,
+    GROWTH, MAX_RANK, BOSS_WAVE, MAPS_PER_GRADE, fmt, STICKERS, DROP_WINS,
+    DUNGEONS, DUNGEON_PACK, PACK, SPLASH, GANG_UP, BOSS_TIME, killProgress, DUNGEON_TIME, DUNGEON_KEYS, dungeonReward, dungeonProgress, atProgress, dungeonUnlocked, refreshDay, enterDungeon, sweepDungeon, makeMobs,
+  };
+}
