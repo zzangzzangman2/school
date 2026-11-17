@@ -11,9 +11,9 @@ site = root / 'work' / 'recess'
 assets = site / 'assets'
 roster = [f'mob{i}' for i in range(1, 9)]
 dungeons = {
-    'coin': ('매점 줄서기 대회', 'store', ['mob1', 'mob2', 'mob3']),
-    'ticket': ('도서실 퀴즈왕', 'quiz', ['mob4', 'mob5', 'mob8']),
-    'badge': ('전국 체력장', 'sports', ['mob3', 'mob6', 'mob7']),
+    'coin': ('상금 토너먼트', 'store', ['mob1', 'mob2', 'mob3']),
+    'ticket': ('팬 미팅 이벤트전', 'quiz', ['mob4', 'mob5', 'mob8']),
+    'badge': ('국가대표 선발전', 'sports', ['mob3', 'mob6', 'mob7']),
 }
 
 

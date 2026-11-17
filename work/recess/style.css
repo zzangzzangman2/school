@@ -936,3 +936,14 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .school-art { display: grid; place-items: end center; height: 150px; margin: -6px auto 6px; border-radius: 18px; background: radial-gradient(ellipse at 50% 85%, #ffe7a8 0 34%, transparent 35%), linear-gradient(#cfe8ff, #fff6dc); }
 .school-art .sprite { position: relative; width: 90px; height: 148px; background: var(--sprite-image) center bottom / contain no-repeat; }
 .school-dialog p { margin: 6px 0 14px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+/* 격투 종목 칩: 타격은 글러브, 태권도는 헤드기어, 잡기 종목은 띠 */
+.contest-chip:is([data-contest='boxing'], [data-contest='kickboxing'], [data-contest='muaythai'], [data-contest='mma']) { --contest-prop: url('assets/prop-glove.webp'); }
+.contest-chip:is([data-contest='wrestling'], [data-contest='judo'], [data-contest='jiujitsu'], [data-contest='ssireum']) .contest-mark { border-radius: 0; background: url('assets/prop-satba.webp') center / contain no-repeat; }
+.region-board { margin-top: 12px; padding: 10px; border-radius: 16px; border: 1px solid var(--line); background: var(--card); }
+.region-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.region-head h3 { margin: 0; font-size: 15px; }
+.region-list { display: flex; flex-wrap: wrap; gap: 5px; margin: 0; padding: 0; list-style: none; counter-reset: region; }
+.region { counter-increment: region; padding: 4px 8px; border-radius: 999px; background: #efe9df; color: #9a9184; font-size: 11px; }
+.region::before { content: counter(region) '. '; opacity: .7; }
+.region.done { background: linear-gradient(#ffd86b, #ffb428); color: #5a3a00; font-weight: 700; }
+.region.now { outline: 2px solid var(--gold-deep, #d68a00); background: #fff4d6; color: #6b4300; font-weight: 700; }

@@ -18,7 +18,7 @@ const QUEST_TEXT = {
   recruits: n => `동료 ${n}번 모집`,
   dungeons: n => `던전 ${n}번 하기`,
   tier: n => `${tierName(n)} 승급`,
-  transfer: n => `전학 ${n}번 가기`,
+  transfer: n => `재입학 ${n}번 하기`,
   party: n => `동료 ${n}명 출전`,
 };
 const QUEST_GO = {
@@ -250,13 +250,13 @@ function renderTierPanel() {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'tier-button';
-  button.textContent = '승급 시험';
-  button.ariaLabel = `${tierName(next)} 승급 시험 도전`;
+  button.textContent = '승급 심사';
+  button.ariaLabel = `${tierName(next)} 승급 심사 도전`;
   button.disabled = !tierReady(state) || Boolean(state.dungeon);
   button.addEventListener('click', () => {
     if (!enterTrial(state)) return;
     combatEvent('enter', {});
-    message(`${tierName(next)} 승급 시험 시작! 30초 안에 이기세요.`);
+    message(`${tierName(next)} 승급 심사 시작! 30초 안에 이기세요.`);
     selectView('battle');
     commit();
   });
@@ -433,7 +433,7 @@ function showRecruitResults(results, count, currency) {
   dialog.dataset.best = RARITY_ORDER[best];
   setText('gacha-result-title', '동료 모집 결과');
   const fresh = results.filter(result => result.isNew).length;
-  setText('gacha-result-note', [fresh && `새 동료 ${fresh}명`, results.some(result => result.leveled) && '레벨 업!'].filter(Boolean).join(' · ') || '친구들과 더 친해졌어요.');
+  setText('gacha-result-note', [fresh && `새 동료 ${fresh}명`, results.some(result => result.leveled) && '레벨 업!'].filter(Boolean).join(' · ') || '동기들과 더 친해졌어요.');
   $('gacha-results').classList.toggle('single', results.length === 1);
   $('gacha-results').replaceChildren(...results.map((result, index) => {
     const card = mateCard(result.id);

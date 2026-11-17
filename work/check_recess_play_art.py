@@ -48,8 +48,8 @@ with sync_playwright() as playwright:
     page.get_by_role('textbox', name='닉네임').fill('하루')
     page.get_by_role('button', name='입학하기').click()
 
-    for cycle, map, contest, motion in [(0, 0, 'ddakji', 'toss'), (0, 3, 'eraser', 'toss'), (0, 6, 'dodge', 'toss'),
-                                      (0, 9, 'scuffle', 'push'), (2, 0, 'taekwondo', 'spar'), (2, 6, 'sparring', 'spar'), (0, 15, 'basket', 'toss')]:
+    for cycle, map, contest, motion in [(0, 0, 'boxing', 'strike'), (0, 6, 'wrestling', 'push'), (0, 7, 'jiujitsu', 'push'),
+                                      (1, 0, 'ssireum', 'push'), (2, 0, 'taekwondo', 'spar'), (3, 9, 'mma', 'strike')]:
         page.evaluate('''([cycle, map]) => {
           state.cycle = cycle;
           state.equipped.top = 'mintHood';
@@ -62,7 +62,7 @@ with sync_playwright() as playwright:
         expect(page.locator('#arena')).to_have_attribute('data-contest', contest)
         expect(page.locator('#arena')).to_have_attribute('data-motion', motion)
         path = page.locator('#player-sprite').evaluate("e => getComputedStyle(e).getPropertyValue('--pose-image')")
-        assert from_asset(path, f'motion-boy-{motion}-strike')
+        assert from_asset(path, 'motion-boy-strike' if motion == 'strike' else f'motion-boy-{motion}-strike')
         if motion == 'spar':
             assert 'wardrobe-rendered' not in (page.locator('#player-sprite').get_attribute('class') or '')
             color = page.locator('#rival-sprite').get_attribute('data-spar')
@@ -71,19 +71,14 @@ with sync_playwright() as playwright:
         else:
             expect(page.locator('#player-sprite canvas')).to_have_attribute('data-frame', re.compile(f':{motion}$'))
 
-        if contest == 'ddakji':
-            assert from_asset(page.locator('.fight').evaluate("e => getComputedStyle(e, '::after').backgroundImage"), 'prop-ddakji')
-
         page.evaluate("flashHit('rival', { amount: 4, move: 'attack' })")
-        if motion in ('toss', 'push'):
-            effect = 'cloud' if motion == 'push' else 'dust'
+        effect = page.evaluate('contest(state).fx')
+        if effect in ('dust', 'cloud'):
             value = page.locator(f'.impact.fx-{effect}').last.evaluate("e => getComputedStyle(e, '::before').backgroundImage")
             assert from_asset(value, f'fx-{effect}')
             assert page.locator(f'.impact.fx-{effect}').last.evaluate("e => getComputedStyle(e, '::before').animationTimingFunction") == 'steps(6)'
-        if contest in ('ddakji', 'eraser', 'dodge', 'basket'):
-            prop = 'dodgeball' if contest == 'dodge' else 'basketball' if contest == 'basket' else contest
-            assert from_asset(page.locator(f'.prop-{prop}').last.evaluate('e => getComputedStyle(e).backgroundImage'), f'prop-{prop}')
-        if contest in ('ddakji', 'scuffle', 'taekwondo'):
+        assert page.locator('.prop').count() == 0
+        if contest in ('boxing', 'wrestling', 'taekwondo'):
             page.clock.run_for(130)
             page.screenshot(path=str(root / 'work' / f'play-art-{contest}.png'))
         page.clock.run_for(750)
@@ -99,4 +94,4 @@ with sync_playwright() as playwright:
     assert not failures, failures
     browser.close()
 
-print('New cover, all three pose families, wardrobe overlays, protective rivals, seven props, six-frame effects and school handoff assets verified.')
+print('Cover, pose families, fighting-contest mapping (strike/grapple), protective rivals, six-frame effects and art assets verified.')

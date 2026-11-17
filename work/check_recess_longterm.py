@@ -20,14 +20,14 @@ with sync_playwright() as playwright:
     page.get_by_role('button', name='입학하기').click()
     page.clock.run_for(3000)
 
-    # 6-3 보스 직전 상태로 만들고 이기면 2년차로 넘어가는지
+    # 아카데미 4-3 보스 직전 상태로 만들고 이기면 졸업해 첫 지역(정선)으로 넘어가는지
     page.evaluate('''() => {
       const save = JSON.parse(localStorage.getItem('haesol-recess-king-v1'));
       save.when = Date.now();
-      Object.assign(save.state, { map: 17, wave: 3, enemyHp: 1, pause: 0, nextAttack: 0.05, nextEnemy: 3, roundEnd: null, playerMove: null, enemyMove: null });
+      Object.assign(save.state, { map: 11, wave: 3, enemyHp: 1, pause: 0, nextAttack: 0.05, nextEnemy: 3, roundEnd: null, playerMove: null, enemyMove: null });
       save.state.training.health = 300;
       save.state.training.power = 400;
-      save.state.cleared.fill(true, 0, 17);
+      save.state.cleared.fill(true, 0, 11);
       sessionStorage.setItem('qa-snapshot', JSON.stringify(save));
     }''')
     page.add_init_script('''(() => {
@@ -36,32 +36,32 @@ with sync_playwright() as playwright:
     })()''')
     page.reload()
     page.clock.run_for(4000)
-    expect(page.locator('#stage-number')).to_contain_text('해솔중')
+    expect(page.locator('#stage-number')).to_contain_text('정선')
     assert page.evaluate('state.cycle') == 1 and page.evaluate('state.cleared.every(done => !done) || state.cleared[0]')
 
-    # 던전: 열쇠로 매점 줄서기 대회 Lv.1에 들어가 졸개+던전 보스를 이기면 단계·보상·열쇠가 바뀌는지
+    # 던전: 열쇠로 상금 토너먼트 Lv.1에 들어가 졸개+던전 보스를 이기면 단계·보상·열쇠가 바뀌는지
     coins = page.evaluate('state.coins')
     page.get_by_role('button', name='대결', exact=True).click()
-    page.get_by_role('button', name='매점 줄서기 대회 Lv.1 도전').click()
-    expect(page.locator('#battle-title')).to_have_text('매점 줄서기 대회')
+    page.get_by_role('button', name='상금 토너먼트 Lv.1 도전').click()
+    expect(page.locator('#battle-title')).to_have_text('상금 토너먼트')
     expect(page.locator('#dungeon-timer')).to_be_visible()
     page.clock.run_for(8000)
     assert page.evaluate('state.dungeons.coin') == 1 and page.evaluate('state.daily.keys.coin') == 1
     assert page.evaluate('state.coins') > coins
-    page.get_by_role('button', name='매점 줄서기 대회 Lv.1 소탕').click()
+    page.get_by_role('button', name='상금 토너먼트 Lv.1 소탕').click()
     assert page.evaluate('state.daily.keys.coin') == 0
-    expect(page.get_by_role('button', name='매점 줄서기 대회 Lv.2 도전')).to_be_disabled()
+    expect(page.get_by_role('button', name='상금 토너먼트 Lv.2 도전')).to_be_disabled()
 
-    # 전학: 배지를 받고 1년차 Lv.1로 돌아가며, 방과 후 학원을 배울 수 있는지
+    # 재입학: 배지를 받고 아카데미 Lv.1로 돌아가며, 명예 코칭을 배울 수 있는지
     page.get_by_role('button', name='성장', exact=True).click()
-    page.get_by_role('tab', name='학원').click()
+    page.get_by_role('tab', name='코칭').click()
     expect(page.locator('#prestige-gain')).to_contain_text('명예 배지 +')
-    page.get_by_role('button', name='전학', exact=True).click()
-    page.get_by_role('button', name='전학 가기').click()
-    expect(page.get_by_role('heading', name='새 학교 첫날!')).to_be_visible()
+    page.get_by_role('button', name='재입학', exact=True).click()
+    page.get_by_role('button', name='재입학하기').click()
+    expect(page.get_by_role('heading', name='다시 입학!')).to_be_visible()
     page.get_by_role('button', name='좋아요').click()
     expect(page.locator('#level')).to_have_text('1')
-    expect(page.locator('#stage-number')).to_contain_text('해솔초')
+    expect(page.locator('#stage-number')).to_contain_text('해솔 아카데미')
     assert int(page.locator('#badge-count').inner_text().replace(',', '')) > 0
     page.locator('#perk-list button').first.click()
     expect(page.locator('#perk-list .item').first).to_contain_text('Lv.1')
@@ -72,4 +72,4 @@ with sync_playwright() as playwright:
     assert not issues, issues
     chrome.close()
 
-print('New school year after 6-3, coin dungeon clear/sweep/keys, transfer (prestige) with badges, perk purchase, and Korean big-number format verified.')
+print('Academy graduation after 4-3 into the first region, coin dungeon clear/sweep/keys, transfer (prestige) with badges, perk purchase, and Korean big-number format verified.')

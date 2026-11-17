@@ -56,21 +56,21 @@ with sync_playwright() as playwright:
     expect(page.get_by_role('button', name='매일 무료 선물 무료')).to_be_disabled()
     expect(page.locator('#cash-list button').first).to_be_disabled()
 
-    # 승급 시험: 조건을 채우면 시험 → 통과하면 칭호·스킬 칸
+    # 승급 심사: 조건을 채우면 심사 → 통과하면 선수 등급·스킬 칸
     page.evaluate('''() => {
       state.level = 12; state.cleared.fill(true, 0, 9); state.map = 9; state.wave = 0; state.farm = null;
       state.training.power = 80; state.training.health = 60; openFight(state, 9, 0, 0.2); commit();
     }''')
     page.get_by_role('button', name='성장', exact=True).click()
     page.get_by_role('tab', name='승급').click()
-    page.get_by_role('button', name='모범생 승급 시험 도전').click()
-    expect(page.locator('#battle-title')).to_have_text('승급 시험')
+    page.get_by_role('button', name='아마추어 승급 심사 도전').click()
+    expect(page.locator('#battle-title')).to_have_text('승급 심사')
     for _ in range(40):
         if page.evaluate('state.tier') >= 1:
             break
         page.clock.run_for(500)
     assert page.evaluate('state.tier') == 1
-    expect(page.locator('#hud-tier')).to_have_text('모범생')
+    expect(page.locator('#hud-tier')).to_have_text('아마추어')
     expect(page.locator('#actives .active-skill.pencil')).not_to_have_class('active-skill pencil locked')
 
     # 성장 패스 + 프리미엄(결제 연결 전 grantPurchase로 지급 확인)

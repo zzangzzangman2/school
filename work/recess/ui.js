@@ -62,7 +62,7 @@ function queuePopup(open) {
 }
 
 const DAON_TEXT = {
-  ready: ['반장 다온', '방어 뒤 강한 반격을 준비해요.'],
+  ready: ['1학년 대표 다온', '방어 뒤 강한 반격을 준비해요.'],
   guard: ['방어 자세', '보통 동작 효과가 줄어요 · 종소리로 방어 풀기'],
   counter: ['반격 예고', '종소리로 반격을 끊을 수 있어요.'],
   open: ['반격 뒤 빈틈', '쏜살 돌진이 더 강해져요.'],
@@ -417,7 +417,7 @@ function renderBattle() {
   const gradeNumber = gradeIndex(state.map) + 1;
   const dungeon = state.dungeon ? dungeonInfo(state.dungeon.id) : null;
   setText('stage-number', dungeon ? (state.dungeon.id === 'trial' ? `승급 시험 · ${tierName(state.dungeon.level)}` : `던전 · Lv.${state.dungeon.level}`) : `${schoolName(state.cycle)} ${gradeLabel(state.cycle, state.map)} · ${mapCode(state.map)}`);
-  setText('battle-title', dungeon ? dungeon.name : map.place);
+  setText('battle-title', dungeon ? dungeon.name : stagePlace(state.cycle || 0, state.map));
   $('arena').dataset.map = dungeon ? (dungeon.background || dungeon.map + 1) : venueMap(state) || state.map + 1;
   $('arena').classList.toggle('dungeon-round', Boolean(dungeon));
   const status = $('battle-status');
@@ -443,7 +443,7 @@ function renderBattle() {
     const leader = front?.leader;
     const size = (0.87 + (gradeNumber - 1) * 0.026) * (boss || (dungeon && leader) ? 1.1 : leader ? 1 : 0.88);
     const sprite = $('rival-sprite');
-    sprite.dataset.sprite = front?.sprite || rivalSprite(state.map, state.wave);
+    sprite.dataset.sprite = front?.sprite || rivalSprite(state.map, state.wave, state.cycle || 0);
     sprite.dataset.spar = protectiveSprite(sprite.dataset.sprite);
     $('rival').style.setProperty('--size', size.toFixed(2));
     $('rival').classList.toggle('minion', Boolean(front) && !leader);
@@ -457,7 +457,7 @@ function renderBattle() {
   }
   const behind = aliveBehind(state);
   const finalBoss = boss && isGradeFinal(state.map);
-  setText('round-label', dungeon ? (behind ? `참가자 ${behind + 1}명 남음` : '던전 보스전') : finalBoss ? '학년 대표전' : boss ? '보스 대결' : `대결 ${state.wave + 1}/${BOSS_WAVE + 1} · ${behind + 1}명`);
+  setText('round-label', dungeon ? (behind ? `참가자 ${behind + 1}명 남음` : '던전 보스전') : finalBoss ? (state.cycle ? (gradeIndex(state.map) === GRADE_COUNT - 1 ? '지역 챔피언전' : '관장전') : '학년 대표전') : boss ? '보스 대결' : `대결 ${state.wave + 1}/${BOSS_WAVE + 1} · ${behind + 1}명`);
   renderPack();
   renderDungeonTimer();
   renderKills();
@@ -465,7 +465,7 @@ function renderBattle() {
   $('player-name').textContent = state.profile.name;
   $('player-sprite').dataset.sprite = state.profile.gender;
   $('player-tag').textContent = `LV. ${state.level}`;
-  setText('rival-tag', dungeon ? (state.front?.leader ? '던전 보스' : '참가자') : state.farm ? '수련' : boss ? '보스' : state.front?.leader ? '대장' : `${gradeNumber}학년`);
+  setText('rival-tag', dungeon ? (state.front?.leader ? '던전 보스' : '참가자') : state.farm ? '수련' : boss ? '보스' : state.front?.leader ? '대장' : state.cycle ? '도전자' : `${gradeNumber}학년`);
   $('rival-name').textContent = currentEnemy(state);
   const totalHp = maxHp(state);
   const totalEnemy = enemyMaxHp(state);
@@ -490,8 +490,8 @@ function renderBattle() {
 
 function renderRoster() {
   const map = MAPS[state.map];
-  $('roster-note').textContent = `${mapCode(state.map)} ${map.place} · ${state.farm ? '반복 수련 중이에요. 3승하면 다시 도전해요.' : '넷을 모두 이기면 다음 장소가 열려요.'}`;
-  $('roster').replaceChildren(...map.names.map((name, wave) => {
+  $('roster-note').textContent = `${mapCode(state.map)} ${stagePlace(state.cycle || 0, state.map)} · ${state.farm ? '반복 수련 중이에요. 3승하면 다시 도전해요.' : '넷을 모두 이기면 다음 장소가 열려요.'}`;
+  $('roster').replaceChildren(...stageNames(state.cycle || 0, state.map).map((name, wave) => {
     const entry = document.createElement('li');
     const status = state.farm ? 'upcoming' : wave < state.wave ? 'past' : wave === state.wave ? 'current' : 'upcoming';
     entry.className = `rival-card ${status}${wave === BOSS_WAVE ? ' boss' : ''}`;
@@ -500,7 +500,7 @@ function renderRoster() {
     figure.ariaHidden = 'true';
     const sprite = document.createElement('span');
     sprite.className = 'sprite';
-    sprite.dataset.sprite = rivalSprite(state.map, wave);
+    sprite.dataset.sprite = rivalSprite(state.map, wave, state.cycle || 0);
     figure.append(sprite);
     const tag = document.createElement('small');
     tag.className = 'rival-tag';
@@ -597,7 +597,7 @@ function row(glyph, name, detail, buttonLabel, action, { selected = false, disab
       icon.style.setProperty('--tile-hi', tile[1]);
     }
   } else {
-    icon.dataset.map = map + 1;
+    icon.dataset.map = stageArt(state.cycle || 0, map);
     const code = document.createElement('span');
     code.textContent = glyph;
     icon.append(code);
@@ -712,7 +712,7 @@ function renderTraining() {
   }));
   document.querySelectorAll('#buy-mode button').forEach(button => button.setAttribute('aria-pressed', String(String(buyMode) === button.dataset.buy)));
   $('auto-train').setAttribute('aria-checked', String(state.autoTrain));
-  $('class-note').textContent = firstGradeWon(state) ? '과목 하나를 골라 다음 대결에 보너스를 받으세요.' : '1-3 교실의 반장에게 이기면 과목을 고를 수 있어요.';
+  $('class-note').textContent = firstGradeWon(state) ? '전공 하나를 골라 대결 보너스를 받으세요.' : '1-3 신입생 체육관의 1학년 대표를 이기면 전공을 고를 수 있어요.';
   $('class-list').replaceChildren(...Object.entries(CLASSES).map(([id, info]) => {
     const selected = state.classId === id;
     return row(ICONS.classes[id] || info.glyph, info.name, info.bonus, selected ? '선택 중' : '선택', () => {
@@ -927,10 +927,10 @@ function renderPrestige() {
   const reached = progress(state);
   const p = state.prestige;
   setText('badge-count', fmt(p.badges));
-  setText('prestige-stats', `전학 ${fmt(p.count)}번 · 최고 기록 ${placeLabel(Math.max(1, Math.max(p.best, reached)) - 1)} · 받은 배지 ${fmt(p.earned)}개`);
+  setText('prestige-stats', `재입학 ${fmt(p.count)}번 · 최고 기록 ${placeLabel(Math.max(1, Math.max(p.best, reached)) - 1)} · 받은 배지 ${fmt(p.earned)}개`);
   const button = $('prestige-button');
   button.disabled = gain <= 0;
-  setText('prestige-gain', gain > 0 ? `지금 전학 가면 명예 배지 +${fmt(gain)}` : `해솔초 2-3까지 깨면 전학할 수 있어요 (지금 ${reached}/${PRESTIGE_UNLOCK})`);
+  setText('prestige-gain', gain > 0 ? `지금 재입학하면 명예 배지 +${fmt(gain)}` : `아카데미 2-3까지 이기면 재입학할 수 있어요 (지금 ${reached}/${PRESTIGE_UNLOCK})`);
   $('perk-list').replaceChildren(...Object.keys(PERKS).map(id => {
     const perk = PERKS[id];
     const level = p.perks[id];
@@ -969,15 +969,30 @@ function doTransfer() {
   renderedRound = '';
   previousObjective = '';
   openView('training:academy');
-  showDialog('새 학교 첫날!', [`${state.prestige.count}번째 전학이에요. 해솔초 1-1 신발장 입구부터 다시 시작해요.`, `명예 배지 +${fmt(gain)}`, '아래 방과 후 학원에서 배지로 영구 능력치를 올리세요.'], '#i-star');
+  showDialog('다시 입학!', [`${state.prestige.count}번째 재입학이에요. 아카데미 1학년 정문부터 다시 시작해요.`, `명예 배지 +${fmt(gain)}`, '아래 명예 코칭에서 배지로 영구 능력치를 올리세요.'], '#i-star');
   $('dialog-content').classList.add('reward-lines');
   commit();
 }
 
+// 전국 제패 목록: 최고 기록 기준으로 제패한 지역을 칠하고, 지금 도전 중인 지역을 표시한다
+function renderRegions() {
+  const done = REGIONS.filter((_, index) => regionConquered(state, index)).length;
+  setText('region-count', `${done} / ${REGIONS.length}`);
+  $('region-list').replaceChildren(...REGIONS.map((name, index) => {
+    const item = document.createElement('li');
+    const now = state.cycle === index + 1;
+    item.className = `region${regionConquered(state, index) ? ' done' : ''}${now ? ' now' : ''}`;
+    item.textContent = name;
+    if (now) item.setAttribute('aria-current', 'step');
+    return item;
+  }));
+}
+
 function renderGrades() {
   renderPrestige();
-  setText('grades-title', `${schoolName(state.cycle)} 학교 지도`);
+  setText('grades-title', state.cycle ? `${schoolName(state.cycle)} 제패 지도` : '아카데미 지도');
   $('grade-count').textContent = `${state.cleared.filter(Boolean).length} / ${MAPS.length} 완료`;
+  renderRegions();
   const groups = Array.from({ length: GRADE_COUNT }, (_, grade) => {
     const firstMap = grade * MAPS_PER_GRADE;
     const end = firstMap + MAPS_PER_GRADE;
@@ -990,14 +1005,14 @@ function renderGrades() {
       else expandedGrades.delete(grade);
     });
     const title = document.createElement('summary');
-    title.append(`${grade + 1}학년`);
+    title.append(gradeLabel(state.cycle || 0, grade * MAPS_PER_GRADE));
     const count = document.createElement('small');
     count.textContent = unlocked(state, firstMap) ? `${state.cleared.slice(firstMap, end).filter(Boolean).length} / ${MAPS_PER_GRADE}` : '잠김';
     title.append(count);
     const list = document.createElement('div');
     list.className = 'map-list';
     for (let index = firstMap; index < end; index++) {
-      const map = MAPS[index];
+      const map = { place: stagePlace(state.cycle || 0, index), names: stageNames(state.cycle || 0, index) };
       const selected = index === state.map;
       const locked = !unlocked(state, index);
       const buttonLabel = selected ? '현재 위치' : locked ? '잠김' : state.cleared[index] ? '재도전' : '도전';
@@ -1177,15 +1192,18 @@ function eatSnack(id) {
   commit();
 }
 
-// 진학 축하: 새 학교 교복 모습과 첫 종목
+// 졸업·지역 제패 축하
 let lastCycle = null;
 function showSchool() {
   const dialog = $('school-dialog');
   if (!dialog || dialog.open) return;
-  $('school-sprite').dataset.sprite = uniformSprite(state.profile.gender, state.cycle);
-  setText('school-title', `${schoolName(state.cycle)} 진학!`);
-  const first = CONTESTS[contestId({ ...state, map: 0, dungeon: null })].name;
-  setText('school-text', `${schoolName(state.cycle - 1)}을 졸업했어요. 새 교복을 입고 ${first}부터 다시 승부해요. 상대도 보상도 커져요.`);
+  $('school-sprite').dataset.sprite = state.profile.gender;
+  const cycle = state.cycle;
+  setText('school-title', cycle === 1 ? '아카데미 졸업!' : `${schoolName(cycle - 1)} 제패!`);
+  const conquered = Math.min(cycle - 1, REGIONS.length);
+  setText('school-text', cycle === 1
+    ? `4학년 과정을 마쳤어요. 이제 ${schoolName(1)}부터 한국 곳곳의 격투 대회를 제패해요.`
+    : `${schoolName(cycle - 1)} 챔피언이 됐어요. 전국 제패 ${conquered}/${REGIONS.length} · 다음 목표는 ${schoolName(cycle)}. 상대도 상금도 커져요.`);
   document.querySelectorAll('dialog[open]').forEach(open => open.close());
   dialog.showModal();
 }
@@ -1225,7 +1243,7 @@ function renderDungeons() {
     level.textContent = best ? `최고 Lv.${best}` : '첫 도전';
     title.append(name, level);
     const info = document.createElement('p');
-    if (!open) info.textContent = dungeon.unlock === 'transfer' ? '첫 전학 후 열려요' : '1-3 반장을 이기면 열려요';
+    if (!open) info.textContent = dungeon.unlock === 'transfer' ? '첫 재입학 후 열려요' : '1-3 1학년 대표를 이기면 열려요';
     else info.append('보상 ', rewardChips(dungeonReward(state, id, best + 1), false));
     const keyRow = document.createElement('span');
     keyRow.className = 'dungeon-keys';
@@ -1281,9 +1299,9 @@ function renderObjective() {
   previousObjective = key;
   const next = state.cleared.indexOf(false);
   $('objective-label').textContent = next < 0 ? '18개 맵 완료' : '다음 목표';
-  $('objective-title').textContent = next < 0 ? '쉬는 시간의 왕 등극!' : `${mapCode(next)} · ${MAPS[next].names[BOSS_WAVE]}`;
+  $('objective-title').textContent = next < 0 ? '쉬는 시간의 왕 등극!' : `${mapCode(next)} · ${stageNames(state.cycle || 0, next)[BOSS_WAVE]}`;
   $('objective-reward').textContent = next < 0 ? '지도에서 어떤 맵이든 다시 대결할 수 있어요.'
-    : next === MAPS.length - 1 ? `첫 승리 시 ${schoolName(state.cycle + 1)} 진학` : isGradeFinal(next) ? `첫 승리 장비 · ${GEAR[BOSS_REWARDS[gradeIndex(next)]].name}` : `첫 승리 시 ${MAPS[next + 1].place} 해금`;
+    : next === MAPS.length - 1 ? (state.cycle ? `첫 승리 시 ${schoolName(state.cycle)} 제패` : '첫 승리 시 아카데미 졸업') : isGradeFinal(next) ? `첫 승리 장비 · ${GEAR[BOSS_REWARDS[gradeIndex(next)]].name}` : `첫 승리 시 ${MAPS[next + 1].place} 해금`;
 }
 
 function setText(id, text) {
@@ -1574,12 +1592,12 @@ function start() {
     commit();
   });
   $('help').addEventListener('click', () => showDialog('쉬는 시간에 대결!', [
-    '1학년 주인공은 자동으로 대결해요. 코인으로 훈련하고 가방에서 더 좋은 장비를 착용하세요.',
-    '1-3 반장 다온의 방어는 종소리 반격으로 깰 수 있어요. 쏜살 돌진은 반격 뒤 빈틈에 강해요.',
+    '아카데미 신입생인 주인공은 자동으로 대결해요. 코인으로 훈련하고 가방에서 더 좋은 장비를 착용하세요.',
+    '1-3 1학년 대표 다온의 방어는 공 울림 카운터로 풀 수 있어요. 돌진 스트레이트는 반격 뒤 빈틈에 강해요.',
     '보스를 이기면 다음 장소가 열려요. 자동 진격을 끄면 같은 장소에서 코인을 모아요.',
     '졌을 때는 같은 맵에서 반복 수련을 시작해요. 수련에서 3승을 하면 자동으로 다시 도전해요.',
     `게임을 닫아도 최대 ${offlineLimit(state) / 3600}시간 동안 대결과 보상이 쌓여요. 진행 상황은 이 브라우저에 저장돼요.`,
-    '6-3 보스를 이기면 해솔초 → 해솔중 → 해솔고 → 전국 리그로 진학해요. 학년마다 딱지치기·지우개 따먹기·피구 같은 놀이 대결 종목이 바뀌어요. 막히면 지도 탭에서 전학을 가고, 명예 배지로 방과 후 학원을 다녀 영구 능력치를 올리세요.',
+    '4-3 보스를 이기면 아카데미를 졸업하고, 정선 산골 마을부터 서울 강남까지 지역 격투 대회를 하나씩 제패해요. 지역마다 동네 도장 → 상가 체육관 → 시민 체육관 → 챔피언전 순서예요. 막히면 지도 탭에서 재입학하고, 명예 배지로 명예 코칭을 받아 영구 능력치를 올리세요.',
   ], '?'));
   document.addEventListener('visibilitychange', () => {
     if (editingProfile || !state.profile) return;

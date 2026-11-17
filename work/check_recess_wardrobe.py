@@ -50,7 +50,7 @@ with sync_playwright() as playwright:
     }''')
     page.reload()
     page.get_by_role('button', name='가방', exact=True).click()
-    for label in ['복도 트레이닝 바지', '새싹 책가방', '귤빛 운동화']:
+    for label in ['기숙사 트레이닝 바지', '새싹 짐가방', '귤빛 운동화']:
         page.get_by_role('button', name=f'{label} 장착').click()
         expect(page.get_by_role('button', name=f'{label} 착용 중')).to_be_visible()
     expect(page.locator('#closet-sprite')).to_have_attribute('data-outfit', 'mint indigo mint orange')

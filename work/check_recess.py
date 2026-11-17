@@ -23,7 +23,7 @@ with sync_playwright() as playwright:
     phone.on('requestfailed', lambda req: issues.append(req.url))
     phone.clock.install()
     phone.goto(target)
-    expect(phone.get_by_role('heading', name='1학년 1반 입학')).to_be_visible()
+    expect(phone.get_by_role('heading', name='해솔 격투 아카데미 입학')).to_be_visible()
     assert phone.evaluate('document.documentElement.scrollWidth === innerWidth')
     assert phone.locator('.enrollment').bounding_box()['width'] == 390
     assert phone.locator('.enrollment-cover').evaluate("e => getComputedStyle(e).backgroundImage.includes('data:image/webp')")
@@ -35,7 +35,7 @@ with sync_playwright() as playwright:
     phone.get_by_role('textbox', name='닉네임').fill('별하늘')
     phone.screenshot(path=str(root / 'work' / 'recess-v2-enrollment.png'))
     phone.get_by_role('button', name='입학하기').click()
-    expect(phone.get_by_role('heading', name='신발장 입구')).to_be_visible()
+    expect(phone.get_by_role('heading', name='아카데미 정문')).to_be_visible()
     expect(phone.locator('#player-name')).to_have_text('별하늘')
     expect(phone.locator('#player-sprite')).to_have_attribute('data-sprite', 'girl')
     expect(phone.locator('#level')).to_have_text('1')
@@ -55,17 +55,17 @@ with sync_playwright() as playwright:
     expect(phone.get_by_role('button', name='별무늬 손목띠 착용 중')).to_be_disabled()
     phone.get_by_role('button', name='대결', exact=True).click()
     phone.clock.run_for(9500)
-    expect(phone.get_by_role('heading', name='1층 복도')).to_be_visible()
+    expect(phone.get_by_role('heading', name='기숙사 복도')).to_be_visible()
     assert phone.locator('.arena-art').evaluate('e => getComputedStyle(e).backgroundImage') != first_art
-    phone.get_by_role('button', name='학교 지도', exact=True).click()
-    expect(phone.get_by_text('1 / 18 완료')).to_be_visible()
-    assert phone.locator('.map-thumb').count() == 18
-    assert phone.locator('.map-thumb').evaluate_all("items => new Set(items.map(e => getComputedStyle(e).getPropertyValue('--map-image'))).size") == 18
+    phone.get_by_role('button', name='대결 지도', exact=True).click()
+    expect(phone.get_by_text('1 / 12 완료')).to_be_visible()
+    assert phone.locator('.map-thumb').count() == 12
+    assert phone.locator('.map-thumb').evaluate_all("items => new Set(items.map(e => getComputedStyle(e).getPropertyValue('--map-image'))).size") == 12
     phone.locator('summary').last.click()
-    expect(phone.get_by_role('button', name='운동장 결승선 잠김')).to_be_disabled()
+    expect(phone.get_by_role('button', name='아카데미 결승 링 잠김')).to_be_disabled()
     phone.screenshot(path=str(root / 'work' / 'recess-v2-map.png'))
-    phone.get_by_role('button', name='신발장 입구 재도전').click()
-    expect(phone.get_by_role('heading', name='신발장 입구')).to_be_visible()
+    phone.get_by_role('button', name='아카데미 정문 재도전').click()
+    expect(phone.get_by_role('heading', name='아카데미 정문')).to_be_visible()
     phone.get_by_role('switch', name='자동 진격').click()
     expect(phone.get_by_role('switch', name='자동 진격')).to_have_attribute('aria-checked', 'false')
 
@@ -105,7 +105,7 @@ with sync_playwright() as playwright:
       const snapshot = sessionStorage.getItem('qa-snapshot');
       if (snapshot) localStorage.setItem('haesol-recess-king-v1', snapshot);
     })()''')
-    for number in range(1, 7):
+    for number in range(1, 5):
         seeded.evaluate('''([seed, grade]) => {
           const game = JSON.parse(seed);
           const map = grade * 3 - 1;
@@ -126,7 +126,7 @@ with sync_playwright() as playwright:
     }''', seed)
     seeded.reload()
     choose(seeded, '여학생', '복학생')
-    expect(seeded.get_by_role('heading', name='학교 텃밭')).to_be_visible()
+    expect(seeded.get_by_role('heading', name='레슬링 매트장')).to_be_visible()
     expect(seeded.locator('#level')).to_have_text('15')
     expect(seeded.locator('#coins')).to_have_text('311')
 
@@ -134,9 +134,9 @@ with sync_playwright() as playwright:
     small.goto(target)
     assert small.evaluate('document.documentElement.scrollWidth === innerWidth')
     choose(small, '여학생', '봄달봄달봄달봄달봄달봄달')
-    small.get_by_role('button', name='학교 지도', exact=True).click()
+    small.get_by_role('button', name='대결 지도', exact=True).click()
     assert small.evaluate('document.documentElement.scrollWidth === innerWidth')
-    expect(small.locator('.grade-group')).to_have_count(6)
+    expect(small.locator('.grade-group')).to_have_count(4)
     chrome.close()
 
-print('Portrait layouts, both player sprites, 18 distinct maps, all six grade bosses, progress, replay, and offline saves passed.')
+print('Portrait layouts, both player sprites, 12 distinct academy maps, all four grade bosses, progress, replay, and offline saves passed.')

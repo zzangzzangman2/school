@@ -944,6 +944,17 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .school-art { display: grid; place-items: end center; height: 150px; margin: -6px auto 6px; border-radius: 18px; background: radial-gradient(ellipse at 50% 85%, #ffe7a8 0 34%, transparent 35%), linear-gradient(#cfe8ff, #fff6dc); }
 .school-art .sprite { position: relative; width: 90px; height: 148px; background: var(--sprite-image) center bottom / contain no-repeat; }
 .school-dialog p { margin: 6px 0 14px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+/* 격투 종목 칩: 타격은 글러브, 태권도는 헤드기어, 잡기 종목은 띠 */
+.contest-chip:is([data-contest='boxing'], [data-contest='kickboxing'], [data-contest='muaythai'], [data-contest='mma']) { --contest-prop: url('data:image/webp;base64,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'); }
+.contest-chip:is([data-contest='wrestling'], [data-contest='judo'], [data-contest='jiujitsu'], [data-contest='ssireum']) .contest-mark { border-radius: 0; background: url('data:image/webp;base64,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') center / contain no-repeat; }
+.region-board { margin-top: 12px; padding: 10px; border-radius: 16px; border: 1px solid var(--line); background: var(--card); }
+.region-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.region-head h3 { margin: 0; font-size: 15px; }
+.region-list { display: flex; flex-wrap: wrap; gap: 5px; margin: 0; padding: 0; list-style: none; counter-reset: region; }
+.region { counter-increment: region; padding: 4px 8px; border-radius: 999px; background: #efe9df; color: #9a9184; font-size: 11px; }
+.region::before { content: counter(region) '. '; opacity: .7; }
+.region.done { background: linear-gradient(#ffd86b, #ffb428); color: #5a3a00; font-weight: 700; }
+.region.now { outline: 2px solid var(--gold-deep, #d68a00); background: #fff4d6; color: #6b4300; font-weight: 700; }
 
 </style>
   <style>
@@ -1439,10 +1450,10 @@ p, small, .item-body p, .muted { font-weight: 400; }
 
   <section id="enrollment" class="enrollment" aria-labelledby="enrollment-title" hidden>
     <div class="enrollment-cover">
-      <div class="enrollment-heading"><p>해솔초등학교</p><h1 id="enrollment-title">쉬는 시간의 왕<span>!</span></h1></div>
+      <div class="enrollment-heading"><p>해솔 격투 아카데미</p><h1 id="enrollment-title">쉬는 시간의 왕<span>!</span></h1></div>
     </div>
     <form class="enrollment-form" id="profile-form">
-      <div class="enrollment-intro"><h2>1학년 1반 입학</h2><p>딱지치기부터 피구까지! 쉬는 시간 놀이 대결에 나설 주인공을 골라 주세요.</p></div>
+      <div class="enrollment-intro"><h2>해솔 격투 아카데미 입학</h2><p>스무 살, 해솔 격투 아카데미 신입생! 쉬는 시간마다 스파링으로 실력을 증명할 주인공을 골라 주세요.</p></div>
       <fieldset>
         <legend>주인공 선택</legend>
         <div class="character-options">
@@ -1480,11 +1491,11 @@ p, small, .item-body p, .muted { font-weight: 400; }
 
       <div class="stage-row">
         <div class="stage-title">
-          <div class="stage-meta"><p class="eyebrow" id="stage-number">1학년 · 1-1</p><span id="battle-status" class="live">자동 대결 중</span></div>
+          <div class="stage-meta"><p class="eyebrow" id="stage-number">해솔 아카데미 1학년 · 1-1</p><span id="battle-status" class="live">자동 대결 중</span></div>
           <h2 id="battle-title">신발장 입구</h2>
         </div>
         <div class="hud-buttons">
-          <button class="round-button" id="map-button" type="button" aria-label="학교 지도"><svg aria-hidden="true"><use href="#i-map"/></svg></button>
+          <button class="round-button" id="map-button" type="button" aria-label="대결 지도"><svg aria-hidden="true"><use href="#i-map"/></svg></button>
           <button class="round-button" id="shop-button" type="button" aria-label="상점"><svg aria-hidden="true"><use href="#i-shop"/></svg><i class="notification" id="shop-dot" hidden></i></button>
           <button class="round-button" id="mail-button" type="button" aria-label="우편함"><svg aria-hidden="true"><use href="#i-mail"/></svg><i class="notification count" id="mail-dot" hidden></i></button>
           <button class="round-button" id="menu-button" type="button" aria-label="설정"><svg aria-hidden="true"><use href="#i-gear"/></svg></button>
@@ -1492,7 +1503,7 @@ p, small, .item-body p, .muted { font-weight: 400; }
       </div>
 
       <div class="status-line">
-        <div class="chip contest-chip" id="contest-chip"><span class="contest-mark" aria-hidden="true"></span><b id="contest-name">딱지치기</b></div>
+        <div class="chip contest-chip" id="contest-chip"><span class="contest-mark" aria-hidden="true"></span><b id="contest-name">복싱</b></div>
         <div class="kill-bar" id="kill-bar" aria-hidden="true"><i id="kill-fill"></i><span id="kill-text">승리 0/18</span><b>BOSS</b></div>
         <div class="chip timer-chip" id="dungeon-timer" hidden><i class="fill" id="dungeon-timer-fill"></i><svg aria-hidden="true"><use href="#i-bolt"/></svg><b id="dungeon-timer-text"></b><span class="sr-only" id="dungeon-timer-title"></span></div>
         <div class="chip farm-chip" id="farm" hidden><i class="fill" id="farm-fill"></i><svg aria-hidden="true"><use href="#i-refresh"/></svg><b id="farm-title"></b><small id="farm-progress"></small><button id="retry-map" type="button">재도전</button></div>
@@ -1509,7 +1520,7 @@ p, small, .item-body p, .muted { font-weight: 400; }
       </div>
 
       <div class="fight">
-        <div class="snacks" id="snacks" aria-label="매점 간식 버프"></div>
+        <div class="snacks" id="snacks" aria-label="간식 버프"></div>
         <div class="allies" id="allies" aria-hidden="true"></div>
         <div class="fighter player" id="player"><div class="sprite" id="player-sprite" data-sprite="boy" aria-hidden="true"></div><div class="shadow"></div></div>
         <div></div>
@@ -1533,7 +1544,7 @@ p, small, .item-body p, .muted { font-weight: 400; }
       <div class="objective">
         <span class="objective-icon" aria-hidden="true"><svg><use href="#i-flag"/></svg></span>
         <div><small id="objective-label">다음 목표</small><b id="objective-title"></b><p id="objective-reward"></p></div>
-        <button type="button" class="objective-button" id="objective-button" aria-label="학교 지도 열기">›</button>
+        <button type="button" class="objective-button" id="objective-button" aria-label="대결 지도 열기">›</button>
       </div>
       <div class="drop-progress" aria-label="현재 맵 장비 획득 진행도">
         <span class="drop-icon" aria-hidden="true"><svg><use href="#i-gift"/></svg></span>
@@ -1544,11 +1555,11 @@ p, small, .item-body p, .muted { font-weight: 400; }
 
     <main class="panel" id="panel">
       <section class="view" id="view-battle" aria-labelledby="roster-title">
-        <div class="section-head"><div><h2 id="dungeon-title">방과 후 던전</h2><p>매일 열쇠 2개 · 30초 안에 참가자와 던전 보스를 이기면 다음 단계가 열려요.</p></div></div>
+        <div class="section-head"><div><h2 id="dungeon-title">오늘의 특별 대회</h2><p>매일 열쇠 2개 · 30초 안에 참가자와 던전 보스를 이기면 다음 단계가 열려요.</p></div></div>
         <div class="stack" id="dungeon-list"></div>
         <div class="section-head sub"><div><h2 id="roster-title">이번 장소 상대</h2><p id="roster-note">상대 넷을 모두 이기면 다음 장소가 열려요.</p></div><span class="pill saved" id="saved">자동 저장</span></div>
         <ol class="roster" id="roster"></ol>
-        <div class="section-head sub"><div><h3 class="subhead" id="log-title">대결 기록</h3><p>화면을 닫아도 대결이 쌓여요(기본 4시간, 방과 후 교실로 최대 8시간).</p></div></div>
+        <div class="section-head sub"><div><h3 class="subhead" id="log-title">대결 기록</h3><p>화면을 닫아도 대결이 쌓여요(기본 4시간, 숙소 휴식으로 최대 8시간).</p></div></div>
         <div class="activity"><ol id="log" aria-labelledby="log-title"></ol></div>
       </section>
 
@@ -1557,13 +1568,13 @@ p, small, .item-body p, .muted { font-weight: 400; }
           <button type="button" role="tab" data-sub="train" aria-selected="true">훈련</button>
           <button type="button" role="tab" data-sub="skills" aria-selected="false">스킬</button>
           <button type="button" role="tab" data-sub="tier" aria-selected="false">승급<i class="notification" id="tier-dot" hidden></i></button>
-          <button type="button" role="tab" data-sub="academy" aria-selected="false">학원<i class="notification" id="academy-dot" hidden></i></button>
+          <button type="button" role="tab" data-sub="academy" aria-selected="false">코칭<i class="notification" id="academy-dot" hidden></i></button>
         </div>
         <div class="subpanel" data-panel="train">
         <div class="section-head"><div><h2 id="training-title">훈련</h2><p>꾹 누르고 있으면 연속으로 올라가요.</p></div><div class="buy-mode" id="buy-mode" role="group" aria-label="한 번에 올릴 횟수"><button type="button" data-buy="1" aria-pressed="true">x1</button><button type="button" data-buy="10" aria-pressed="false">x10</button><button type="button" data-buy="max" aria-pressed="false">MAX</button></div></div>
         <div class="auto-train-row"><p><b>자동 훈련</b> 코인이 모이면 가장 싼 훈련부터 알아서 올려요.</p><button type="button" class="auto-skill small" id="auto-train" role="switch" aria-checked="false" aria-label="자동 훈련"><span>자동</span><span class="switch"></span></button></div>
         <div class="stack" id="training-list"></div>
-        <div class="section-head sub"><div><h3 class="subhead">오늘의 시간표</h3><p class="muted" id="class-note">1학년 반장에게 이기면 과목을 고를 수 있어요.</p></div></div>
+        <div class="section-head sub"><div><h3 class="subhead">전공 선택</h3><p class="muted" id="class-note">1학년 대표에게 이기면 전공을 고를 수 있어요.</p></div></div>
         <div class="stack" id="class-list"></div>
         </div>
         <div class="subpanel" data-panel="skills" hidden>
@@ -1580,23 +1591,23 @@ p, small, .item-body p, .muted { font-weight: 400; }
         <div class="subpanel" data-panel="academy" hidden>
           <div class="prestige-card">
             <div class="prestige-art" aria-hidden="true"><svg><use href="#i-school"/></svg></div>
-            <div class="prestige-copy"><small id="prestige-stats"></small><b>전학 가기</b><p id="prestige-gain"></p></div>
-            <button type="button" class="prestige-button" id="prestige-button">전학</button>
+            <div class="prestige-copy"><small id="prestige-stats"></small><b>재입학하기</b><p id="prestige-gain"></p></div>
+            <button type="button" class="prestige-button" id="prestige-button">재입학</button>
           </div>
-          <div class="section-head sub"><div><h3 class="subhead">방과 후 학원</h3><p>명예 배지로 배운 능력은 전학 가도 그대로예요.</p></div><span class="pill badge-pill"><i class="cur badge" aria-hidden="true"></i>배지 <b id="badge-count">0</b></span></div>
+          <div class="section-head sub"><div><h3 class="subhead">명예 코칭</h3><p>명예 배지로 배운 능력은 재입학해도 그대로예요.</p></div><span class="pill badge-pill"><i class="cur badge" aria-hidden="true"></i>배지 <b id="badge-count">0</b></span></div>
           <div class="stack" id="perk-list"></div>
         </div>
       </section>
 
       <section class="view" id="view-party" aria-labelledby="party-title" hidden>
-        <div class="section-head"><div><h2 id="party-title">동료</h2><p>출전한 친구가 함께 대결해요. 갖고만 있어도 파워가 올라요.</p></div><span class="pill" id="party-owned"></span></div>
+        <div class="section-head"><div><h2 id="party-title">동료</h2><p>출전한 동기가 함께 대결해요. 갖고만 있어도 파워가 올라요.</p></div><span class="pill" id="party-owned"></span></div>
         <div class="party-slots" id="party-slots"></div>
-        <div class="section-head sub"><div><h3 class="subhead">반 친구들</h3><p id="party-summary"></p></div><button type="button" class="pill-button" id="go-recruit">동료 모집</button></div>
+        <div class="section-head sub"><div><h3 class="subhead">아카데미 동기들</h3><p id="party-summary"></p></div><button type="button" class="pill-button" id="go-recruit">동료 모집</button></div>
         <div class="mate-grid" id="mate-grid"></div>
       </section>
 
       <section class="view" id="view-shop" aria-labelledby="shop-title" hidden>
-        <div class="section-head"><div><h2 id="shop-title">매점 상점</h2><p>보석으로 뽑기권·모집권·열쇠를 살 수 있어요.</p></div><span class="pill gem-pill"><i class="cur gem" aria-hidden="true"></i>보석 <b id="shop-gems">0</b></span></div>
+        <div class="section-head"><div><h2 id="shop-title">아카데미 상점</h2><p>보석으로 뽑기권·모집권·열쇠를 살 수 있어요.</p></div><span class="pill gem-pill"><i class="cur gem" aria-hidden="true"></i>보석 <b id="shop-gems">0</b></span></div>
         <div class="shop-grid" id="shop-list"></div>
         <div class="section-head sub"><div><h3 class="subhead">특별 상품</h3><p>결제 기능은 준비 중이에요.</p></div></div>
         <div class="stack" id="cash-list"></div>
@@ -1610,8 +1621,9 @@ p, small, .item-body p, .muted { font-weight: 400; }
       </section>
 
       <section class="view" id="view-grades" aria-labelledby="grades-title" hidden>
-        <div class="section-head"><div><h2 id="grades-title">학교 지도</h2><p>6-3 보스를 이기면 다음 학교로 진학해요.</p></div><span class="pill" id="grade-count"></span></div>
+        <div class="section-head"><div><h2 id="grades-title">대결 지도</h2><p>4-3 보스를 이기면 졸업하고, 시골부터 지역을 제패해요.</p></div><span class="pill" id="grade-count"></span></div>
         <div class="stack" id="grade-list"></div>
+        <section class="region-board" aria-labelledby="region-title"><div class="region-head"><h3 id="region-title">전국 제패</h3><span class="pill" id="region-count"></span></div><ol class="region-list" id="region-list"></ol></section>
       </section>
 
       <section class="view" id="view-gacha" aria-labelledby="gacha-title" hidden>
@@ -1631,7 +1643,7 @@ p, small, .item-body p, .muted { font-weight: 400; }
         <div class="sticker-grid" id="sticker-grid"></div>
         </div>
         <div class="subpanel" data-panel="recruit" hidden>
-          <div class="section-head"><div><h2>반 친구 모집</h2><p>모은 친구는 동료 탭에서 출전시킬 수 있어요.</p></div><span class="pill ticket-pill"><i class="cur recruit" aria-hidden="true"></i>모집권 <b id="recruit-count">0</b>장</span></div>
+          <div class="section-head"><div><h2>동기 모집</h2><p>모은 동기는 동료 탭에서 출전시킬 수 있어요.</p></div><span class="pill ticket-pill"><i class="cur recruit" aria-hidden="true"></i>모집권 <b id="recruit-count">0</b>장</span></div>
           <div class="gacha-banner recruit-banner">
             <div class="gacha-copy"><small>전설 동료 등장!</small><b>임원 보미 <em>전설</em></b><p>10회 모집은 희귀 이상 1명 확정</p></div>
             <div class="gacha-art" aria-hidden="true"><span class="sprite mate-art" data-sprite="mob8"></span></div>
@@ -1674,16 +1686,16 @@ p, small, .item-body p, .muted { font-weight: 400; }
     <div class="dialog-actions"><button type="button" class="confirm ghost" id="gacha-again">한 번 더</button><form method="dialog"><button class="confirm">확인</button></form></div>
   </dialog>
   <dialog id="transfer-dialog" aria-labelledby="transfer-title">
-    <div class="dialog-icon" aria-hidden="true"><svg><use href="#i-school"/></svg></div><h2 id="transfer-title">정말 전학 갈까요?</h2>
+    <div class="dialog-icon" aria-hidden="true"><svg><use href="#i-school"/></svg></div><h2 id="transfer-title">정말 재입학할까요?</h2>
     <p class="transfer-gain"><i class="cur badge" aria-hidden="true"></i>명예 배지 <b id="transfer-gain">+0</b></p>
     <ul class="transfer-list">
-      <li class="reset"><b>처음부터</b>학교·맵, 레벨, 코인, 훈련, 동료·스킬 레벨</li>
-      <li class="keep"><b>그대로</b>장비·강화, 스티커, 뽑기권, 천 조각, 동료(★)·승급, 보석, 방과 후 학원, 출석·미션</li>
+      <li class="reset"><b>처음부터</b>지역·맵, 레벨, 코인, 훈련, 동료·스킬 레벨</li>
+      <li class="keep"><b>그대로</b>장비·강화, 스티커, 뽑기권, 천 조각, 동료(★)·승급, 보석, 명예 코칭, 출석·미션</li>
     </ul>
-    <div class="dialog-actions"><form method="dialog"><button class="confirm ghost-light">다음에</button></form><form method="dialog"><button class="confirm gold" id="transfer-confirm">전학 가기</button></form></div>
+    <div class="dialog-actions"><form method="dialog"><button class="confirm ghost-light">다음에</button></form><form method="dialog"><button class="confirm gold" id="transfer-confirm">재입학하기</button></form></div>
   </dialog>
   <dialog id="school-dialog" class="school-dialog" aria-labelledby="school-title">
-    <div class="school-art" aria-hidden="true"><span class="sprite" id="school-sprite" data-sprite="boy-middle"></span></div><h2 id="school-title">해솔중 진학!</h2><p id="school-text"></p>
+    <div class="school-art" aria-hidden="true"><span class="sprite" id="school-sprite" data-sprite="boy-middle"></span></div><h2 id="school-title">아카데미 졸업!</h2><p id="school-text"></p>
     <form method="dialog"><button class="confirm gold">좋아요</button></form>
   </dialog>
   <dialog id="attend-dialog" aria-labelledby="attend-dialog-title">
@@ -1716,82 +1728,76 @@ p, small, .item-body p, .muted { font-weight: 400; }
 'use strict';
 
 const MAPS_PER_GRADE = 3;
-const GRADE_COUNT = 6;
+const GRADE_COUNT = 4;
+const LEGACY_GRADES = 6; // 저장 버전 1(학년 6칸) 이전용
 const MAPS = [
-  { place: '신발장 입구', names: ['민준', '소민', '지우', '신발장 지킴이 솔'], hp: [24, 30, 38, 61], hit: [3, 3, 4, 6] },
-  { place: '1층 복도', names: ['가온', '여름', '시우', '복도 왕 민서'], hp: [40, 48, 58, 87], hit: [4, 5, 6, 8] },
-  { place: '1학년 교실', names: ['해준', '로아', '우빈', '반장 다온'], hp: [54, 64, 80, 245], hit: [5, 6, 8, 13] },
-  { place: '중앙 계단', names: ['유나', '준서', '승아', '계단 대표 준영'], hp: [80, 99, 118, 167], hit: [8, 10, 12, 15] },
-  { place: '급식실 앞', names: ['은재', '예나', '도율', '급식 당번 이솔'], hp: [115, 134, 158, 215], hit: [11, 12, 15, 19] },
-  { place: '급식실 홀', names: ['수호', '우주', '윤슬', '반장 유찬'], hp: [145, 172, 200, 275], hit: [13, 15, 18, 23] },
-  { place: '학교 텃밭', names: ['지한', '하린', '이준', '텃밭 대표 별이'], hp: [190, 226, 261, 342], hit: [17, 19, 21, 26] },
-  { place: '구름다리', names: ['태인', '유리', '한결', '구름다리 대장 온유'], hp: [246, 284, 330, 425], hit: [20, 22, 25, 31] },
-  { place: '도서실', names: ['유민', '주리', '민재', '대표 채원'], hp: [300, 349, 399, 515], hit: [23, 26, 29, 39] },
-  { place: '음악실', names: ['주원', '세아', '지호', '합주부장 리우'], hp: [380, 432, 490, 630], hit: [28, 31, 35, 43] },
-  { place: '미술실', names: ['서준', '나윤', '현준', '그림부장 리나'], hp: [467, 530, 595, 755], hit: [33, 36, 40, 49] },
-  { place: '과학실', names: ['희수', '민지', '시온', '대표 은우'], hp: [560, 630, 710, 895], hit: [38, 41, 47, 57] },
-  { place: '체육 창고', names: ['하람', '서윤', '태오', '장비부장 도담'], hp: [685, 770, 858, 1050], hit: [44, 48, 53, 64] },
-  { place: '실내 체육관', names: ['윤재', '미루', '수안', '체육부장 규리'], hp: [805, 905, 1001, 1215], hit: [50, 54, 60, 72] },
-  { place: '야외 농구장', names: ['라온', '소이', '기태', '대표 나린'], hp: [950, 1060, 1175, 1415], hit: [56, 61, 68, 81] },
-  { place: '놀이터', names: ['현우', '다인', '건우', '놀이터 대장 나래'], hp: [1110, 1234, 1372, 1620], hit: [64, 69, 76, 90] },
-  { place: '운동장 트랙', names: ['하늘', '나현', '민성', '달리기 대표 유진'], hp: [1290, 1430, 1585, 1875], hit: [72, 78, 87, 102] },
-  { place: '운동장 결승선', names: ['도현', '지안', '아린', '운동장 대장 새봄'], hp: [1505, 1660, 1820, 2250], hit: [80, 88, 98, 115] },
+  { place: '아카데미 정문', names: ['민준', '소민', '지우', '정문 지킴이 솔'], hp: [24, 30, 38, 61], hit: [3, 3, 4, 6] },
+  { place: '기숙사 복도', names: ['가온', '여름', '시우', '복도 조교 민서'], hp: [40, 48, 58, 87], hit: [4, 5, 6, 8] },
+  { place: '신입생 체육관', names: ['해준', '로아', '우빈', '1학년 대표 다온'], hp: [54, 64, 80, 245], hit: [5, 6, 8, 13] },
+  { place: '웨이트 트레이닝장', names: ['유나', '준서', '승아', '웨이트장 터줏대감 준영'], hp: [80, 99, 118, 167], hit: [8, 10, 12, 15] },
+  { place: '학생식당 앞', names: ['은재', '예나', '도율', '식당 앞 단골 이솔'], hp: [115, 134, 158, 215], hit: [11, 12, 15, 19] },
+  { place: '복싱장', names: ['수호', '우주', '윤슬', '2학년 대표 유찬'], hp: [145, 172, 200, 275], hit: [13, 15, 18, 23] },
+  { place: '레슬링 매트장', names: ['지한', '하린', '이준', '매트장 주장 별이'], hp: [190, 226, 261, 342], hit: [17, 19, 21, 26] },
+  { place: '야외 코트', names: ['태인', '유리', '한결', '코트 에이스 온유'], hp: [246, 284, 330, 425], hit: [20, 22, 25, 31] },
+  { place: '모래판 씨름장', names: ['유민', '주리', '민재', '3학년 대표 채원'], hp: [300, 349, 399, 515], hit: [23, 26, 29, 39] },
+  { place: '운동장 트랙', names: ['주원', '세아', '지호', '트랙 에이스 리우'], hp: [380, 432, 490, 630], hit: [28, 31, 35, 43] },
+  { place: '졸업 시험장', names: ['서준', '나윤', '현준', '시험 감독 조교 리나'], hp: [467, 530, 595, 755], hit: [33, 36, 40, 49] },
+  { place: '아카데미 결승 링', names: ['희수', '민지', '시온', '수석 졸업 후보 은우'], hp: [560, 630, 710, 895], hit: [38, 41, 47, 57] },
 ];
 
 const GEAR = {
-  basicTop: { name: '입학 후드', slot: 'top', starter: true },
-  basicBottom: { name: '입학 바지', slot: 'bottom', starter: true },
-  bag: { name: '입학 가방', slot: 'bag', hp: 4, starter: true },
-  basicShoes: { name: '입학 운동화', slot: 'shoes', starter: true },
-  pencil: { name: '새 연필', slot: 'accessory', attack: 1, starter: true },
+  basicTop: { name: '신입생 후드', slot: 'top', starter: true },
+  basicBottom: { name: '신입생 트레이닝 바지', slot: 'bottom', starter: true },
+  bag: { name: '신입생 짐가방', slot: 'bag', hp: 4, starter: true },
+  basicShoes: { name: '신입생 운동화', slot: 'shoes', starter: true },
+  pencil: { name: '새 핸드랩', slot: 'accessory', attack: 1, starter: true },
   wristband: { name: '별무늬 손목띠', slot: 'accessory', attack: 5 },
-  shoes: { name: '보라색 체육화', slot: 'shoes', hp: 18, style: 'violet' },
-  jersey: { name: '급식실 챔피언 띠', slot: 'accessory', attack: 13 },
+  shoes: { name: '보라색 링 슈즈', slot: 'shoes', hp: 18, style: 'violet' },
+  jersey: { name: '1학년 챔피언 띠', slot: 'accessory', attack: 13 },
   jumper: { name: '줄무늬 점퍼', slot: 'top', hp: 43, style: 'crimson' },
-  gloves: { name: '별무늬 체육 장갑', slot: 'accessory', attack: 29 },
+  gloves: { name: '별무늬 스파링 글러브', slot: 'accessory', attack: 29 },
   vest: { name: '체육관 팀 조끼', slot: 'top', hp: 79, style: 'indigo' },
-  badge: { name: '운동장 왕 배지', slot: 'accessory', attack: 54 },
+  badge: { name: '아카데미 수석 배지', slot: 'accessory', attack: 54 },
   mintHood: { name: '민트 후드', slot: 'top', hp: 10, attack: 2, style: 'mint' },
-  hallPants: { name: '복도 트레이닝 바지', slot: 'bottom', hp: 12, attack: 1, style: 'indigo' },
-  classBag: { name: '새싹 책가방', slot: 'bag', hp: 12, attack: 3, style: 'mint' },
+  hallPants: { name: '기숙사 트레이닝 바지', slot: 'bottom', hp: 12, attack: 1, style: 'indigo' },
+  classBag: { name: '새싹 짐가방', slot: 'bag', hp: 12, attack: 3, style: 'mint' },
   stairShoes: { name: '귤빛 운동화', slot: 'shoes', hp: 20, attack: 2, style: 'orange' },
-  lunchTop: { name: '급식실 줄무늬 후드', slot: 'top', hp: 25, attack: 4, style: 'orange' },
-  lunchPants: { name: '식판 자수 바지', slot: 'bottom', hp: 25, attack: 4, style: 'graphite' },
-  gardenBag: { name: '텃밭 물뿌리개 가방', slot: 'bag', hp: 29, attack: 6, style: 'forest' },
-  bridgeShoes: { name: '구름다리 러닝화', slot: 'shoes', hp: 29, attack: 6, style: 'sky' },
-  libraryPants: { name: '도서부 남색 바지', slot: 'bottom', hp: 33, attack: 7, style: 'violet' },
-  musicBag: { name: '음표 스쿨백', slot: 'bag', hp: 38, attack: 9, style: 'pink' },
-  artTop: { name: '분필빛 활동복', slot: 'top', hp: 49, attack: 8, style: 'pink' },
-  labShoes: { name: '과학실 실습화', slot: 'shoes', hp: 41, attack: 11, style: 'forest' },
-  gymPants: { name: '체육부 바지', slot: 'bottom', hp: 47, attack: 13, style: 'forest' },
+  lunchTop: { name: '학생식당 줄무늬 후드', slot: 'top', hp: 25, attack: 4, style: 'orange' },
+  lunchPants: { name: '자수 조거 바지', slot: 'bottom', hp: 25, attack: 4, style: 'graphite' },
+  gardenBag: { name: '숲길 러닝 가방', slot: 'bag', hp: 29, attack: 6, style: 'forest' },
+  bridgeShoes: { name: '하늘빛 러닝화', slot: 'shoes', hp: 29, attack: 6, style: 'sky' },
+  libraryPants: { name: '남색 트레이닝 바지', slot: 'bottom', hp: 33, attack: 7, style: 'violet' },
+  musicBag: { name: '음표 스포츠백', slot: 'bag', hp: 38, attack: 9, style: 'pink' },
+  artTop: { name: '분필빛 훈련복', slot: 'top', hp: 49, attack: 8, style: 'pink' },
+  labShoes: { name: '숲색 훈련화', slot: 'shoes', hp: 41, attack: 11, style: 'forest' },
+  gymPants: { name: '체육관 바지', slot: 'bottom', hp: 47, attack: 13, style: 'forest' },
   gymBag: { name: '체육관 더플백', slot: 'bag', hp: 48, attack: 13, style: 'sky' },
   courtShoes: { name: '코트 농구화', slot: 'shoes', hp: 49, attack: 15, style: 'crimson' },
-  playTop: { name: '놀이터 레이싱 후드', slot: 'top', hp: 75, attack: 17, style: 'sky' },
+  playTop: { name: '레이싱 후드', slot: 'top', hp: 75, attack: 17, style: 'sky' },
   trackPants: { name: '트랙 스프린트 바지', slot: 'bottom', hp: 59, attack: 18, style: 'crimson' },
   finishBag: { name: '결승선 우승 가방', slot: 'bag', hp: 68, attack: 20, style: 'crimson' },
 };
 const SLOTS = { top: '상의', bottom: '하의', bag: '가방', shoes: '신발', accessory: '장신구' };
 const STARTER_GEAR = { top: 'basicTop', bottom: 'basicBottom', bag: 'bag', shoes: 'basicShoes', accessory: 'pencil' };
-const MAP_REWARDS = ['mintHood', 'hallPants', 'classBag', 'stairShoes', 'lunchTop', 'lunchPants', 'gardenBag', 'bridgeShoes', 'libraryPants', 'musicBag', 'artTop', 'labShoes', 'gymPants', 'gymBag', 'courtShoes', 'playTop', 'trackPants', 'finishBag'];
+const MAP_REWARDS = ['mintHood', 'hallPants', 'classBag', 'stairShoes', 'lunchTop', 'lunchPants', 'gardenBag', 'bridgeShoes', 'libraryPants', 'musicBag', 'artTop', 'labShoes'];
 const DROP_WINS = 4;
 const FARM_WINS = 3;
 const MAX_RANK = 30;
 const RANK_BONUS = 0.03;
-// ── 장기 성장: 6-3을 깨면 다음 년차로 넘어가며 적·보상이 지수적으로 커진다 ──
-// 2년차부터는 맵 하나 넘어갈 때마다 아래 비율로 이어서 커진다(1년차 마지막 보스 기준).
+// ── 장기 성장: 아카데미 4-3을 깨면 졸업, 그 뒤로 지역을 하나씩 제패하며 적·보상이 지수적으로 커진다 ──
+// 지역부터는 맵 하나 넘어갈 때마다 아래 비율로 이어서 커진다(아카데미 마지막 보스 기준).
 const GROWTH = { hp: 1.243, hit: 1.233, coin: 1.25, xp: 1.03 };
 const MILESTONE = 25;
 const COST_TAIL = 1.05;
 const GRADE_SCALING = [
-  { hp: 1, attack: 1 }, { hp: 1.14, attack: 1.08 }, { hp: 1.24, attack: 1.20 },
-  { hp: 1.38, attack: 1.28 }, { hp: 1.49, attack: 1.36 }, { hp: 1.62, attack: 1.45 },
+  { hp: 1, attack: 1 }, { hp: 1.14, attack: 1.08 }, { hp: 1.24, attack: 1.20 }, { hp: 1.38, attack: 1.28 },
 ];
 const MISSIONS = {
   wins: { name: '쉬는 시간 단골', hint: '대결 승리', glyph: '✷', step: 8, value: state => state.wins },
-  clears: { name: '학교 탐방', hint: '맵 첫 클리어', glyph: '⚑', step: 2, value: state => state.totalClears ?? state.cleared.filter(Boolean).length },
+  clears: { name: '경기장 탐방', hint: '맵 첫 클리어', glyph: '⚑', step: 2, value: state => state.totalClears ?? state.cleared.filter(Boolean).length },
   closet: { name: '옷장 채우기', hint: '새 장비 수집', glyph: '✧', step: 3, value: state => state.bag.filter(id => !GEAR[id].starter).length },
 };
-const BOSS_REWARDS = ['shoes', 'jersey', 'jumper', 'gloves', 'vest', 'badge'];
+const BOSS_REWARDS = ['shoes', 'jersey', 'jumper', 'gloves'];
 const TRAINING = {
   power: { name: '힘 훈련', glyph: '✧', bonus: '파워 +4', base: 22, cap: 1e9, scale: 1.16, milestone: true },
   health: { name: '체력 훈련', glyph: '♥', bonus: '최대 체력 +15', base: 18, cap: 1e9, scale: 1.13, milestone: true },
@@ -1801,13 +1807,13 @@ const TRAINING = {
   recover: { name: '회복 훈련', glyph: '✚', bonus: '대결 중 초당 체력 회복 +0.1%', base: 50, cap: 30, scale: 1.3 },
 };
 const CLASSES = {
-  gym: { name: '체육', glyph: '↗', bonus: '동작 간격 18% 단축' },
-  math: { name: '수학', glyph: '+', bonus: '대결 코인 보상 25% 증가' },
-  music: { name: '음악', glyph: '♪', bonus: '필살기 충전량 50% 증가' },
+  gym: { name: '스피드 전공', glyph: '↗', bonus: '동작 간격 18% 단축' },
+  math: { name: '스폰서 관리', glyph: '+', bonus: '대결 코인 보상 25% 증가' },
+  music: { name: '멘탈 코칭', glyph: '♪', bonus: '필살기 충전량 50% 증가' },
 };
 const SKILLS = {
-  rush: { name: '쏜살 돌진', glyph: '➤', cost: 54, multiplier: 2.2, windup: 0.15, detail: '빠르게 충전돼요. 다온이 반격 뒤 빈틈을 보일 때 사용해 큰 피해를 줘요.' },
-  bell: { name: '종소리 반격', glyph: '✷', cost: 72, multiplier: 2.7, windup: 0.2, detail: '다온의 방어를 풀고 반격을 끊어요. 자동 사용은 방어할 때까지 기다려요.' },
+  rush: { name: '돌진 스트레이트', glyph: '➤', cost: 54, multiplier: 2.2, windup: 0.15, detail: '빠르게 충전돼요. 다온이 반격 뒤 빈틈을 보일 때 사용해 큰 피해를 줘요.' },
+  bell: { name: '공 울림 카운터', glyph: '✷', cost: 72, multiplier: 2.7, windup: 0.2, detail: '다온의 방어를 풀고 반격을 끊어요. 자동 사용은 방어할 때까지 기다려요.' },
 };
 // ── 방치형 기본 기능: 스티커 뽑기·도감, 매점 간식 버프, 출석, 일일 미션 ──
 const RARITIES = {
@@ -1819,25 +1825,25 @@ const RARITIES = {
 };
 const RARITY_ORDER = Object.keys(RARITIES);
 const STICKERS = {
-  eraser: { name: '말랑 지우개', rarity: 'common', stat: 'hp', value: 0.02 },
-  ruler: { name: '반짝이 자', rarity: 'common', stat: 'attack', value: 0.02 },
-  clip: { name: '무지개 클립', rarity: 'common', stat: 'coin', value: 0.03 },
-  notebook: { name: '줄무늬 공책', rarity: 'common', stat: 'xp', value: 0.03 },
-  crayon: { name: '12색 크레파스', rarity: 'uncommon', stat: 'attack', value: 0.03 },
-  stamp: { name: '참 잘했어요 도장', rarity: 'uncommon', stat: 'coin', value: 0.05 },
-  bandage: { name: '캐릭터 밴드', rarity: 'uncommon', stat: 'hp', value: 0.04 },
-  marble: { name: '왕구슬', rarity: 'rare', stat: 'crit', value: 0.015 },
-  slime: { name: '액체 괴물', rarity: 'rare', stat: 'attack', value: 0.05 },
-  whistle: { name: '체육 호루라기', rarity: 'epic', stat: 'attack', value: 0.07 },
-  captain: { name: '반장 배지', rarity: 'epic', stat: 'coin', value: 0.1 },
-  goldpen: { name: '황금 샤프', rarity: 'legend', stat: 'attack', value: 0.12 },
+  eraser: { name: '스포츠 테이프', rarity: 'common', stat: 'hp', value: 0.02 },
+  ruler: { name: '줄넘기', rarity: 'common', stat: 'attack', value: 0.02 },
+  clip: { name: '에너지바', rarity: 'common', stat: 'coin', value: 0.03 },
+  notebook: { name: '훈련 일지', rarity: 'common', stat: 'xp', value: 0.03 },
+  crayon: { name: '땀 수건', rarity: 'uncommon', stat: 'attack', value: 0.03 },
+  stamp: { name: '스폰서 계약 도장', rarity: 'uncommon', stat: 'coin', value: 0.05 },
+  bandage: { name: '테이핑 밴드', rarity: 'uncommon', stat: 'hp', value: 0.04 },
+  marble: { name: '행운의 메달', rarity: 'rare', stat: 'crit', value: 0.015 },
+  slime: { name: '아령', rarity: 'rare', stat: 'attack', value: 0.05 },
+  whistle: { name: '심판 호루라기', rarity: 'epic', stat: 'attack', value: 0.07 },
+  captain: { name: '주장 완장', rarity: 'epic', stat: 'coin', value: 0.1 },
+  goldpen: { name: '황금 글러브', rarity: 'legend', stat: 'attack', value: 0.12 },
 };
 const STICKER_STATS = { attack: '파워', hp: '체력', coin: '코인', xp: '경험치', crit: '크리티컬' };
 const STICKER_LEVELS = Array.from({ length: 100 }, (_, index) => (index + 1) * (index + 2) / 2);
 const SNACKS = {
-  choco: { name: '초코우유', stat: 'attack', bonus: 0.5, label: '파워 +50%' },
+  choco: { name: '프로틴 쉐이크', stat: 'attack', bonus: 0.5, label: '파워 +50%' },
   banana: { name: '바나나우유', stat: 'coin', bonus: 1, label: '코인 2배' },
-  berry: { name: '딸기우유', stat: 'xp', bonus: 1, label: '경험치 2배' },
+  berry: { name: '에너지 드링크', stat: 'xp', bonus: 1, label: '경험치 2배' },
 };
 const SNACK_TIME = 15 * 60;
 const SNACK_MAX = 60 * 60;
@@ -1847,7 +1853,7 @@ const DAILY_MISSIONS = {
   wins: { name: '대결 20번 이기기', target: 20, value: state => state.wins - state.daily.baseWins, reward: { tickets: 2 } },
   trains: { name: '훈련 10번 하기', target: 10, value: state => state.daily.trains, reward: { coins: 12 } },
   pulls: { name: '스티커 5번 뽑기', target: 5, value: state => state.daily.pulls, reward: { patches: 2 } },
-  snacks: { name: '매점 간식 2번 먹기', target: 2, value: state => state.daily.snacks, reward: { tickets: 2 } },
+  snacks: { name: '간식 2번 먹기', target: 2, value: state => state.daily.snacks, reward: { tickets: 2 } },
   dungeons: { name: '던전 3번 하기', target: 3, value: state => state.daily.dungeons || 0, reward: { tickets: 2 } },
   all: { name: '일일 미션 모두 완료', target: 5, value: state => state.daily.claimed.filter(id => id !== 'all').length, reward: { tickets: 5, gems: 30 } },
 };
@@ -1867,9 +1873,9 @@ const MOB_SPRITES = ['mob1', 'mob2', 'mob3', 'mob4', 'mob5', 'mob6', 'mob7', 'mo
 
 // ── 일일 던전: 하루 열쇠 2개, 30초 안에 졸개 셋과 던전 보스를 이기면 다음 단계 ──
 const DUNGEONS = {
-  coin: { name: '매점 줄서기 대회', boss: '매점 줄서기 대장', minion: '줄서기 참가자', reward: 'coin', hp: 4, hit: 0.6, sprite: 'dboss-store', background: 'd-coin', minionSprites: ['mob1', 'mob2', 'mob3'], map: 5, unlock: 'clear' },
-  ticket: { name: '도서실 퀴즈왕', boss: '퀴즈 대장 책벌레', minion: '퀴즈 참가자', reward: 'ticket', hp: 2.4, hit: 1.5, sprite: 'dboss-quiz', background: 'd-ticket', minionSprites: ['mob4', 'mob5', 'mob8'], map: 9, unlock: 'clear' },
-  badge: { name: '전국 체력장', boss: '체력장 1등 선배', minion: '체력장 선배', reward: 'badge', hp: 3, hit: 1.3, sprite: 'dboss-sports', background: 'd-badge', minionSprites: ['mob3', 'mob6', 'mob7'], map: 17, unlock: 'transfer' },
+  coin: { name: '상금 토너먼트', boss: '토너먼트 우승 후보', minion: '토너먼트 참가자', reward: 'coin', hp: 4, hit: 0.6, sprite: 'dboss-store', background: 'd-coin', minionSprites: ['mob1', 'mob2', 'mob3'], map: 5, unlock: 'clear' },
+  ticket: { name: '팬 미팅 이벤트전', boss: '인기 스타 선수', minion: '이벤트전 선수', reward: 'ticket', hp: 2.4, hit: 1.5, sprite: 'dboss-quiz', background: 'd-ticket', minionSprites: ['mob4', 'mob5', 'mob8'], map: 9, unlock: 'clear' },
+  badge: { name: '국가대표 선발전', boss: '국가대표 코치', minion: '선발전 선수', reward: 'badge', hp: 3, hit: 1.3, sprite: 'dboss-sports', background: 'd-badge', minionSprites: ['mob3', 'mob6', 'mob7'], map: 11, unlock: 'transfer' },
 };
 const DUNGEON_PACK = [
   { share: 0.08, hit: 0.3 }, { share: 0.08, hit: 0.3 }, { share: 0.08, hit: 0.3 }, { share: 0.08, hit: 0.3 }, { share: 0.08, hit: 0.3 },
@@ -1878,55 +1884,64 @@ const DUNGEON_PACK = [
 const DUNGEON_KEYS = 2;
 const DUNGEON_TIME = 30;
 
-// ── 학교 단계와 놀이 대결 종목(구글 플레이 정책: 학교 폭력이 아닌 '쉬는 시간 놀이 대결') ──
-// motion: 동작 그림 묶음. toss=던지기·치기(딱지·공), push=밀기·버티기(씨름·팔씨름·유도), spar=보호구 낀 정식 스포츠 겨루기
-// 초·중학교는 놀이·스포츠 종목, 고등학교부터 보호구를 갖춘 정식 스파링. 회차(cycle)마다 학교가 바뀐다.
-const SCHOOLS = [
-  { name: '해솔초', grades: 6 },
-  { name: '해솔중', grades: 3 },
-  { name: '해솔고', grades: 3 },
+// ── 격투 아카데미(4학년) → 졸업 후 시골부터 한국 지역을 하나씩 제패(스포츠 격투 대회) ──
+// 회차(cycle) 0 = 아카데미, 1부터 = REGIONS 순서. 지역마다 4구역(동네 도장 → 상가 체육관 → 시민 체육관 → 챔피언전) × 경기장 3곳.
+// motion: 동작 그림 묶음. strike = 타격(기본 동작 그림, 장비 외형 합성됨), push = 잡기·던지기, spar = 보호구를 갖춘 태권도 겨루기
+const ACADEMY = { name: '해솔 격투 아카데미', short: '해솔 아카데미' };
+const REGIONS = [
+  '정선 산골 마을', '신안 섬마을', '청송 시골 장터', '괴산 읍내', '남원 소도시', '통영 항구', '공주 옛 도읍', '춘천 호반',
+  '제주', '전주', '포항', '청주', '창원', '천안', '광주광역시', '대전광역시',
+  '울산광역시', '대구광역시', '인천광역시', '부산광역시', '수원', '성남', '서울 강북', '서울 강남',
 ];
+const ZONES = ['동네 도장', '상가 체육관', '시민 체육관', '지역 챔피언전'];
+const ZONE_PLACES = [
+  ['마을 회관 앞', '장터 공터', '동네 도장'],
+  ['상가 체육관 입구', '상가 체육관', '체육관 관장실 앞'],
+  ['시민 체육관 연습장', '시민 체육관 관중석', '시민 체육관 메인 링'],
+  ['챔피언전 예선', '챔피언전 준결승', '챔피언전 결승'],
+];
+const ZONE_LEADERS = ['도장 사범', '체육관 코치', '체육관 주장', '챔피언전 시드'];
+const ZONE_BOSSES = ['동네 도장 관장', '상가 체육관 관장', '시민 체육관 에이스'];
+const FIGHTERS = ['강훈', '서진', '태호', '민혁', '지성', '현우', '도겸', '승철', '유진', '하은', '수빈', '예린', '지아', '다인', '채린', '소윤', '건우', '시혁', '재윤', '한별', '무진', '세라', '규리', '나래'];
 const CONTESTS = {
-  ddakji: { name: '딱지치기', prop: 'ddakji', sound: '딱!', fx: 'dust', motion: 'toss' },
-  eraser: { name: '지우개 따먹기', prop: 'eraser', sound: '톡!', fx: 'dust', motion: 'toss' },
-  dodge: { name: '피구', prop: 'dodgeball', sound: '통!', fx: 'dust', motion: 'toss' },
-  scuffle: { name: '코믹 밀치기', prop: null, sound: '뿅!', fx: 'cloud', motion: 'push' },
-  arm: { name: '팔씨름', prop: null, sound: '끄응!', fx: 'dust', motion: 'push' },
-  basket: { name: '1:1 농구', prop: 'basketball', sound: '슛!', fx: 'dust', motion: 'toss' },
+  boxing: { name: '복싱', prop: null, sound: '퍽!', fx: 'spark', motion: 'strike' },
+  kickboxing: { name: '킥복싱', prop: null, sound: '팡!', fx: 'spark', motion: 'strike' },
+  muaythai: { name: '무에타이', prop: null, sound: '쾅!', fx: 'spark', motion: 'strike' },
+  taekwondo: { name: '태권도', prop: null, sound: '얍!', fx: 'spark', motion: 'spar' },
+  wrestling: { name: '레슬링', prop: null, sound: '쿵!', fx: 'cloud', motion: 'push' },
+  judo: { name: '유도', prop: null, sound: '한판!', fx: 'cloud', motion: 'push' },
   ssireum: { name: '씨름', prop: null, sound: '영차!', fx: 'cloud', motion: 'push' },
-  dodgeLeague: { name: '피구 대항전', prop: 'dodgeball', sound: '통!', fx: 'dust', motion: 'toss' },
-  basketLeague: { name: '농구 리그', prop: 'basketball', sound: '슛!', fx: 'dust', motion: 'toss' },
-  taekwondo: { name: '태권도 겨루기', prop: null, sound: '얍!', fx: 'spark', motion: 'spar' },
-  judo: { name: '유도 대련', prop: null, sound: '한판!', fx: 'cloud', motion: 'push' },
-  sparring: { name: '정식 스파링', prop: null, sound: '팡!', fx: 'spark', motion: 'spar' },
+  jiujitsu: { name: '주짓수', prop: null, sound: '꽉!', fx: 'dust', motion: 'push' },
+  mma: { name: '종합격투', prop: null, sound: '쾅!', fx: 'spark', motion: 'strike' },
 };
-const CONTEST_PLAN = [
-  ['ddakji', 'eraser', 'dodge', 'scuffle', 'arm', 'basket'],
-  ['ssireum', 'arm', 'dodgeLeague', 'basketLeague', 'taekwondo', 'taekwondo'],
-  ['taekwondo', 'judo', 'sparring', 'sparring', 'basketLeague', 'sparring'],
+// 아카데미는 경기장마다, 지역은 구역마다 종목이 정해져 있다
+const ACADEMY_PLAN = ['boxing', 'boxing', 'boxing', 'kickboxing', 'muaythai', 'boxing', 'wrestling', 'jiujitsu', 'ssireum', 'taekwondo', 'judo', 'mma'];
+const REGION_PLANS = [
+  ['ssireum', 'boxing', 'judo', 'mma'],
+  ['taekwondo', 'kickboxing', 'wrestling', 'mma'],
+  ['judo', 'muaythai', 'jiujitsu', 'mma'],
 ];
-const LEAGUE_PLAN = ['dodgeLeague', 'basketLeague', 'ssireum', 'taekwondo', 'judo', 'sparring'];
-const DUNGEON_CONTESTS = { coin: 'ddakji', ticket: 'eraser', badge: 'basket', trial: 'arm' };
+const DUNGEON_CONTESTS = { coin: 'boxing', ticket: 'kickboxing', badge: 'mma', trial: 'mma' };
 
-// ── 승급: 시험(1:1, 30초)을 통과하면 파워·체력 ×1.5, 스킬 칸·동료 칸이 열린다. 전학해도 유지 ──
-const TIERS = ['새내기', '모범생', '선도부', '학급 반장', '학년 대표', '학생회 임원', '학생회장', '전교 회장', '명예 졸업생'];
+// ── 승급(선수 등급): 심사(1:1, 30초)를 통과하면 파워·체력 ×1.3, 스킬 칸·동료 칸이 열린다. 재입학해도 유지 ──
+const TIERS = ['연습생', '아마추어', '세미프로', '프로 데뷔', '랭커', '타이틀 도전자', '챔피언', '통합 챔피언', '전설'];
 const TIER_MULT = 1.3;
 const EXAMINERS = [
-  ['선도부장 선배', 'boss1'], ['반장 회의 의장', 'boss2'], ['학년 대표 선배', 'boss3'], ['학생회 총무', 'boss4'],
-  ['학생회 부회장', 'boss5'], ['학생회장 선배', 'boss6'], ['전교 회장 선배', 'dboss-sports'], ['졸업생 대표', 'dboss-quiz'],
+  ['기초반 수석 코치', 'boss1'], ['심판 위원장', 'boss2'], ['아마추어 대회 우승자', 'boss3'], ['세미프로 랭킹 1위', 'boss4'],
+  ['프로 심사 위원', 'boss5'], ['랭킹 1위 선배', 'boss6'], ['현역 챔피언', 'dboss-sports'], ['전설의 챔피언', 'dboss-quiz'],
 ];
-const TRIAL = { name: '승급 시험', minion: '시험 감독', reward: 'tier', hp: 2.6, hit: 1.15, background: 'd-ticket', map: 9, solo: true };
+const TRIAL = { name: '승급 심사', minion: '심사 위원', reward: 'tier', hp: 2.6, hit: 1.15, background: 'd-ticket', map: 9, solo: true };
 
-// ── 동료: 반 친구들이 내 편에서 함께 대결한다(모집권으로 모집, 겹치면 레벨 업, 보유 효과) ──
+// ── 동료: 아카데미 동기들이 내 편에서 함께 대결한다(모집권으로 모집, 겹치면 ★ 업, 보유 효과) ──
 const COMPANIONS = {
-  mob1: { name: '노란 모자 도윤', rarity: 'common' },
-  mob2: { name: '분홍 원피스 서아', rarity: 'common' },
-  mob3: { name: '축구왕 이안', rarity: 'uncommon' },
-  mob4: { name: '줄넘기 지유', rarity: 'uncommon' },
-  mob5: { name: '리코더 시온', rarity: 'rare' },
-  mob6: { name: '체육복 아린', rarity: 'rare' },
-  mob7: { name: '농구부 태양', rarity: 'epic' },
-  mob8: { name: '임원 보미', rarity: 'legend' },
+  mob1: { name: '복서 도윤', rarity: 'common' },
+  mob2: { name: '레슬러 서아', rarity: 'common' },
+  mob3: { name: '킥복서 이안', rarity: 'uncommon' },
+  mob4: { name: '주짓수 지유', rarity: 'uncommon' },
+  mob5: { name: '유도 시온', rarity: 'rare' },
+  mob6: { name: '태권도 아린', rarity: 'rare' },
+  mob7: { name: '무에타이 태양', rarity: 'epic' },
+  mob8: { name: '종합격투 보미', rarity: 'legend' },
 };
 const ALLY_POWER = { common: 0.12, uncommon: 0.16, rare: 0.24, epic: 0.36, legend: 0.5 };
 const ALLY_OWNED = { common: 0.01, uncommon: 0.015, rare: 0.02, epic: 0.03, legend: 0.05 };
@@ -1937,10 +1952,10 @@ const CRIT_BASE = 1.8;
 
 // ── 액티브 스킬: 승급할 때마다 한 칸씩 열리고, 쿨타임이 돌면 자동으로 쓴다 ──
 const ACTIVE = {
-  pencil: { name: '딱지 연타', tier: 1, cd: 8, desc: '딱지를 연달아 쳐서 앞 상대와 뒤의 팀 모두를 몰아붙여요', lvBonus: '피해 +5%', lvBase: 120, lvScale: 1.2, lvCap: 60 },
-  cheer: { name: '응원 함성', tier: 2, cd: 15, dur: 6, desc: '6초 동안 나와 동료 파워 배율 증가', lvBonus: '배율 +0.01', lvBase: 300, lvScale: 1.2, lvCap: 50 },
-  lunch: { name: '급식 충전', tier: 3, cd: 12, desc: '체력을 크게 회복', lvBonus: '회복 +1%p', lvBase: 600, lvScale: 1.2, lvCap: 40 },
-  sprint: { name: '체육 대장', tier: 4, cd: 18, dur: 6, desc: '6초 동안 동작 속도 배율 증가', lvBonus: '배율 +0.01', lvBase: 1200, lvScale: 1.2, lvCap: 50 },
+  pencil: { name: '연타 러시', tier: 1, cd: 8, desc: '빠른 연타로 앞 상대와 뒤의 팀 모두를 몰아붙여요', lvBonus: '피해 +5%', lvBase: 120, lvScale: 1.2, lvCap: 60 },
+  cheer: { name: '관중 함성', tier: 2, cd: 15, dur: 6, desc: '6초 동안 나와 동료 파워 배율 증가', lvBonus: '배율 +0.01', lvBase: 300, lvScale: 1.2, lvCap: 50 },
+  lunch: { name: '프로틴 충전', tier: 3, cd: 12, desc: '체력을 크게 회복', lvBonus: '회복 +1%p', lvBase: 600, lvScale: 1.2, lvCap: 40 },
+  sprint: { name: '풋워크', tier: 4, cd: 18, dur: 6, desc: '6초 동안 동작 속도 배율 증가', lvBonus: '배율 +0.01', lvBase: 1200, lvScale: 1.2, lvCap: 50 },
 };
 
 // ── 보석(유료 재화 자리)·상점·우편·퀘스트·성장 패스 ──
@@ -1952,14 +1967,14 @@ const SHOP = {
   keys: { name: '던전 열쇠 세트', desc: '모든 던전 열쇠 +1', price: 100, limit: 2, reward: { keys: 1 } },
   coinbox: { name: '코인 상자', desc: '대결 약 600번 분량', price: 150, reward: { coinUnits: 600 } },
   patches: { name: '천 조각 꾸러미', price: 80, reward: { patches: 20 } },
-  snacks: { name: '매점 간식 세트', desc: '세 가지 간식 15분씩', price: 60, reward: { snacks: 1 } },
+  snacks: { name: '간식 세트', desc: '세 가지 간식 15분씩', price: 60, reward: { snacks: 1 } },
 };
 // 캐시 상품: 결제 연결 전까지 '준비 중'. 결제가 끝나면 grantPurchase(state, id)만 부르면 된다.
 const CASH = {
   starter: { name: '입학 축하 패키지', price: '₩1,100', desc: '보석 300 · 동료 모집권 10 · 뽑기권 20', reward: { gems: 300, recruits: 10, tickets: 20 }, once: true },
-  monthly: { name: '급식 월정액 30일', price: '₩5,500', desc: '즉시 보석 300 + 30일 동안 매일 보석 100', reward: { gems: 300, monthly: 30 } },
+  monthly: { name: '식단 월정액 30일', price: '₩5,500', desc: '즉시 보석 300 + 30일 동안 매일 보석 100', reward: { gems: 300, monthly: 30 } },
   pass: { name: '프리미엄 성장 패스', price: '₩9,900', desc: '성장 패스 프리미엄 칸 보상 열기', reward: { premiumPass: true }, once: true },
-  adfree: { name: '간식 무제한', price: '₩6,600', desc: '매점 간식을 최대 3시간까지 쌓기', reward: { adFree: true }, once: true },
+  adfree: { name: '간식 무제한', price: '₩6,600', desc: '간식 버프를 최대 3시간까지 쌓기', reward: { adFree: true }, once: true },
   gems1: { name: '보석 주머니', price: '₩3,300', desc: '보석 330', reward: { gems: 330 } },
   gems2: { name: '보석 상자', price: '₩33,000', desc: '보석 3,800', reward: { gems: 3800 } },
 };
@@ -1985,16 +2000,16 @@ const QUEST_SCRIPT = [
 ];
 const QUEST_LOOP = ['best', 'power', 'health', 'level', 'pulls', 'dungeons', 'recruits'];
 
-// ── 환생: 전학 → 명예 배지 → 방과 후 학원(영구 강화) ──
+// ── 환생: 재입학 → 명예 배지 → 명예 코칭(영구 강화) ──
 const PRESTIGE_UNLOCK = 6;
 const PRESTIGE = { base: 3, growth: 1.05 };
-// 학원 효과는 레벨마다 곱해진다(×mult^레벨). 비용은 base × growth^레벨.
+// 코칭 효과는 레벨마다 곱해진다(×mult^레벨). 비용은 base × growth^레벨.
 const PERKS = {
-  power: { name: '태권도 학원', stat: 'attack', mult: 1.1, base: 3, growth: 1.15, cap: 1e9 },
-  health: { name: '수영 학원', stat: 'hp', mult: 1.1, base: 3, growth: 1.15, cap: 1e9 },
-  coin: { name: '용돈 인상', stat: 'coin', mult: 1.12, base: 4, growth: 1.16, cap: 1e9 },
-  xp: { name: '선행 학습', stat: 'xp', mult: 1.1, base: 4, growth: 1.18, cap: 1e9 },
-  offline: { name: '방과 후 교실', stat: 'offline', value: 3600, base: 10, growth: 3, cap: 4 },
+  power: { name: '전설 코치 특훈', stat: 'attack', mult: 1.1, base: 3, growth: 1.15, cap: 1e9 },
+  health: { name: '체력 캠프', stat: 'hp', mult: 1.1, base: 3, growth: 1.15, cap: 1e9 },
+  coin: { name: '스폰서 계약', stat: 'coin', mult: 1.12, base: 4, growth: 1.16, cap: 1e9 },
+  xp: { name: '경기 영상 분석', stat: 'xp', mult: 1.1, base: 4, growth: 1.18, cap: 1e9 },
+  offline: { name: '숙소 휴식', stat: 'offline', value: 3600, base: 10, growth: 3, cap: 4 },
 };
 const freshPrestige = () => ({ count: 0, badges: 0, earned: 0, best: 0, perks: Object.fromEntries(Object.keys(PERKS).map(id => [id, 0])) });
 
@@ -2055,7 +2070,7 @@ function freshState() {
     classId: null, autoNext: true, autoSkill: true, skillId: 'rush', sound: true, charge: 0, hp: 84, enemyHp: MAPS[0].hp[0],
     nextAttack: 0.65, nextEnemy: 1.5, pause: 0.2, tickRemainder: 0,
     playerMove: null, enemyMove: null, roundEnd: null, bossPhase: 'ready', bossTimer: BOSS_PHASES.ready.duration,
-    log: ['입학 첫날. 신발장 입구에서 첫 대결이 시작됐어요.'],
+    log: ['격투 아카데미 입학 첫날. 정문에서 첫 스파링이 시작됐어요.'],
   };
 }
 
@@ -2123,7 +2138,7 @@ function transfer(state) {
   Object.assign(state, newGame(), keep);
   state.prestige = { ...before, count: before.count + 1, badges: before.badges + gain, earned: before.earned + gain, best: Math.max(before.best, reached) };
   state.hp = maxHp(state);
-  state.log = [`${state.prestige.count}번째 전학! 새 학교 1-1 신발장 입구에서 다시 시작해요.`];
+  state.log = [`${state.prestige.count}번째 재입학! 아카데미 1학년 정문에서 다시 시작해요.`];
   return gain;
 }
 function critPower(state) { return CRIT_BASE + 0.05 * (state.training.critDmg || 0); }
@@ -2176,7 +2191,7 @@ function refreshDay(state, today) {
       keys: Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, DUNGEON_KEYS])) };
     if (!first && state.premium?.monthly > 0) {
       state.premium.monthly--;
-      sendMail(state, '급식 월정액 오늘의 보석', { gems: 100 }, `남은 기간 ${state.premium.monthly}일`);
+      sendMail(state, '식단 월정액 오늘의 보석', { gems: 100 }, `남은 기간 ${state.premium.monthly}일`);
     }
   }
 }
@@ -2219,9 +2234,9 @@ function waveHp(state) {
   return hp * 0.64 ** (state.farm?.easy || 0);
 }
 function enemyMaxHp(state) { return state.front?.max ?? Math.max(1, Math.round(waveHp(state))); }
-function rivalSprite(map, wave) {
+function rivalSprite(map, wave, cycle = 0) {
   const boss = wave === BOSS_WAVE;
-  if (boss && isGradeFinal(map)) return `boss${gradeIndex(map) + 1}`;
+  if (boss && isGradeFinal(map)) return `boss${(gradeIndex(map) + 2 * cycle) % 6 + 1}`;
   return boss ? 'rival4' : `rival${(map + wave) % 3 + 1}`;
 }
 function mobKey(state) {
@@ -2240,10 +2255,12 @@ function makeMobs(state) {
     return DUNGEON_PACK.map((slot, index) => make(slot, slot.leader ? dungeon.boss : `${dungeon.minion} ${index + 1}`, slot.leader ? dungeon.sprite : dungeon.minionSprites[index % dungeon.minionSprites.length]));
   }
   const { map, wave } = state;
-  const leader = rivalSprite(map, wave);
-  if (wave === BOSS_WAVE) return [make({ share: 1, hit: 1, leader: true }, MAPS[map].names[wave], leader)];
+  const cycle = state.cycle || 0;
+  const leader = rivalSprite(map, wave, cycle);
+  const names = stageNames(cycle, map);
+  if (wave === BOSS_WAVE) return [make({ share: 1, hit: 1, leader: true }, names[wave], leader)];
   return PACK.map((slot, index) => make(slot,
-    slot.leader ? MAPS[map].names[wave] : CLASSMATES[(map * 7 + wave * 3 + index) % CLASSMATES.length],
+    slot.leader ? names[wave] : CLASSMATES[(cycle * 5 + map * 7 + wave * 3 + index) % CLASSMATES.length],
     slot.leader ? leader : MOB_SPRITES[(map + wave * 2 + index) % MOB_SPRITES.length]));
 }
 function aliveBehind(state) { return state.pack?.filter(mob => mob.hp > 0).length || 0; }
@@ -2252,12 +2269,22 @@ function atProgress(reached, kind) {
   return baseValue(map, kind) * cycleScale({ cycle: Math.floor(reached / MAPS.length), map }, kind);
 }
 function dungeonProgress(level) { return 3 * level - 1; }
-function schoolName(cycle) { return cycle < SCHOOLS.length ? SCHOOLS[cycle].name : `전국 리그 ${cycle - SCHOOLS.length + 1}시즌`; }
+function schoolName(cycle) {
+  if (!cycle) return ACADEMY.short;
+  return cycle <= REGIONS.length ? REGIONS[cycle - 1] : `전국 챔피언 방어전 ${cycle - REGIONS.length}시즌`;
+}
 function gradeLabel(cycle, map) {
   const block = gradeIndex(map);
-  if (cycle === 0) return `${block + 1}학년`;
-  if (cycle < SCHOOLS.length) return `${Math.floor(block / 2) + 1}학년 ${block % 2 + 1}학기`;
-  return `${block + 1}라운드`;
+  return cycle ? ZONES[block] : `${block + 1}학년`;
+}
+function stagePlace(cycle, map) { return cycle ? ZONE_PLACES[gradeIndex(map)][map % MAPS_PER_GRADE] : MAPS[map].place; }
+function stageNames(cycle, map) {
+  if (!cycle) return MAPS[map].names;
+  const block = gradeIndex(map);
+  const pick = k => FIGHTERS[(cycle * 31 + map * 7 + k * 13) % FIGHTERS.length];
+  const region = schoolName(cycle).split(' ')[0];
+  const title = !isGradeFinal(map) ? ZONE_LEADERS[block] : block === GRADE_COUNT - 1 ? `${region} 챔피언` : `${region} ${ZONE_BOSSES[block]}`;
+  return [pick(0), pick(1), pick(2), `${title} ${pick(3)}`];
 }
 function placeLabel(reached) {
   const cycle = Math.floor(reached / MAPS.length);
@@ -2265,20 +2292,23 @@ function placeLabel(reached) {
   return `${schoolName(cycle)} ${mapCode(map)}`;
 }
 function contestId(state) {
-  if (state.dungeon) return DUNGEON_CONTESTS[state.dungeon.id] || 'ddakji';
+  if (state.dungeon) return DUNGEON_CONTESTS[state.dungeon.id] || 'boxing';
   const cycle = state.cycle || 0;
-  const block = gradeIndex(state.map);
-  return cycle < CONTEST_PLAN.length ? CONTEST_PLAN[cycle][block] : LEAGUE_PLAN[(block + cycle) % LEAGUE_PLAN.length];
+  if (!cycle) return ACADEMY_PLAN[state.map] || 'boxing';
+  return REGION_PLANS[(cycle - 1) % REGION_PLANS.length][gradeIndex(state.map)];
 }
 function contest(state) { return CONTESTS[contestId(state)]; }
-// 중학교부터는 종목에 맞는 대결장(체육관·씨름장·도장·링·농구장) 배경을 쓴다. 초등학교는 학교 곳곳 맵 그대로
-const VENUES = { dodgeLeague: 'm01', arm: 'm01', ssireum: 'm02', taekwondo: 'h01', judo: 'h01', sparring: 'h02', basketLeague: 'h04' };
+// 배경: 아카데미는 경기장 그림, 지역은 구역에 맞는 대결장(도장·체육관·관중석 링·결승 링). 씨름은 모래판
+const ACADEMY_ART = ['1', '2', 'm01', '13', '5', 'h02', 'h01', 'h03', 'm02', '17', '14', 'h04'];
+const ZONE_ART = ['h01', 'm01', 'h04', 'h02'];
+function stageArt(cycle, map) { return cycle ? ZONE_ART[gradeIndex(map)] : ACADEMY_ART[map]; }
 function venueMap(state) {
-  if (state.dungeon || (state.cycle || 0) < 1) return null;
-  const id = contestId(state);
-  return id === 'basketLeague' && state.cycle === 1 ? 'h03' : VENUES[id] || null;
+  if (state.dungeon) return null;
+  const cycle = state.cycle || 0;
+  if (cycle && contestId(state) === 'ssireum') return 'm02';
+  return stageArt(cycle, state.map);
 }
-function uniformSprite(gender, cycle) { return cycle >= 2 ? `${gender}-high` : cycle === 1 ? `${gender}-middle` : gender; }
+function regionConquered(state, index) { return bestProgress(state) >= (index + 2) * MAPS.length; }
 function dungeonInfo(id) { return id === 'trial' ? TRIAL : DUNGEONS[id]; }
 function dungeonReach(state) { return state.dungeon.id === 'trial' ? tierReq(state.dungeon.level) : dungeonProgress(state.dungeon.level); }
 function dungeonUnlocked(state, id) {
@@ -2400,7 +2430,7 @@ function mapCode(map) { return `${gradeIndex(map) + 1}-${map % MAPS_PER_GRADE + 
 function isGradeFinal(map) { return (map + 1) % MAPS_PER_GRADE === 0; }
 function firstGradeWon(state) { return state.cleared[MAPS_PER_GRADE - 1]; }
 function unlocked(state, map) { return map === 0 || state.cleared[map - 1]; }
-function currentEnemy(state) { return state.front?.name ?? MAPS[state.map].names[state.wave]; }
+function currentEnemy(state) { return state.front?.name ?? stageNames(state.cycle || 0, state.map)[state.wave]; }
 function isDaon(state) { return !state.dungeon && state.map === DAON_MAP && state.wave === BOSS_WAVE; }
 function guarding(state) { return isDaon(state) && ['guard', 'counter'].includes(state.bossPhase); }
 function opening(state) { return isDaon(state) && ['open', 'broken'].includes(state.bossPhase); }
@@ -2506,13 +2536,13 @@ function win(state, emit) {
     state.cycle = (state.cycle || 0) + 1;
     state.cleared = MAPS.map(() => false);
     state.hp = maxHp(state);
-    record(state, `${schoolName(state.cycle - 1)} 졸업! ${schoolName(state.cycle)}에서 새 대결이 시작돼요.`);
+    record(state, state.cycle === 1 ? `아카데미 졸업! 이제 ${schoolName(1)}부터 지역을 제패하러 가요.` : `${schoolName(state.cycle - 1)} 제패! 다음 목표는 ${schoolName(state.cycle)}.`);
     finishRound(state, 'win', 0, 0, 1.6, emit, reward);
     return;
   }
   if (firstBoss) {
     state.cleared[map] = true;
-    record(state, `${mapCode(map + 1)} ${MAPS[map + 1].place} 해금!`);
+    record(state, `${mapCode(map + 1)} ${stagePlace(state.cycle || 0, map + 1)} 해금!`);
   }
   if (boss) {
     const next = state.autoNext && map < MAPS.length - 1 ? map + 1 : map;
@@ -2547,7 +2577,7 @@ function strike(state, move, emit) {
   state.enemyHp -= amount;
   if (breaks) {
     changeBossPhase(state, 'broken', emit);
-    record(state, '종소리 반격으로 다온의 방어를 풀었어요!');
+    record(state, '공 울림 카운터로 다온의 방어를 풀었어요!');
   }
   emit?.('impact', { side: 'player', move, amount, blocked, breaks, lucky });
   // 필살기는 뒤에 선 상대까지 맞힌다
@@ -2915,7 +2945,7 @@ function sendMail(state, title, reward, body = '') {
   state.mail.length = Math.min(60, state.mail.length);
 }
 function welcomeMail(state) {
-  sendMail(state, '입학 축하 선물', { gems: 300, recruits: 5 }, '해솔초등학교에 온 걸 환영해요! 동료 모집권으로 친구를 불러 보세요.');
+  sendMail(state, '입학 축하 선물', { gems: 300, recruits: 5 }, '해솔 격투 아카데미 입학을 환영해요! 동료 모집권으로 동기를 불러 보세요.');
 }
 function claimMail(state, id = null) {
   const picked = state.mail.filter(mail => id === null || mail.id === id);
@@ -3037,7 +3067,7 @@ function migrateFeatures(s) {
   s.premium = { pass: premium.pass === true, adFree: premium.adFree === true, monthly: count(premium.monthly) ? premium.monthly : 0, bought: isObject(premium.bought) ? premium.bought : {} };
   s.mail = hadMail ? s.mail.filter(mail => mail && count(mail.id) && typeof mail.title === 'string' && isObject(mail.reward)).slice(0, 60) : [];
   if (s.daily && !isObject(s.daily.shop)) s.daily.shop = {};
-  if (!hadMail) sendMail(s, '새 기능 업데이트 선물', { gems: 500, recruits: 10 }, '승급·동료·스킬·상점이 생겼어요. 동료 모집권으로 친구를 불러 보세요!');
+  if (!hadMail) sendMail(s, '새 기능 업데이트 선물', { gems: 500, recruits: 10 }, '승급·동료·스킬·상점이 생겼어요. 동료 모집권으로 동기를 불러 보세요!');
   if (!Number.isFinite(s.bossTime) || s.bossTime > BOSS_TIME) s.bossTime = BOSS_TIME;
   if (!count(s.totalClears)) s.totalClears = Array.isArray(s.cleared) ? s.cleared.filter(Boolean).length : 0;
   const prestige = s.prestige && typeof s.prestige === 'object' ? s.prestige : {};
@@ -3058,8 +3088,9 @@ function restore(snapshot) {
   migrateFeatures(s);
   if (s.cleared.some(entry => typeof entry !== 'boolean') || s.bag.some(id => !Object.hasOwn(GEAR, id))) return null;
   if (snapshot.version === 1) {
-    if (s.cleared.length !== GRADE_COUNT || !Number.isInteger(s.grade) || s.grade < 0 || s.grade >= GRADE_COUNT) return null;
+    if (s.cleared.length !== LEGACY_GRADES || !Number.isInteger(s.grade) || s.grade < 0 || s.grade >= LEGACY_GRADES) return null;
     const gradesCleared = s.cleared;
+    s.grade = Math.min(s.grade, GRADE_COUNT - 1);
     s.cleared = MAPS.map((_, index) => gradesCleared[gradeIndex(index)]);
     s.profile = null;
     openFight(s, s.grade * MAPS_PER_GRADE, 0, 0);
@@ -3067,6 +3098,16 @@ function restore(snapshot) {
   } else if (s.profile !== null) {
     s.profile = makeProfile(s.profile?.name, s.profile?.gender);
     if (!s.profile) return null;
+  }
+  if (s.cleared.length === 18 && MAPS.length === 12) {
+    // 6학년(18맵) 시절 저장: 진행 비율대로 12맵에 옮기고 지금 맵의 처음부터 다시 연다
+    const done = Math.min(MAPS.length - 1, Math.floor(s.cleared.filter(Boolean).length * 2 / 3));
+    s.cleared = MAPS.map((_, index) => index < done);
+    s.map = Math.min(done, Math.floor(s.map * 2 / 3));
+    s.mapWins = MAPS.map((_, index) => (Array.isArray(s.mapWins) && Number.isSafeInteger(s.mapWins[Math.floor(index * 3 / 2)]) ? s.mapWins[Math.floor(index * 3 / 2)] : 0));
+    if (s.prestige) s.prestige.best = Math.floor((s.prestige.best || 0) * 2 / 3);
+    s.farm = null; s.front = null; s.pack = []; s.roundEnd = null; s.dungeon = null;
+    openFight(s, s.map, 0, 0.3);
   }
   if (s.cleared.length !== MAPS.length) return null;
   if (!s.equipped || !s.training || ![null, ...Object.keys(CLASSES)].includes(s.classId) || typeof s.autoNext !== 'boolean') return null;
@@ -3133,8 +3174,8 @@ function restore(snapshot) {
 
 if (typeof module !== 'undefined') {
   module.exports = {
-    skillPower, skillUnlocked, venueMap, uniformSprite, autoTrain, critPower, regenRate, allyTrainLevel, allyTrainCap, allyTrainCost, trainAlly, skillLevel, skillCost, cheerMult, sprintMult, lunchHeal, trainSkill, ALLY_TRAIN, CRIT_BASE,
-    SCHOOLS, CONTESTS, schoolName, gradeLabel, placeLabel, contestId, contest,
+    skillPower, skillUnlocked, venueMap, stagePlace, stageNames, stageArt, regionConquered, REGIONS, ZONES, ACADEMY, autoTrain, critPower, regenRate, allyTrainLevel, allyTrainCap, allyTrainCost, trainAlly, skillLevel, skillCost, cheerMult, sprintMult, lunchHeal, trainSkill, ALLY_TRAIN, CRIT_BASE,
+    CONTESTS, schoolName, gradeLabel, placeLabel, contestId, contest,
     newGame, simulate, restore, trainingCost, maxHp, attack, enemyMaxHp, openFight, activateSkill, gearStats, nextMission, MAPS, GEAR, SLOTS, MAP_REWARDS, BOSS_REWARDS, TRAINING, SKILLS, makeProfile,
     trainingCostAt, enemyHit, winCoins, winXp, interval, critChance, prestigeGain, transfer, perkCost, PERKS, pullStickers, pullCost, progress, xpTarget,
     GROWTH, MAX_RANK, BOSS_WAVE, MAPS_PER_GRADE, fmt, STICKERS, DROP_WINS,
@@ -3272,7 +3313,7 @@ const QUEST_TEXT = {
   recruits: n => `동료 ${n}번 모집`,
   dungeons: n => `던전 ${n}번 하기`,
   tier: n => `${tierName(n)} 승급`,
-  transfer: n => `전학 ${n}번 가기`,
+  transfer: n => `재입학 ${n}번 하기`,
   party: n => `동료 ${n}명 출전`,
 };
 const QUEST_GO = {
@@ -3504,13 +3545,13 @@ function renderTierPanel() {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'tier-button';
-  button.textContent = '승급 시험';
-  button.ariaLabel = `${tierName(next)} 승급 시험 도전`;
+  button.textContent = '승급 심사';
+  button.ariaLabel = `${tierName(next)} 승급 심사 도전`;
   button.disabled = !tierReady(state) || Boolean(state.dungeon);
   button.addEventListener('click', () => {
     if (!enterTrial(state)) return;
     combatEvent('enter', {});
-    message(`${tierName(next)} 승급 시험 시작! 30초 안에 이기세요.`);
+    message(`${tierName(next)} 승급 심사 시작! 30초 안에 이기세요.`);
     selectView('battle');
     commit();
   });
@@ -3687,7 +3728,7 @@ function showRecruitResults(results, count, currency) {
   dialog.dataset.best = RARITY_ORDER[best];
   setText('gacha-result-title', '동료 모집 결과');
   const fresh = results.filter(result => result.isNew).length;
-  setText('gacha-result-note', [fresh && `새 동료 ${fresh}명`, results.some(result => result.leveled) && '레벨 업!'].filter(Boolean).join(' · ') || '친구들과 더 친해졌어요.');
+  setText('gacha-result-note', [fresh && `새 동료 ${fresh}명`, results.some(result => result.leveled) && '레벨 업!'].filter(Boolean).join(' · ') || '동기들과 더 친해졌어요.');
   $('gacha-results').classList.toggle('single', results.length === 1);
   $('gacha-results').replaceChildren(...results.map((result, index) => {
     const card = mateCard(result.id);
@@ -3945,7 +3986,7 @@ function queuePopup(open) {
 }
 
 const DAON_TEXT = {
-  ready: ['반장 다온', '방어 뒤 강한 반격을 준비해요.'],
+  ready: ['1학년 대표 다온', '방어 뒤 강한 반격을 준비해요.'],
   guard: ['방어 자세', '보통 동작 효과가 줄어요 · 종소리로 방어 풀기'],
   counter: ['반격 예고', '종소리로 반격을 끊을 수 있어요.'],
   open: ['반격 뒤 빈틈', '쏜살 돌진이 더 강해져요.'],
@@ -4300,7 +4341,7 @@ function renderBattle() {
   const gradeNumber = gradeIndex(state.map) + 1;
   const dungeon = state.dungeon ? dungeonInfo(state.dungeon.id) : null;
   setText('stage-number', dungeon ? (state.dungeon.id === 'trial' ? `승급 시험 · ${tierName(state.dungeon.level)}` : `던전 · Lv.${state.dungeon.level}`) : `${schoolName(state.cycle)} ${gradeLabel(state.cycle, state.map)} · ${mapCode(state.map)}`);
-  setText('battle-title', dungeon ? dungeon.name : map.place);
+  setText('battle-title', dungeon ? dungeon.name : stagePlace(state.cycle || 0, state.map));
   $('arena').dataset.map = dungeon ? (dungeon.background || dungeon.map + 1) : venueMap(state) || state.map + 1;
   $('arena').classList.toggle('dungeon-round', Boolean(dungeon));
   const status = $('battle-status');
@@ -4326,7 +4367,7 @@ function renderBattle() {
     const leader = front?.leader;
     const size = (0.87 + (gradeNumber - 1) * 0.026) * (boss || (dungeon && leader) ? 1.1 : leader ? 1 : 0.88);
     const sprite = $('rival-sprite');
-    sprite.dataset.sprite = front?.sprite || rivalSprite(state.map, state.wave);
+    sprite.dataset.sprite = front?.sprite || rivalSprite(state.map, state.wave, state.cycle || 0);
     sprite.dataset.spar = protectiveSprite(sprite.dataset.sprite);
     $('rival').style.setProperty('--size', size.toFixed(2));
     $('rival').classList.toggle('minion', Boolean(front) && !leader);
@@ -4340,7 +4381,7 @@ function renderBattle() {
   }
   const behind = aliveBehind(state);
   const finalBoss = boss && isGradeFinal(state.map);
-  setText('round-label', dungeon ? (behind ? `참가자 ${behind + 1}명 남음` : '던전 보스전') : finalBoss ? '학년 대표전' : boss ? '보스 대결' : `대결 ${state.wave + 1}/${BOSS_WAVE + 1} · ${behind + 1}명`);
+  setText('round-label', dungeon ? (behind ? `참가자 ${behind + 1}명 남음` : '던전 보스전') : finalBoss ? (state.cycle ? (gradeIndex(state.map) === GRADE_COUNT - 1 ? '지역 챔피언전' : '관장전') : '학년 대표전') : boss ? '보스 대결' : `대결 ${state.wave + 1}/${BOSS_WAVE + 1} · ${behind + 1}명`);
   renderPack();
   renderDungeonTimer();
   renderKills();
@@ -4348,7 +4389,7 @@ function renderBattle() {
   $('player-name').textContent = state.profile.name;
   $('player-sprite').dataset.sprite = state.profile.gender;
   $('player-tag').textContent = `LV. ${state.level}`;
-  setText('rival-tag', dungeon ? (state.front?.leader ? '던전 보스' : '참가자') : state.farm ? '수련' : boss ? '보스' : state.front?.leader ? '대장' : `${gradeNumber}학년`);
+  setText('rival-tag', dungeon ? (state.front?.leader ? '던전 보스' : '참가자') : state.farm ? '수련' : boss ? '보스' : state.front?.leader ? '대장' : state.cycle ? '도전자' : `${gradeNumber}학년`);
   $('rival-name').textContent = currentEnemy(state);
   const totalHp = maxHp(state);
   const totalEnemy = enemyMaxHp(state);
@@ -4373,8 +4414,8 @@ function renderBattle() {
 
 function renderRoster() {
   const map = MAPS[state.map];
-  $('roster-note').textContent = `${mapCode(state.map)} ${map.place} · ${state.farm ? '반복 수련 중이에요. 3승하면 다시 도전해요.' : '넷을 모두 이기면 다음 장소가 열려요.'}`;
-  $('roster').replaceChildren(...map.names.map((name, wave) => {
+  $('roster-note').textContent = `${mapCode(state.map)} ${stagePlace(state.cycle || 0, state.map)} · ${state.farm ? '반복 수련 중이에요. 3승하면 다시 도전해요.' : '넷을 모두 이기면 다음 장소가 열려요.'}`;
+  $('roster').replaceChildren(...stageNames(state.cycle || 0, state.map).map((name, wave) => {
     const entry = document.createElement('li');
     const status = state.farm ? 'upcoming' : wave < state.wave ? 'past' : wave === state.wave ? 'current' : 'upcoming';
     entry.className = `rival-card ${status}${wave === BOSS_WAVE ? ' boss' : ''}`;
@@ -4383,7 +4424,7 @@ function renderRoster() {
     figure.ariaHidden = 'true';
     const sprite = document.createElement('span');
     sprite.className = 'sprite';
-    sprite.dataset.sprite = rivalSprite(state.map, wave);
+    sprite.dataset.sprite = rivalSprite(state.map, wave, state.cycle || 0);
     figure.append(sprite);
     const tag = document.createElement('small');
     tag.className = 'rival-tag';
@@ -4480,7 +4521,7 @@ function row(glyph, name, detail, buttonLabel, action, { selected = false, disab
       icon.style.setProperty('--tile-hi', tile[1]);
     }
   } else {
-    icon.dataset.map = map + 1;
+    icon.dataset.map = stageArt(state.cycle || 0, map);
     const code = document.createElement('span');
     code.textContent = glyph;
     icon.append(code);
@@ -4595,7 +4636,7 @@ function renderTraining() {
   }));
   document.querySelectorAll('#buy-mode button').forEach(button => button.setAttribute('aria-pressed', String(String(buyMode) === button.dataset.buy)));
   $('auto-train').setAttribute('aria-checked', String(state.autoTrain));
-  $('class-note').textContent = firstGradeWon(state) ? '과목 하나를 골라 다음 대결에 보너스를 받으세요.' : '1-3 교실의 반장에게 이기면 과목을 고를 수 있어요.';
+  $('class-note').textContent = firstGradeWon(state) ? '전공 하나를 골라 대결 보너스를 받으세요.' : '1-3 신입생 체육관의 1학년 대표를 이기면 전공을 고를 수 있어요.';
   $('class-list').replaceChildren(...Object.entries(CLASSES).map(([id, info]) => {
     const selected = state.classId === id;
     return row(ICONS.classes[id] || info.glyph, info.name, info.bonus, selected ? '선택 중' : '선택', () => {
@@ -4810,10 +4851,10 @@ function renderPrestige() {
   const reached = progress(state);
   const p = state.prestige;
   setText('badge-count', fmt(p.badges));
-  setText('prestige-stats', `전학 ${fmt(p.count)}번 · 최고 기록 ${placeLabel(Math.max(1, Math.max(p.best, reached)) - 1)} · 받은 배지 ${fmt(p.earned)}개`);
+  setText('prestige-stats', `재입학 ${fmt(p.count)}번 · 최고 기록 ${placeLabel(Math.max(1, Math.max(p.best, reached)) - 1)} · 받은 배지 ${fmt(p.earned)}개`);
   const button = $('prestige-button');
   button.disabled = gain <= 0;
-  setText('prestige-gain', gain > 0 ? `지금 전학 가면 명예 배지 +${fmt(gain)}` : `해솔초 2-3까지 깨면 전학할 수 있어요 (지금 ${reached}/${PRESTIGE_UNLOCK})`);
+  setText('prestige-gain', gain > 0 ? `지금 재입학하면 명예 배지 +${fmt(gain)}` : `아카데미 2-3까지 이기면 재입학할 수 있어요 (지금 ${reached}/${PRESTIGE_UNLOCK})`);
   $('perk-list').replaceChildren(...Object.keys(PERKS).map(id => {
     const perk = PERKS[id];
     const level = p.perks[id];
@@ -4852,15 +4893,30 @@ function doTransfer() {
   renderedRound = '';
   previousObjective = '';
   openView('training:academy');
-  showDialog('새 학교 첫날!', [`${state.prestige.count}번째 전학이에요. 해솔초 1-1 신발장 입구부터 다시 시작해요.`, `명예 배지 +${fmt(gain)}`, '아래 방과 후 학원에서 배지로 영구 능력치를 올리세요.'], '#i-star');
+  showDialog('다시 입학!', [`${state.prestige.count}번째 재입학이에요. 아카데미 1학년 정문부터 다시 시작해요.`, `명예 배지 +${fmt(gain)}`, '아래 명예 코칭에서 배지로 영구 능력치를 올리세요.'], '#i-star');
   $('dialog-content').classList.add('reward-lines');
   commit();
 }
 
+// 전국 제패 목록: 최고 기록 기준으로 제패한 지역을 칠하고, 지금 도전 중인 지역을 표시한다
+function renderRegions() {
+  const done = REGIONS.filter((_, index) => regionConquered(state, index)).length;
+  setText('region-count', `${done} / ${REGIONS.length}`);
+  $('region-list').replaceChildren(...REGIONS.map((name, index) => {
+    const item = document.createElement('li');
+    const now = state.cycle === index + 1;
+    item.className = `region${regionConquered(state, index) ? ' done' : ''}${now ? ' now' : ''}`;
+    item.textContent = name;
+    if (now) item.setAttribute('aria-current', 'step');
+    return item;
+  }));
+}
+
 function renderGrades() {
   renderPrestige();
-  setText('grades-title', `${schoolName(state.cycle)} 학교 지도`);
+  setText('grades-title', state.cycle ? `${schoolName(state.cycle)} 제패 지도` : '아카데미 지도');
   $('grade-count').textContent = `${state.cleared.filter(Boolean).length} / ${MAPS.length} 완료`;
+  renderRegions();
   const groups = Array.from({ length: GRADE_COUNT }, (_, grade) => {
     const firstMap = grade * MAPS_PER_GRADE;
     const end = firstMap + MAPS_PER_GRADE;
@@ -4873,14 +4929,14 @@ function renderGrades() {
       else expandedGrades.delete(grade);
     });
     const title = document.createElement('summary');
-    title.append(`${grade + 1}학년`);
+    title.append(gradeLabel(state.cycle || 0, grade * MAPS_PER_GRADE));
     const count = document.createElement('small');
     count.textContent = unlocked(state, firstMap) ? `${state.cleared.slice(firstMap, end).filter(Boolean).length} / ${MAPS_PER_GRADE}` : '잠김';
     title.append(count);
     const list = document.createElement('div');
     list.className = 'map-list';
     for (let index = firstMap; index < end; index++) {
-      const map = MAPS[index];
+      const map = { place: stagePlace(state.cycle || 0, index), names: stageNames(state.cycle || 0, index) };
       const selected = index === state.map;
       const locked = !unlocked(state, index);
       const buttonLabel = selected ? '현재 위치' : locked ? '잠김' : state.cleared[index] ? '재도전' : '도전';
@@ -5060,15 +5116,18 @@ function eatSnack(id) {
   commit();
 }
 
-// 진학 축하: 새 학교 교복 모습과 첫 종목
+// 졸업·지역 제패 축하
 let lastCycle = null;
 function showSchool() {
   const dialog = $('school-dialog');
   if (!dialog || dialog.open) return;
-  $('school-sprite').dataset.sprite = uniformSprite(state.profile.gender, state.cycle);
-  setText('school-title', `${schoolName(state.cycle)} 진학!`);
-  const first = CONTESTS[contestId({ ...state, map: 0, dungeon: null })].name;
-  setText('school-text', `${schoolName(state.cycle - 1)}을 졸업했어요. 새 교복을 입고 ${first}부터 다시 승부해요. 상대도 보상도 커져요.`);
+  $('school-sprite').dataset.sprite = state.profile.gender;
+  const cycle = state.cycle;
+  setText('school-title', cycle === 1 ? '아카데미 졸업!' : `${schoolName(cycle - 1)} 제패!`);
+  const conquered = Math.min(cycle - 1, REGIONS.length);
+  setText('school-text', cycle === 1
+    ? `4학년 과정을 마쳤어요. 이제 ${schoolName(1)}부터 한국 곳곳의 격투 대회를 제패해요.`
+    : `${schoolName(cycle - 1)} 챔피언이 됐어요. 전국 제패 ${conquered}/${REGIONS.length} · 다음 목표는 ${schoolName(cycle)}. 상대도 상금도 커져요.`);
   document.querySelectorAll('dialog[open]').forEach(open => open.close());
   dialog.showModal();
 }
@@ -5108,7 +5167,7 @@ function renderDungeons() {
     level.textContent = best ? `최고 Lv.${best}` : '첫 도전';
     title.append(name, level);
     const info = document.createElement('p');
-    if (!open) info.textContent = dungeon.unlock === 'transfer' ? '첫 전학 후 열려요' : '1-3 반장을 이기면 열려요';
+    if (!open) info.textContent = dungeon.unlock === 'transfer' ? '첫 재입학 후 열려요' : '1-3 1학년 대표를 이기면 열려요';
     else info.append('보상 ', rewardChips(dungeonReward(state, id, best + 1), false));
     const keyRow = document.createElement('span');
     keyRow.className = 'dungeon-keys';
@@ -5164,9 +5223,9 @@ function renderObjective() {
   previousObjective = key;
   const next = state.cleared.indexOf(false);
   $('objective-label').textContent = next < 0 ? '18개 맵 완료' : '다음 목표';
-  $('objective-title').textContent = next < 0 ? '쉬는 시간의 왕 등극!' : `${mapCode(next)} · ${MAPS[next].names[BOSS_WAVE]}`;
+  $('objective-title').textContent = next < 0 ? '쉬는 시간의 왕 등극!' : `${mapCode(next)} · ${stageNames(state.cycle || 0, next)[BOSS_WAVE]}`;
   $('objective-reward').textContent = next < 0 ? '지도에서 어떤 맵이든 다시 대결할 수 있어요.'
-    : next === MAPS.length - 1 ? `첫 승리 시 ${schoolName(state.cycle + 1)} 진학` : isGradeFinal(next) ? `첫 승리 장비 · ${GEAR[BOSS_REWARDS[gradeIndex(next)]].name}` : `첫 승리 시 ${MAPS[next + 1].place} 해금`;
+    : next === MAPS.length - 1 ? (state.cycle ? `첫 승리 시 ${schoolName(state.cycle)} 제패` : '첫 승리 시 아카데미 졸업') : isGradeFinal(next) ? `첫 승리 장비 · ${GEAR[BOSS_REWARDS[gradeIndex(next)]].name}` : `첫 승리 시 ${MAPS[next + 1].place} 해금`;
 }
 
 function setText(id, text) {
@@ -5457,12 +5516,12 @@ function start() {
     commit();
   });
   $('help').addEventListener('click', () => showDialog('쉬는 시간에 대결!', [
-    '1학년 주인공은 자동으로 대결해요. 코인으로 훈련하고 가방에서 더 좋은 장비를 착용하세요.',
-    '1-3 반장 다온의 방어는 종소리 반격으로 깰 수 있어요. 쏜살 돌진은 반격 뒤 빈틈에 강해요.',
+    '아카데미 신입생인 주인공은 자동으로 대결해요. 코인으로 훈련하고 가방에서 더 좋은 장비를 착용하세요.',
+    '1-3 1학년 대표 다온의 방어는 공 울림 카운터로 풀 수 있어요. 돌진 스트레이트는 반격 뒤 빈틈에 강해요.',
     '보스를 이기면 다음 장소가 열려요. 자동 진격을 끄면 같은 장소에서 코인을 모아요.',
     '졌을 때는 같은 맵에서 반복 수련을 시작해요. 수련에서 3승을 하면 자동으로 다시 도전해요.',
     `게임을 닫아도 최대 ${offlineLimit(state) / 3600}시간 동안 대결과 보상이 쌓여요. 진행 상황은 이 브라우저에 저장돼요.`,
-    '6-3 보스를 이기면 해솔초 → 해솔중 → 해솔고 → 전국 리그로 진학해요. 학년마다 딱지치기·지우개 따먹기·피구 같은 놀이 대결 종목이 바뀌어요. 막히면 지도 탭에서 전학을 가고, 명예 배지로 방과 후 학원을 다녀 영구 능력치를 올리세요.',
+    '4-3 보스를 이기면 아카데미를 졸업하고, 정선 산골 마을부터 서울 강남까지 지역 격투 대회를 하나씩 제패해요. 지역마다 동네 도장 → 상가 체육관 → 시민 체육관 → 챔피언전 순서예요. 막히면 지도 탭에서 재입학하고, 명예 배지로 명예 코칭을 받아 영구 능력치를 올리세요.',
   ], '?'));
   document.addEventListener('visibilitychange', () => {
     if (editingProfile || !state.profile) return;
