@@ -144,6 +144,7 @@
         <div class="pack" id="pack" aria-hidden="true"></div>
       </div>
       <div class="round-result" id="round-result" hidden></div>
+      <div class="rule-banner" id="rule-banner" role="status" hidden></div>
       <div class="levelup" id="levelup" aria-hidden="true" hidden><b>LEVEL UP!</b><span id="levelup-text"></span></div>
 
 
@@ -313,6 +314,7 @@
   <dialog id="transfer-dialog" aria-labelledby="transfer-title">
     <div class="dialog-icon" aria-hidden="true"><svg><use href="#i-school"/></svg></div><h2 id="transfer-title">정말 재입학할까요?</h2>
     <p class="transfer-gain"><i class="cur badge" aria-hidden="true"></i>명예 배지 <b id="transfer-gain">+0</b></p>
+    <p class="transfer-rush" id="transfer-rush" hidden></p>
     <ul class="transfer-list">
       <li class="reset"><b>처음부터</b>지역·맵, 레벨, 코인, 훈련, 동료·스킬 레벨</li>
       <li class="keep"><b>그대로</b>장비·강화, 스티커, 뽑기권, 천 조각, 동료(★)·승급, 보석, 명예 코칭, 출석·미션</li>
@@ -366,12 +368,17 @@
     <p class="test-note" id="test-note" role="status"></p>
     <form method="dialog"><button class="confirm">닫기</button></form>
   </dialog>
+  <dialog id="run-result" class="run-result" aria-labelledby="run-result-title">
+    <h2 id="run-result-title"></h2>
+    <dl class="run-result-list" id="run-result-list"></dl>
+    <form method="dialog"><button class="confirm">확인</button></form>
+  </dialog>
   <dialog id="mate-dialog" class="mate-dialog" aria-labelledby="mate-dialog-name">
     <div class="mate-dialog-art"><span class="portrait-figure" id="mate-dialog-art" aria-hidden="true"></span></div>
     <p class="mate-dialog-meta" id="mate-dialog-meta"></p>
     <h2 id="mate-dialog-name"></h2>
     <p class="mate-stars" id="mate-dialog-stars"></p>
-    <div class="mate-dialog-skill"><b id="mate-dialog-skill"></b><p id="mate-dialog-desc"></p><small id="mate-dialog-cd"></small></div>
+    <div class="mate-dialog-skill"><b id="mate-dialog-skill"></b><p id="mate-dialog-desc"></p><small id="mate-dialog-cd"></small><small class="mate-dialog-rule" id="mate-dialog-rule"></small></div>
     <div class="mate-dialog-actions">
       <button type="button" id="mate-dialog-use">지금 쓰기</button>
       <button type="button" id="mate-dialog-move">자리 바꾸기</button>

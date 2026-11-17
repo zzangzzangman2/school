@@ -69,6 +69,41 @@ with sync_playwright() as playwright:
     # 큰 수 표기
     assert page.evaluate('fmt(123456)') == '12.3만'
     assert page.evaluate('fmt(1.5e12)') == '1.5조'
+    # 추가 기능: 30초 기록전, 재입학 빠른 복귀, 경기 규칙·추천 동료, 던전 승리하면 다음 단계
+    extra = page.evaluate('''() => {
+      const backup = structuredClone(state);
+      const out = {};
+      state.daily = null; refreshDay(state, todayKey());
+      state.dungeon = null; state.roundEnd = null; state.dungeonResult = null; state.totalClears = Math.max(3, state.totalClears);
+      state.training.power = 6000; state.training.health = 4000; state.hp = maxHp(state);
+      out.recordEnter = enterRecord(state);
+      simulate(state, 33, null);
+      out.record = [state.dungeonResult?.id, state.dungeonResult?.record > 0, state.record.best > 0, recordKeys(state), state.dungeon];
+      out.recordSweep = Boolean(sweepRecord(state)) && recordKeys(state) === 0;
+      state.dungeonAuto = { coin: true }; state.dungeons.coin = 0; state.daily.keys.coin = 2; state.hp = maxHp(state);
+      enterDungeon(state, 'coin');
+      for (let i = 0; i < 150 && (state.dungeon || state.roundEnd); i++) simulate(state, 1, null);
+      out.chain = [state.dungeons.coin, dungeonKeys(state, 'coin'), state.dungeonResult?.chain?.wins, state.dungeonChain];
+      out.rushEnd = [rushEnd(5), rushEnd(30), rushEnd(REGION_START[5] * MAPS.length + 3) === REGION_START[4] * MAPS.length];
+      const rushState = structuredClone(state);
+      rushState.dungeon = null; rushState.roundEnd = null; rushState.farm = null; rushState.cycle = 0; rushState.cleared = MAPS.map(() => false); rushState.map = 0; rushState.wave = 0;
+      const normal = structuredClone(rushState);
+      rushState.rush = { until: 120 };
+      simulate(rushState, 20, null); simulate(normal, 20, null);
+      out.rushFaster = progress(rushState) > progress(normal);
+      const regional = structuredClone(state); regional.dungeon = null; regional.cycle = REGION_START[2]; regional.map = 3;
+      const rule = ruleId(regional);
+      regional.party = [ruleMates(regional, rule)[0], null, null, null];
+      regional.companions[regional.party[0]] = 1;
+      out.rule = [ruleId({ ...regional, cycle: 0 }), RULE_ORDER.includes(rule), ruleBonus(regional) > 0];
+      Object.assign(state, backup);
+      commit();
+      return out;
+    }''')
+    assert extra == {
+        'recordEnter': True, 'record': ['record', True, True, 1, None], 'recordSweep': True,
+        'chain': [2, 0, 2, None], 'rushEnd': [0, 12, True], 'rushFaster': True, 'rule': [None, True, True],
+    }, extra
     assert not issues, issues
     chrome.close()
 

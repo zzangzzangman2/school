@@ -210,7 +210,7 @@ function allyApproach(ally, slot) {
 function allyRun(slot, poses, { dash = true, hitAt = 0, onHit = () => {}, skill = false } = {}) {
   const key = String(slot);
   const now = performance.now();
-  const rate = state?.speed || 1;
+  const rate = motionRate();
   const prev = allyRuns.get(key);
   if (prev && prev.skill && !skill && prev.until > now) { onHit(); return; } // 스킬 연출 중에는 평타 숫자만
   prev?.timers.forEach(clearTimeout);
@@ -279,7 +279,7 @@ function onMate(event) {
   }
   const mate = COMPANIONS[event.id];
   const now = performance.now();
-  const rate = state?.speed || 1;
+  const rate = motionRate();
   const inPlace = ['buff', 'heal'].includes(mate.skill.kind);
   const hit = () => {
     if (event.amount) floatText('rival', `${event.crit ? '크리티컬 ' : ''}${event.hits > 1 ? `${event.hits}연타 ` : ''}${fmt(event.amount)}`, 'skill');
@@ -832,7 +832,14 @@ function partyCard(slot, open) {
     status.className = 'pc-status';
     info.append(name, status);
     card.append(face, info);
-    card.ariaLabel = `${slot + 1}번 ${row} ${mate.name}, ${mate.skill.name}`;
+    const fits = ruleFit(id, ruleId(state));
+    if (fits) {
+      const pick = document.createElement('small');
+      pick.className = 'pc-pick';
+      pick.textContent = '추천';
+      card.append(pick);
+    }
+    card.ariaLabel = `${slot + 1}번 ${row} ${mate.name}, ${mate.skill.name}${fits ? ', 이번 경기 추천' : ''}`;
   }
   return card;
 }
@@ -841,7 +848,7 @@ function renderPartyBar() {
   const box = $('party-bar-slots');
   const open = partySlots(state);
   const auto = state.autoMates !== false;
-  const key = [open, state.party.join(','), formationMode, formationPick, auto].join('|');
+  const key = [open, state.party.join(','), formationMode, formationPick, auto, ruleId(state)].join('|');
   if (key !== partyBarKey) {
     partyBarKey = key;
     box.replaceChildren(...Array.from({ length: PARTY_MAX }, (_, slot) => partyCard(slot, open)));
@@ -914,6 +921,8 @@ function fillMateDialog(slot) {
   setText('mate-dialog-stars', `${star.textContent} · Lv.${allyTrainLevel(state, id)} · 내 파워의 ${fmt(Math.round(allyPower(state, id) * 100))}%`);
   setText('mate-dialog-skill', mate.skill.name);
   setText('mate-dialog-desc', mate.skill.desc);
+  const rule = ruleId(state);
+  setText('mate-dialog-rule', rule ? (ruleFit(id, rule) ? `이번 경기(${RULES[rule].name}) 추천 · 팀 피해 +${Math.round(RULE_BONUS * 100)}%` : `이번 경기(${RULES[rule].name}) 추천: ${RULES[rule].tip}`) : '');
   setText('mate-dialog-cd', `쿨타임 ${mate.skill.cd}초 · ${left > 0 ? `${Math.ceil(left)}초 남음` : '준비됨'}${state.autoMates === false ? '' : ' · 자동 사용 중'}`);
   const use = $('mate-dialog-use');
   use.hidden = state.autoMates !== false;

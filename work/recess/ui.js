@@ -123,9 +123,12 @@ function playSound(kind) {
   }
 }
 
+// 화면 연출 속도: 배속 × 빠른 복귀(엔진이 그만큼 빨리 돌기 때문에 포즈도 맞춘다)
+function motionRate() { return (state?.speed || 1) * (state && rushing(state) ? RUSH_SPEED : 1); }
+
 function setPoses(side, frames) {
   let until = performance.now();
-  const rate = state?.speed || 1;
+  const rate = motionRate();
   poses[side] = frames.map(([pose, ms]) => ({ pose, until: (until += ms / rate) }));
 }
 
@@ -364,7 +367,7 @@ function packAct(pose, count, ms) {
   if (!alive) return;
   const picks = pose === 'hit' ? [...Array(alive).keys()] : [...Array(alive).keys()].sort(() => Math.random() - 0.5).slice(0, count);
   const now = performance.now();
-  const rate = state?.speed || 1;
+  const rate = motionRate();
   for (const index of picks) {
     const delay = pose === 'hit' ? 0 : Math.random() * 120;
     if (pose === 'hit') packPoses.set(index, [{ pose: 'hit', until: now + ms / rate }]);
@@ -393,9 +396,12 @@ let renderedContest = '';
 
 function renderContest() {
   const id = contestId(state);
-  if (id === renderedContest) return;
-  renderedContest = id;
-  setText('contest-name', CONTESTS[id].name);
+  const rule = ruleId(state);
+  const key = `${id}|${rule}`;
+  if (key === renderedContest) return;
+  renderedContest = key;
+  setText('contest-name', rule ? `${CONTESTS[id].name} · ${RULES[rule].name}` : CONTESTS[id].name);
+  $('contest-chip').dataset.rule = rule || '';
   $('contest-chip').dataset.contest = id;
   $('arena').dataset.contest = id;
   $('arena').dataset.motion = CONTESTS[id].motion;
@@ -458,7 +464,7 @@ function renderTravel() {
       : won && finish.boss && !sameTrack ? 'exit' : 'cut';
   const arena = $('arena');
   const art = arena.querySelector('.arena-art:not(.leaving)');
-  const rate = state.speed || 1;
+  const rate = motionRate();
   if (mode === 'exit') {
     const ghost = art.cloneNode();
     ghost.classList.remove('entering', 'cut');
@@ -486,7 +492,7 @@ function renderTravel() {
 }
 // 이동하는 동안 주인공·동료는 달리고, 새 상대는 오른쪽에서 드러난다
 function travelRun(ms) {
-  const rate = state.speed || 1;
+  const rate = motionRate();
   setPoses('player', [['run', ms]]);
   const now = performance.now();
   for (let slot = 0; slot < PARTY_MAX; slot++) allyPoses.set(String(slot), [{ pose: 'step', until: now + ms / rate }]);
@@ -510,7 +516,8 @@ function renderBattle() {
   $('arena').classList.toggle('dungeon-round', Boolean(dungeon));
   const status = $('battle-status');
   const resting = state.roundEnd?.result === 'loss';
-  setText('battle-status', resting ? '잠깐 쉬는 중' : state.roundEnd ? '승리' : dungeon ? '던전 도전 중' : state.farm ? '반복 수련 중' : '자동 대결 중');
+  setText('battle-status', resting ? '잠깐 쉬는 중' : state.roundEnd ? '승리' : state.dungeon?.id === 'record' ? '기록 측정 중' : state.dungeonChain ? `연속 도전 ${state.dungeonChain.wins}승` : dungeon ? '던전 도전 중' : rushing(state) ? `빠른 복귀 ×${RUSH_SPEED}` : state.farm ? '반복 수련 중' : '자동 대결 중');
+  status.classList.toggle('rush', !dungeon && rushing(state));
   status.classList.toggle('rest', resting);
   const boss = !dungeon && state.wave === BOSS_WAVE;
   const round = `${state.map}:${state.wave}:${state.farm ? 1 : 0}:${state.dungeon?.id || ''}${state.dungeon?.level || ''}`;
@@ -558,7 +565,7 @@ function renderBattle() {
   const totalHp = maxHp(state);
   const totalEnemy = enemyMaxHp(state);
   $('hp-text').textContent = `${fmt(state.hp)} / ${fmt(totalHp)}`;
-  $('enemy-text').textContent = `${fmt(state.enemyHp)} / ${fmt(totalEnemy)}`;
+  $('enemy-text').textContent = state.dungeon?.id === 'record' ? `누적 피해 ${fmt(Math.max(0, totalEnemy - state.enemyHp))}` : `${fmt(state.enemyHp)} / ${fmt(totalEnemy)}`;
   bar($('hp-fill'), $('hp-bar'), state.hp, totalHp);
   bar($('enemy-fill'), $('enemy-bar'), state.enemyHp, totalEnemy);
   renderMotion();
@@ -1047,6 +1054,9 @@ function openTransfer() {
   const gain = prestigeGain(state);
   if (!gain) return;
   $('transfer-gain').textContent = `+${fmt(gain)}`;
+  const until = rushEnd(Math.max(state.prestige.best, progress(state)));
+  $('transfer-rush').hidden = !until;
+  setText('transfer-rush', until ? `빠른 복귀: 아카데미 정문부터 ${placeLabel(until)}까지 ${RUSH_SPEED}배 속도로 달려요. 지면 그 자리부터 보통 속도예요.` : '');
   $('transfer-dialog').showModal();
 }
 
@@ -1371,9 +1381,152 @@ function renderDungeons() {
       commit();
     });
     actions.append(enter, sweep);
+    const auto = document.createElement('button');
+    auto.type = 'button';
+    auto.className = 'dungeon-auto';
+    auto.setAttribute('role', 'switch');
+    auto.setAttribute('aria-checked', String(state.dungeonAuto?.[id] === true));
+    auto.textContent = '승리하면 다음 단계';
+    auto.ariaLabel = `${dungeon.name} 승리하면 다음 단계로 이어서 도전`;
+    auto.disabled = !open;
+    auto.addEventListener('click', () => {
+      state.dungeonAuto = { ...state.dungeonAuto, [id]: !state.dungeonAuto?.[id] };
+      message(state.dungeonAuto[id] ? `${dungeon.name}: 이기고 열쇠가 남으면 바로 다음 단계로 이어가요.` : `${dungeon.name}: 한 단계씩 도전해요.`);
+      commit();
+    });
+    body.append(auto);
     card.append(icon, body, actions);
     return card;
+  }).flatMap(card => (card.classList.contains('coin') ? [card, recordCard()] : [card])));
+}
+
+// 상금 토너먼트 30초 기록전 카드: 개인 최고, 보상 구간, 다음 구간까지 남은 피해
+function recordCard() {
+  const open = recordUnlocked(state);
+  const keys = recordKeys(state);
+  const best = state.record?.best || 0;
+  const reach = recordTier(best);
+  const card = document.createElement('article');
+  card.className = `dungeon-card record${open ? '' : ' locked'}`;
+  const icon = document.createElement('span');
+  icon.className = 'item-icon';
+  icon.dataset.tone = DUNGEON_TONES.coin;
+  setIcon(icon, ICONS.dungeons.coin);
+  const body = document.createElement('div');
+  body.className = 'dungeon-body';
+  const title = document.createElement('b');
+  const name = document.createElement('span');
+  name.className = 'item-name';
+  name.textContent = `상금 토너먼트 · ${RECORD.name}`;
+  const level = document.createElement('em');
+  level.className = 'lv';
+  level.textContent = best ? `최고 ${fmt(best)}` : '첫 도전';
+  title.append(name, level);
+  const info = document.createElement('p');
+  info.textContent = !open ? '1-3 1학년 대표를 이기면 열려요'
+    : best ? `보상 구간 ${reach.tier} · 다음 구간까지 피해 ${fmt(reach.next)} · 동료·장비를 바꾸면 기록이 달라져요` : '30초 동안 준 피해만큼 보상 구간을 올려요. 주인공과 출전 동료의 피해를 모두 더해요.';
+  const keyRow = document.createElement('span');
+  keyRow.className = 'dungeon-keys';
+  keyRow.ariaLabel = `오늘 입장권 ${keys}장 남음`;
+  for (let index = 0; index < DUNGEON_KEYS; index++) {
+    const key = document.createElement('i');
+    key.className = index < keys ? 'on' : '';
+    keyRow.append(key);
+  }
+  body.append(title, info, keyRow);
+  const actions = document.createElement('div');
+  actions.className = 'dungeon-actions';
+  const enter = document.createElement('button');
+  enter.type = 'button';
+  enter.className = 'enter';
+  enter.textContent = '기록 도전';
+  enter.ariaLabel = `${RECORD.name} 도전`;
+  enter.disabled = !open || keys <= 0 || Boolean(state.dungeon);
+  enter.addEventListener('click', () => {
+    refreshDay(state, todayKey());
+    if (!enterRecord(state)) return;
+    combatEvent('enter', {});
+    message(`${RECORD.name} 시작! 30초 동안 최대한 많이 때리세요.`);
+    commit();
+  });
+  const sweep = document.createElement('button');
+  sweep.type = 'button';
+  sweep.className = 'sweep';
+  sweep.textContent = '소탕';
+  sweep.ariaLabel = `${RECORD.name} 최고 기록 구간으로 소탕`;
+  sweep.disabled = !open || !reach.tier || keys <= 0 || Boolean(state.dungeon);
+  sweep.addEventListener('click', () => {
+    refreshDay(state, todayKey());
+    if (!sweepRecord(state)) return;
+    flyCoins(6);
+    commit();
+  });
+  actions.append(enter, sweep);
+  card.append(icon, body, actions);
+  return card;
+}
+
+// 경기 규칙 안내: 새 구역(도장)에 들어설 때 규칙·추천 동료·이유를 한 줄씩 보여 준다
+let renderedRule = '';
+function ruleLine(state) {
+  const rule = ruleId(state);
+  if (!rule) return null;
+  const owned = ruleMates(state, rule).filter(id => companionLevel(state, id));
+  const picks = (owned.length ? owned : ruleMates(state, rule)).slice(0, 3).map(id => COMPANIONS[id].name);
+  const deployed = state.party.slice(0, partySlots(state)).filter(id => id && ruleFit(id, rule)).length;
+  return { rule, title: `경기 규칙 · ${RULES[rule].name}`, desc: RULES[rule].desc, picks: `추천 동료 · ${picks.join('·')}`, why: `이유 · ${RULES[rule].tip}. 출전한 추천 동료마다 팀 피해 +${Math.round(RULE_BONUS * 100)}%(지금 ${Math.min(3, deployed)}명)` };
+}
+function renderRule() {
+  const key = state.dungeon || !state.cycle ? '' : `${state.cycle}:${gradeIndex(state.map)}`;
+  if (key === renderedRule || (travel && state.roundEnd)) return;
+  renderedRule = key;
+  const info = key && ruleLine(state);
+  const banner = $('rule-banner');
+  if (!info) {
+    banner.hidden = true;
+    return;
+  }
+  banner.replaceChildren(...[info.title, info.desc, info.picks, info.why].map((text, index) => {
+    const line = document.createElement(index ? 'span' : 'b');
+    line.textContent = text;
+    return line;
   }));
+  banner.dataset.rule = info.rule;
+  banner.hidden = false;
+  banner.classList.remove('show');
+  void banner.offsetWidth;
+  banner.classList.add('show');
+  clearTimeout(renderRule.timer);
+  renderRule.timer = setTimeout(() => { banner.hidden = true; }, 4200);
+}
+
+// 기록전·연속 도전 결과 창
+function showRunResult(result) {
+  const lines = [];
+  if (result.id === 'record') {
+    setText('run-result-title', `${RECORD.name} 결과`);
+    lines.push(['이번 기록', `${fmt(result.record)}${result.newBest ? ' · 최고 기록 갱신!' : ''}`]);
+    lines.push(['개인 최고', fmt(result.best)]);
+    lines.push(['도달한 보상 구간', `${result.level}구간`]);
+    lines.push(['다음 보상까지 남은 피해', fmt(result.next)]);
+    lines.push(['보상', result.text]);
+  } else {
+    const chain = result.chain;
+    setText('run-result-title', `${dungeonInfo(result.id).name} 연속 도전`);
+    lines.push(['연승', `Lv.${chain.from} → Lv.${chain.to} · ${chain.wins}연승`]);
+    lines.push(['보상 합계', chain.text]);
+    lines.push(['마지막', result.win ? `Lv.${result.level} 통과 · ${dungeonKeys(state, result.id) > 0 ? '연속 도전을 멈췄어요' : '열쇠를 다 썼어요'}` : `Lv.${result.level} ${result.reason === 'timeout' ? '시간 초과' : '실패'} · 열쇠는 그대로예요`]);
+  }
+  $('run-result-list').replaceChildren(...lines.map(([label, value]) => {
+    const row = document.createElement('div');
+    const name = document.createElement('dt');
+    name.textContent = label;
+    const text = document.createElement('dd');
+    text.textContent = value;
+    row.append(name, text);
+    return row;
+  }));
+  if (!$('run-result').open) $('run-result').showModal();
 }
 
 function trainingReady() {
@@ -1417,10 +1570,15 @@ function render() {
   $('gacha-dot').hidden = state.tickets < 1;
   refreshDay(state, todayKey());
   $('battle-dot').hidden = currentView === 'battle' || !Object.keys(DUNGEONS).some(id => dungeonUnlocked(state, id) && dungeonKeys(state, id) > 0);
+  // 처음 그릴 때 이미 있던 결과(지난번 것)는 다시 띄우지 않고, 그 뒤에 생긴 결과부터 보여 준다
+  if (shownDungeonResult === null) shownDungeonResult = state.dungeonResult?.serial ?? 0;
   if (state.dungeonResult && state.dungeonResult.serial !== shownDungeonResult) {
-    if (shownDungeonResult !== null) {
+    {
       const result = state.dungeonResult;
-      message(`${dungeonInfo(result.id).name}${result.id === 'trial' ? '' : ` Lv.${result.level}`} ${result.sweep ? '소탕' : result.win ? '클리어' : result.reason === 'timeout' ? '시간 초과' : '실패'} · ${result.text}`);
+      if (result.id === 'record' && !result.sweep) showRunResult(result);
+      else if (result.chain) showRunResult(result);
+      else if (result.id === 'record') message(`${RECORD.name} 소탕 · 최고 기록 구간 ${result.level} · ${result.text}`);
+      else message(`${dungeonInfo(result.id).name}${result.id === 'trial' ? '' : ` Lv.${result.level}`} ${result.sweep ? '소탕' : result.win ? '클리어' : result.reason === 'timeout' ? '시간 초과' : '실패'} · ${result.text}`);
     }
     shownDungeonResult = state.dungeonResult.serial;
   }
@@ -1439,6 +1597,7 @@ function render() {
   renderActives();
   renderAllies();
   renderPartyBar();
+  renderRule();
   const viewModels = {
     battle: [state.log, state.dungeons, state.daily?.keys, Boolean(state.dungeon), state.totalClears, state.prestige.count, state.prestige.perks, state.stickers],
     training: [growthTab, Object.keys(TRAINING).map(id => { const plan = trainingPlan(id); return [plan.count, plan.total, state.coins >= plan.total]; }), state.training, firstGradeWon(state), state.classId, buyMode, state.tier, state.level, state.prestige, state.autoSkills, state.autoTrain, state.skillLv, Object.keys(ACTIVE).map(id => state.coins >= skillCost(state, id)), state.skillId, Boolean(state.dungeon), bestProgress(state)],

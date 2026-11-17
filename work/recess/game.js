@@ -163,6 +163,11 @@ const DUNGEON_PACK = [
 ];
 const DUNGEON_KEYS = 2;
 const DUNGEON_TIME = 30;
+// 상금 토너먼트 30초 기록전: 쓰러지지 않는 스파링 파트너에게 30초 동안 준 유효 피해(주인공+동료)를 잰다.
+// 보상 구간 k의 체력 = 진행 3k-1 맵 보스 체력 × tierHp. 기록은 1구간부터 차례로 깎아 도달한 구간까지 코인을 더한다.
+// 체력이 아주 커서 넘친 피해는 없고, 체력 비례 기술은 원래 상한(파워 ×20)을 쓴다. 상대 공격은 1이라 지지 않는다.
+// 입장권은 하루 2장(던전 열쇠와 따로). 끝날 때 입장권 차감과 보상 지급을 한 번에 한다. 소탕은 최고 기록 구간으로.
+const RECORD = { name: '30초 기록전', boss: '기록 측정 스파링 파트너', sprite: 'dboss-sports', background: 'd-coin', hit: 0, map: 5, tierHp: 1.5, tierCoin: 100, hpMult: 1e7 };
 
 // ── 격투 아카데미(4학년) → 졸업 후 시골부터 한국 지역을 하나씩 제패(스포츠 격투 대회) ──
 // 회차(cycle) 0 = 아카데미, 1부터 = REGIONS 순서. 지역마다 4구역(동네 도장 → 상가 체육관 → 시민 체육관 → 챔피언전) × 경기장 3곳.
@@ -206,7 +211,7 @@ const REGION_PLANS = [
   ['taekwondo', 'kickboxing', 'wrestling', 'mma'],
   ['judo', 'muaythai', 'jiujitsu', 'mma'],
 ];
-const DUNGEON_CONTESTS = { coin: 'boxing', ticket: 'kickboxing', badge: 'mma', trial: 'mma' };
+const DUNGEON_CONTESTS = { coin: 'boxing', ticket: 'kickboxing', badge: 'mma', trial: 'mma', record: 'boxing' };
 
 // ── 승급(선수 등급): 심사(1:1, 30초)를 통과하면 파워·체력 ×1.3, 스킬 칸·동료 칸이 열린다. 재입학해도 유지 ──
 const TIERS = ['연습생', '아마추어', '세미프로', '프로 데뷔', '랭커', '타이틀 도전자', '챔피언', '통합 챔피언', '전설'];
@@ -384,7 +389,7 @@ function newGame() {
 function freshState() {
   return {
     dungeons: Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, 0])), dungeon: null, dungeonResult: null, front: null, pack: [],
-    gems: 0, recruits: 0, companions: {}, mateShards: {}, mateGrade: 1, autoMates: true, party: [null, null, null, null], allyTimers: [1.1, 1.5, 1.9, 2.3], mateBuffs: {}, shield: 0, tier: 0,
+    gems: 0, recruits: 0, companions: {}, mateShards: {}, mateGrade: 1, autoMates: true, record: { best: 0, tier: 0 }, dungeonAuto: {}, dungeonChain: null, rush: null, party: [null, null, null, null], allyTimers: [1.1, 1.5, 1.9, 2.3], mateBuffs: {}, shield: 0, tier: 0,
     cooldowns: {}, buffs: {}, autoSkills: true, quest: 0, stats: { pulls: 0, recruits: 0, dungeons: 0 },
     pass: { free: 0, premium: 0 }, premium: { pass: false, adFree: false, monthly: 0, bought: {} }, mail: [], mailSeq: 0,
     profile: null, level: 1, xp: 0, coins: 12, map: 0, wave: 0, wins: 0,
@@ -459,12 +464,14 @@ function transfer(state) {
   const keep = {};
   for (const key of ['profile', 'wins', 'bag', 'equipped', 'ranks', 'patches', 'missions', 'classId', 'autoNext', 'autoSkill', 'skillId', 'sound',
     'tickets', 'stickers', 'snacks', 'speed', 'attendance', 'daily', 'totalClears', 'dungeons', 'dungeonResult',
-    'gems', 'recruits', 'companions', 'mateShards', 'mateGrade', 'autoMates', 'test', 'party', 'tier', 'autoSkills', 'quest', 'stats', 'pass', 'premium', 'mail', 'mailSeq', 'autoTrain']) keep[key] = state[key];
+    'gems', 'recruits', 'companions', 'mateShards', 'mateGrade', 'autoMates', 'record', 'dungeonAuto', 'test', 'party', 'tier', 'autoSkills', 'quest', 'stats', 'pass', 'premium', 'mail', 'mailSeq', 'autoTrain']) keep[key] = state[key];
   const before = state.prestige;
   Object.assign(state, newGame(), keep);
   state.prestige = { ...before, count: before.count + 1, badges: before.badges + gain, earned: before.earned + gain, best: Math.max(before.best, reached) };
   state.hp = maxHp(state);
-  state.log = [`${state.prestige.count}번째 재입학! 아카데미 1학년 정문에서 다시 시작해요.`];
+  const until = rushEnd(state.prestige.best);
+  state.rush = until > 0 ? { until } : null;
+  state.log = [`${state.prestige.count}번째 재입학! 아카데미 1학년 정문에서 다시 시작해요.${until ? ` ${placeLabel(until)}까지 빠른 복귀 ×${RUSH_SPEED}.` : ''}`];
   return gain;
 }
 function critPower(state) { return CRIT_BASE + 0.05 * (state.training.critDmg || 0) + mateBuff(state, 'critDmg'); }
@@ -491,7 +498,8 @@ function enemyHit(state) {
   const base = state.dungeon
     ? atProgress(dungeonReach(state), 'hit') * dungeonInfo(state.dungeon.id).hit
     : MAPS[state.map].hit[state.wave] * GRADE_SCALING[gradeIndex(state.map)].attack * cycleScale(state, 'hit');
-  return base * (state.front?.hit ?? 1) * (1 + GANG_UP * aliveBehind(state)) * (1 - mateBuff(state, 'weaken'));
+  const rule = ruleId(state);
+  return base * (state.front?.hit ?? 1) * (1 + GANG_UP * aliveBehind(state)) * (1 - mateBuff(state, 'weaken')) * ((rule && RULES[rule].hit) || 1);
 }
 function winCoins(state, firstBoss) {
   const grade = gradeIndex(state.map);
@@ -514,7 +522,7 @@ function refreshDay(state, today) {
   if (!state.daily || state.daily.date !== today) {
     const first = !state.daily;
     state.daily = { date: today, baseWins: state.wins, trains: 0, pulls: 0, snacks: 0, dungeons: 0, claimed: [], shop: {},
-      keys: Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, DUNGEON_KEYS])) };
+      keys: { ...Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, DUNGEON_KEYS])), record: DUNGEON_KEYS } };
     if (!first && state.premium?.monthly > 0) {
       state.premium.monthly--;
       sendMail(state, '식단 월정액 오늘의 보석', { gems: 100 }, `남은 기간 ${state.premium.monthly}일`);
@@ -575,10 +583,13 @@ function mobKey(state) {
 function makeMobs(state) {
   const full = waveHp(state);
   const key = mobKey(state);
-  const make = (slot, name, sprite) => ({ name, share: slot.share, hit: slot.hit, sprite, leader: Boolean(slot.leader), key, max: Math.max(1, Math.round(full * slot.share)) });
+  const make = (slot, name, sprite) => ({ name, share: slot.share, hit: slot.hit, sprite, leader: Boolean(slot.leader), key, max: Math.max(1, Math.round(full * slot.share * ruleHp(state, slot.leader))) });
   if (state.dungeon?.id === 'trial') {
     const [name, sprite] = EXAMINERS[(state.dungeon.level - 1) % EXAMINERS.length];
     return [make({ share: 1, hit: 1, leader: true }, name, sprite)];
+  }
+  if (state.dungeon?.id === 'record') {
+    return [{ name: RECORD.boss, share: 1, hit: 1, sprite: RECORD.sprite, leader: true, key, max: Math.max(1, Math.round(attack(state) * RECORD.hpMult)) }];
   }
   if (state.dungeon) {
     const dungeon = DUNGEONS[state.dungeon.id];
@@ -668,12 +679,58 @@ function venueMap(state) {
   return stageArt(cycle, state.map);
 }
 function regionConquered(state, index) { return bestProgress(state) >= REGION_START[index + 1] * MAPS.length; }
-function dungeonInfo(id) { return id === 'trial' ? TRIAL : DUNGEONS[id]; }
-function dungeonReach(state) { return state.dungeon.id === 'trial' ? tierReq(state.dungeon.level) : dungeonProgress(state.dungeon.level); }
+function dungeonInfo(id) { return id === 'trial' ? TRIAL : id === 'record' ? RECORD : DUNGEONS[id]; }
+function dungeonReach(state) { return state.dungeon.id === 'trial' ? tierReq(state.dungeon.level) : state.dungeon.id === 'record' ? progress(state) : dungeonProgress(state.dungeon.level); }
+function recordTierHp(tier) { return atProgress(dungeonProgress(tier), 'hp') * RECORD.tierHp; }
+// 피해량으로 도달한 보상 구간과 다음 구간까지 남은 피해
+function recordTier(damage) {
+  let left = damage;
+  for (let tier = 0; tier < 2000; tier++) {
+    const hp = recordTierHp(tier + 1);
+    if (left < hp) return { tier, next: Math.ceil(hp - left) };
+    left -= hp;
+  }
+  return { tier: 2000, next: 0 };
+}
+function recordReward(state, tier) {
+  let coins = 0;
+  for (let k = 1; k <= tier; k++) coins += atProgress(dungeonProgress(k), 'coin') * RECORD.tierCoin;
+  return { coins: Math.round(coins * statBonus(state, 'coin')) };
+}
+function recordKeys(state) { return state.daily?.keys?.record ?? DUNGEON_KEYS; }
+function recordUnlocked(state) { return dungeonUnlocked(state, 'coin'); }
+function enterRecord(state) {
+  if (!recordUnlocked(state) || state.dungeon || state.roundEnd?.leaveDungeon || recordKeys(state) <= 0) return false;
+  if (state.roundEnd) {
+    const end = state.roundEnd;
+    state.farm = end.nextFarm;
+    state.map = end.nextMap;
+    state.wave = end.nextWave;
+    state.roundEnd = null;
+  }
+  state.dungeon = { id: 'record', level: 1, time: DUNGEON_TIME };
+  state.hp = maxHp(state);
+  openFight(state, state.map, state.wave, 0.6);
+  return true;
+}
+function useRecordKey(state) {
+  state.daily.keys = { ...state.daily.keys, record: recordKeys(state) - 1 };
+  state.daily.dungeons = (state.daily.dungeons || 0) + 1;
+  state.stats.dungeons++;
+}
+function sweepRecord(state) {
+  const best = state.record?.tier || 0;
+  if (!best || state.dungeon || recordKeys(state) <= 0) return null;
+  useRecordKey(state);
+  const reward = grantDungeon(state, 'record', best);
+  state.dungeonResult = { id: 'record', level: best, win: true, sweep: true, record: state.record.best, best: state.record.best, next: recordTier(state.record.best).next, text: rewardLine(reward), serial: (state.dungeonResult?.serial || 0) + 1 };
+  return reward;
+}
 function dungeonUnlocked(state, id) {
   return DUNGEONS[id].unlock === 'transfer' ? state.prestige.count > 0 : (state.totalClears >= 3 || state.prestige.count > 0);
 }
 function dungeonReward(state, id, level) {
+  if (id === 'record') return recordReward(state, level);
   const reached = dungeonProgress(level);
   if (id === 'coin') return { coins: Math.round(atProgress(reached, 'coin') * 300 * statBonus(state, 'coin')) };
   if (id === 'ticket') return { tickets: 1 + Math.floor(level / 10) };
@@ -720,6 +777,20 @@ function sweepDungeon(state, id) {
 }
 function leaveDungeon(state, win, emit, reason = '') {
   const { id, level } = state.dungeon;
+  if (id === 'record') {
+    const dealt = Math.max(0, Math.round((state.front?.max || 0) - Math.max(0, state.enemyHp)));
+    const best = Math.max(state.record?.best || 0, dealt);
+    const reach = recordTier(dealt);
+    state.record = { best, tier: recordTier(best).tier };
+    useRecordKey(state);
+    const reward = grantDungeon(state, 'record', reach.tier);
+    const text = reach.tier ? rewardLine(reward) : '보상 구간에 못 미쳤어요';
+    state.dungeonResult = { id, level: reach.tier, win: true, record: dealt, best, next: reach.next, newBest: dealt >= best && dealt > 0, text, serial: (state.dungeonResult?.serial || 0) + 1 };
+    record(state, `${RECORD.name} · 피해 ${fmt(dealt)} (최고 ${fmt(best)}) · ${text}`);
+    finishRound(state, 'win', state.map, state.wave, 1.5, emit, null, state.farm);
+    state.roundEnd.leaveDungeon = true;
+    return;
+  }
   let text = '열쇠는 그대로예요.';
   if (id === 'trial') {
     text = '레벨을 더 올리고 다시 도전해요.';
@@ -734,10 +805,23 @@ function leaveDungeon(state, win, emit, reason = '') {
     state.dungeons[id] = Math.max(state.dungeons[id] || 0, level);
     text = rewardLine(grantDungeon(state, id, level));
   }
-  state.dungeonResult = { id, level, win, reason, text, serial: (state.dungeonResult?.serial || 0) + 1 };
+  const chaining = id !== 'trial' && (state.dungeonChain?.id === id || (win && state.dungeonAuto?.[id]));
+  let chain = null;
+  if (chaining) {
+    const before = state.dungeonChain?.id === id ? state.dungeonChain : { id, from: level, to: level - 1, wins: 0, coins: 0, tickets: 0, badges: 0 };
+    const reward = win ? dungeonReward(state, id, level) : {};
+    chain = { ...before, to: win ? level : before.to, wins: before.wins + (win ? 1 : 0), coins: before.coins + (reward.coins || 0), tickets: before.tickets + (reward.tickets || 0), badges: before.badges + (reward.badges || 0) };
+  }
+  const more = Boolean(chain) && win && state.dungeonAuto?.[id] && dungeonKeys(state, id) > 0;
+  state.dungeonChain = more ? chain : null;
+  if (!more) {
+    const summary = chain && chain.wins > 1 ? { from: chain.from, to: chain.to, wins: chain.wins, text: rewardLine(chain) || '보상 없음' } : null;
+    state.dungeonResult = { id, level, win, reason, text, chain: summary, serial: (state.dungeonResult?.serial || 0) + 1 };
+  }
   record(state, `${dungeonInfo(id).name} ${id === 'trial' ? '' : `Lv.${level} `}${win ? '통과!' : reason === 'timeout' ? '시간 초과' : '실패'} · ${text}`);
-  finishRound(state, win ? 'win' : 'loss', state.map, state.wave, 1.5, emit, null, state.farm);
+  finishRound(state, win ? 'win' : 'loss', state.map, state.wave, more ? 0.9 : 1.5, emit, null, state.farm);
   state.roundEnd.leaveDungeon = true;
+  if (more) state.roundEnd.chain = id;
 }
 function mobReward(state, mob, emit) {
   const coins = Math.round(winCoins(state, false) * mob.share);
@@ -826,6 +910,10 @@ function openFight(state, map, wave, delay) {
 }
 
 function finishRound(state, result, nextMap, nextWave, wait, emit, reward = null, nextFarm = state.farm) {
+  if (result === 'loss' && state.rush && !state.dungeon) {
+    state.rush = null;
+    record(state, '빠른 복귀 중에 졌어요. 여기부터는 보통 속도예요.');
+  }
   state.playerMove = null;
   state.enemyMove = null;
   state.roundEnd = { result, nextMap, nextWave, wait, nextFarm };
@@ -1020,6 +1108,17 @@ function step(state, emit) {
     if (end.wait <= 1e-8) {
       if (end.result === 'loss' || end.leaveDungeon) state.hp = maxHp(state);
       if (end.leaveDungeon) state.dungeon = null;
+      if (end.chain) {
+        state.roundEnd = null;
+        state.farm = end.nextFarm;
+        state.map = end.nextMap;
+        state.wave = end.nextWave;
+        if (enterDungeon(state, end.chain)) {
+          emit?.('enter', {});
+          return;
+        }
+        state.dungeonChain = null;
+      }
       state.farm = end.nextFarm;
       openFight(state, end.nextMap, end.nextWave, 0.19);
       emit?.('enter', {});
@@ -1111,11 +1210,28 @@ function step(state, emit) {
   }
 }
 
+// ── 재입학 빠른 복귀: 재입학 전 최고 기록의 한 지역 앞까지는 이미 지나온 곳이라 RUSH_SPEED배로 달린다 ──
+// 진 순간이나 종료 지점에 닿으면 보통 속도. 이긴 맵은 정상 진행이고 첫 제패 보상은 원래대로 최고 기록 기준. 오프라인에서도 같다
+const RUSH_SPEED = 3;
+function rushEnd(best) {
+  const cycle = Math.floor(best / MAPS.length);
+  if (cycle < 2) return 0;
+  const index = Math.min(regionIndex(cycle), REGIONS.length - 1);
+  return REGION_START[Math.max(0, index - 1)] * MAPS.length;
+}
+function rushing(state) { return Boolean(state.rush) && !state.dungeon && progress(state) < state.rush.until; }
 function simulate(state, seconds, emit) {
   const elapsed = seconds + state.tickRemainder;
   const ticks = Math.floor((elapsed + 1e-8) / STEP);
   state.tickRemainder = Math.max(0, elapsed - ticks * STEP);
-  for (let index = 0; index < ticks; index++) step(state, emit);
+  for (let index = 0; index < ticks; index++) {
+    const times = rushing(state) ? RUSH_SPEED : 1;
+    for (let repeat = 0; repeat < times; repeat++) step(state, emit);
+    if (state.rush && !state.dungeon && progress(state) >= state.rush.until) {
+      state.rush = null;
+      record(state, '빠른 복귀 끝! 여기부터는 보통 속도로 겨뤄요.');
+    }
+  }
 }
 
 // ── 승급 ──
@@ -1247,7 +1363,28 @@ function setParty(state, slot, id) {
   state.party[slot] = id;
   return true;
 }
-function buffMult(state) { return (state.buffs?.cheer > 0 ? cheerMult(state) : 1) * (1 + mateBuff(state, 'power')); }
+// ── 경기 규칙: 지역 구역마다 규칙 하나(지역·바퀴·구역에 따라 돌아감). 추천 동료가 출전하면 한 명당 팀 피해 +10%(최대 3명) ──
+const RULES = {
+  crowd: { name: '난전', desc: '졸개 체력 +25%', tip: '여럿을 한꺼번에 치는 광역 스킬', minion: 1.25, fit: skill => skill.kind === 'aoe' },
+  boss: { name: '강적전', desc: '대장·보스 체력 +25%', tip: '대장·보스 추가 피해·방어 무시·체력 비례 피해', leader: 1.25, fit: skill => Boolean(skill.boss || skill.pierce || skill.hpPct) },
+  heavy: { name: '난타전', desc: '상대 공격 +25%', tip: '보호막·회복·약화·회피·반사', hit: 1.25, fit: skill => Boolean(skill.shield || skill.heal || skill.weaken || skill.dodge || skill.reflect) },
+};
+const RULE_ORDER = ['crowd', 'boss', 'heavy'];
+const RULE_BONUS = 0.1;
+function ruleId(state, cycle = state.cycle || 0, map = state.map) {
+  if (state.dungeon || !cycle) return null;
+  const index = Math.min(regionIndex(cycle), REGIONS.length);
+  return RULE_ORDER[(index + regionRound(cycle) + gradeIndex(map)) % RULE_ORDER.length];
+}
+function ruleFit(id, rule) { return Boolean(rule) && RULES[rule].fit(COMPANIONS[id].skill); }
+function ruleMates(state, rule = ruleId(state)) { return rule ? Object.keys(COMPANIONS).filter(id => ruleFit(id, rule)) : []; }
+function ruleBonus(state) {
+  const rule = ruleId(state);
+  if (!rule) return 0;
+  return Math.min(3, state.party.slice(0, partySlots(state)).filter(id => id && ruleFit(id, rule)).length) * RULE_BONUS;
+}
+function ruleHp(state, leader) { const rule = ruleId(state); return rule ? (leader ? RULES[rule].leader : RULES[rule].minion) || 1 : 1; }
+function buffMult(state) { return (state.buffs?.cheer > 0 ? cheerMult(state) : 1) * (1 + mateBuff(state, 'power')) * (1 + ruleBonus(state)); }
 
 // 앞 상대가 쓰러지면 다음 상대로, 넘친 피해는 이어서(관통). 무리가 다 쓰러지면 승리.
 function resolveKills(state, overflow, emit) {
@@ -1569,8 +1706,8 @@ function migrateFeatures(s) {
   const dungeons = s.dungeons && typeof s.dungeons === 'object' ? s.dungeons : {};
   s.dungeons = Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, count(dungeons[id]) ? dungeons[id] : 0]));
   const active = s.dungeon;
-  if (!(active && (Object.hasOwn(DUNGEONS, active.id) || active.id === 'trial') && count(active.level) && active.level >= 1 && Number.isFinite(active.time))) s.dungeon = null;
-  if (!s.dungeonResult || typeof s.dungeonResult !== 'object' || !(Object.hasOwn(DUNGEONS, s.dungeonResult.id) || s.dungeonResult.id === 'trial')) s.dungeonResult = null;
+  if (!(active && (Object.hasOwn(DUNGEONS, active.id) || active.id === 'trial' || active.id === 'record') && count(active.level) && active.level >= 1 && Number.isFinite(active.time))) s.dungeon = null;
+  if (!s.dungeonResult || typeof s.dungeonResult !== 'object' || !(Object.hasOwn(DUNGEONS, s.dungeonResult.id) || s.dungeonResult.id === 'trial' || s.dungeonResult.id === 'record')) s.dungeonResult = null;
   if (!count(s.cycle)) s.cycle = 0;
   const fresh = freshState();
   const isObject = value => value && typeof value === 'object' && !Array.isArray(value);
@@ -1601,6 +1738,10 @@ function migrateFeatures(s) {
   if (s.profile && typeof s.profile === 'object') s.profile.gender = 'boy'; // 주인공은 남자로 고정(사용자 결정)
   if (typeof s.autoSkills !== 'boolean') s.autoSkills = true;
   if (typeof s.autoMates !== 'boolean') s.autoMates = true;
+  s.record = isObject(s.record) && count(s.record.best) ? { best: s.record.best, tier: count(s.record.tier) ? s.record.tier : 0 } : { best: 0, tier: 0 };
+  s.dungeonAuto = isObject(s.dungeonAuto) ? Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, s.dungeonAuto[id] === true])) : {};
+  if (!isObject(s.dungeonChain) || !Object.hasOwn(DUNGEONS, s.dungeonChain.id)) s.dungeonChain = null;
+  s.rush = isObject(s.rush) && count(s.rush.until) && s.rush.until > 0 ? { until: s.rush.until } : null;
   s.stats = isObject(s.stats) ? s.stats : {};
   for (const key of ['pulls', 'recruits', 'dungeons']) if (!count(s.stats[key])) s.stats[key] = 0;
   s.pass = isObject(s.pass) ? { free: count(s.pass.free) ? s.pass.free : 0, premium: count(s.pass.premium) ? s.pass.premium : 0 } : { free: 0, premium: 0 };
@@ -1715,7 +1856,7 @@ function restore(snapshot) {
 
 if (typeof module !== 'undefined') {
   module.exports = {
-    castMate, useMate, swapParty, mateScale, mateBuff, mateSkillDps, PARTY_MAX, PARTY_UNLOCKS, PARTY_UNLOCK_TEXT, LEGACY_MATES, BOSS_SPRITES, REGION_ROUNDS, REGION_START, regionIndex, regionRound, lastRound, roundTag, stageLabel, skillPower, skillUnlocked, venueMap, stagePlace, stageNames, stageArt, regionConquered, REGIONS, ZONES, ACADEMY, autoTrain, critPower, regenRate, allyTrainLevel, allyTrainCap, allyTrainCost, trainAlly, skillLevel, skillCost, cheerMult, sprintMult, lunchHeal, trainSkill, ALLY_TRAIN, CRIT_BASE,
+    castMate, useMate, swapParty, RECORD, recordTier, recordTierHp, recordReward, recordKeys, enterRecord, sweepRecord, RUSH_SPEED, rushEnd, rushing, RULES, RULE_ORDER, RULE_BONUS, ruleId, ruleFit, ruleMates, ruleBonus, leaveDungeon, dungeonKeys, mateScale, mateBuff, mateSkillDps, PARTY_MAX, PARTY_UNLOCKS, PARTY_UNLOCK_TEXT, LEGACY_MATES, BOSS_SPRITES, REGION_ROUNDS, REGION_START, regionIndex, regionRound, lastRound, roundTag, stageLabel, skillPower, skillUnlocked, venueMap, stagePlace, stageNames, stageArt, regionConquered, REGIONS, ZONES, ACADEMY, autoTrain, critPower, regenRate, allyTrainLevel, allyTrainCap, allyTrainCost, trainAlly, skillLevel, skillCost, cheerMult, sprintMult, lunchHeal, trainSkill, ALLY_TRAIN, CRIT_BASE,
     CONTESTS, schoolName, gradeLabel, placeLabel, contestId, contest,
     newGame, simulate, restore, trainingCost, maxHp, attack, enemyMaxHp, openFight, activateSkill, gearStats, nextMission, MAPS, GEAR, SLOTS, MAP_REWARDS, BOSS_REWARDS, TRAINING, SKILLS, makeProfile,
     trainingCostAt, enemyHit, winCoins, winXp, interval, critChance, prestigeGain, transfer, perkCost, PERKS, pullStickers, pullCost, progress, xpTarget,
