@@ -24,7 +24,7 @@ let lastPull = null;
 const popupQueue = [];
 
 const ICONS = {
-  training: { power: '#i-power', health: '#i-heart', speed: '#i-bolt', focus: '#i-target' },
+  training: { power: '#i-power', health: '#i-heart', speed: '#i-bolt', focus: '#i-target', critDmg: '#i-star', recover: '#i-plus' },
   classes: { gym: '#st-whistle', math: '#i-plus', music: '#i-note' },
   slots: { top: '#i-shirt', bottom: '#i-pants', bag: '#i-bag', shoes: '#i-shoe', accessory: '#i-gem' },
   skills: { rush: '#i-bolt', bell: '#i-bell' },
@@ -292,6 +292,7 @@ function updateClock(animate = true) {
   openedAt = now;
   if (elapsed >= 15) catchUp(elapsed);
   else simulate(state, elapsed * (state.speed || 1), animate ? combatEvent : null);
+  runAutoTrain();
   if (now - lastSavedAt > 2000) save();
 }
 
@@ -304,6 +305,11 @@ const PACK_SLOTS = [
   { x: 24, y: 34, s: 0.7, z: 1 }, { x: 70, y: 38, s: 0.68, z: 1 }, { x: 114, y: 34, s: 0.68, z: 0 },
 ];
 const packPoses = new Map();
+
+function protectiveSprite(id) {
+  const seed = Array.from(id).reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  return ['sport-blue', 'sport-red', 'sport-green'][seed % 3];
+}
 
 function renderPack() {
   const pack = (state.pack || []).filter(mob => mob.hp > 0);
@@ -325,6 +331,7 @@ function renderPack() {
       const sprite = document.createElement('span');
       sprite.className = 'sprite';
       sprite.dataset.sprite = mob.sprite;
+      sprite.dataset.spar = protectiveSprite(mob.sprite);
       sprite.dataset.pose = 'ready';
       slot.append(meter, sprite);
       return slot;
@@ -379,12 +386,11 @@ function renderContest() {
   renderedContest = id;
   setText('contest-name', CONTESTS[id].name);
   $('contest-chip').dataset.contest = id;
-  // 종목별 동작 그림 연결 자리: motion.css에서 .arena[data-motion='toss'] [data-sprite='boy'][data-pose='strike'] 처럼 덮어쓴다
   $('arena').dataset.contest = id;
   $('arena').dataset.motion = CONTESTS[id].motion;
 }
 
-// 종목 도구(딱지·지우개·피구공·농구공)가 공격하는 쪽에서 상대 쪽으로 날아간다
+// 종목 도구는 해당 놀이의 높이와 방향을 따라 움직인다.
 function throwProp(prop, target) {
   const fight = document.querySelector('.fight');
   if (!fight) return;
@@ -412,7 +418,7 @@ function renderBattle() {
   const dungeon = state.dungeon ? dungeonInfo(state.dungeon.id) : null;
   setText('stage-number', dungeon ? (state.dungeon.id === 'trial' ? `승급 시험 · ${tierName(state.dungeon.level)}` : `던전 · Lv.${state.dungeon.level}`) : `${schoolName(state.cycle)} ${gradeLabel(state.cycle, state.map)} · ${mapCode(state.map)}`);
   setText('battle-title', dungeon ? dungeon.name : map.place);
-  $('arena').dataset.map = dungeon ? (dungeon.background || dungeon.map + 1) : state.map + 1;
+  $('arena').dataset.map = dungeon ? (dungeon.background || dungeon.map + 1) : venueMap(state) || state.map + 1;
   $('arena').classList.toggle('dungeon-round', Boolean(dungeon));
   const status = $('battle-status');
   const resting = state.roundEnd?.result === 'loss';
@@ -436,7 +442,9 @@ function renderBattle() {
     const front = state.front;
     const leader = front?.leader;
     const size = (0.87 + (gradeNumber - 1) * 0.026) * (boss || (dungeon && leader) ? 1.1 : leader ? 1 : 0.88);
-    $('rival-sprite').dataset.sprite = front?.sprite || rivalSprite(state.map, state.wave);
+    const sprite = $('rival-sprite');
+    sprite.dataset.sprite = front?.sprite || rivalSprite(state.map, state.wave);
+    sprite.dataset.spar = protectiveSprite(sprite.dataset.sprite);
     $('rival').style.setProperty('--size', size.toFixed(2));
     $('rival').classList.toggle('minion', Boolean(front) && !leader);
     if (stepIn && !reducedMotion.matches) {
@@ -649,7 +657,7 @@ function renderSkillChoices() {
   $('auto-skill').setAttribute('aria-checked', String(state.autoSkill));
 }
 
-const TRAINING_TONES = { power: 'red', health: 'pink', speed: 'yellow', focus: 'teal' };
+const TRAINING_TONES = { power: 'red', health: 'pink', speed: 'yellow', focus: 'teal', critDmg: 'blue', recover: 'green' };
 const CLASS_TONES = { gym: 'green', math: 'blue', music: 'pink' };
 const SKILL_TONES = { rush: 'yellow', bell: 'blue' };
 const MISSION_TONES = { wins: 'red', clears: 'blue', closet: 'pink' };
@@ -703,6 +711,7 @@ function renderTraining() {
     return article;
   }));
   document.querySelectorAll('#buy-mode button').forEach(button => button.setAttribute('aria-pressed', String(String(buyMode) === button.dataset.buy)));
+  $('auto-train').setAttribute('aria-checked', String(state.autoTrain));
   $('class-note').textContent = firstGradeWon(state) ? '과목 하나를 골라 다음 대결에 보너스를 받으세요.' : '1-3 교실의 반장에게 이기면 과목을 고를 수 있어요.';
   $('class-list').replaceChildren(...Object.entries(CLASSES).map(([id, info]) => {
     const selected = state.classId === id;
@@ -1168,6 +1177,19 @@ function eatSnack(id) {
   commit();
 }
 
+// 진학 축하: 새 학교 교복 모습과 첫 종목
+let lastCycle = null;
+function showSchool() {
+  const dialog = $('school-dialog');
+  if (!dialog || dialog.open) return;
+  $('school-sprite').dataset.sprite = uniformSprite(state.profile.gender, state.cycle);
+  setText('school-title', `${schoolName(state.cycle)} 진학!`);
+  const first = CONTESTS[contestId({ ...state, map: 0, dungeon: null })].name;
+  setText('school-text', `${schoolName(state.cycle - 1)}을 졸업했어요. 새 교복을 입고 ${first}부터 다시 승부해요. 상대도 보상도 커져요.`);
+  document.querySelectorAll('dialog[open]').forEach(open => open.close());
+  dialog.showModal();
+}
+
 function showLevelUp(from, to) {
   const banner = $('levelup');
   $('levelup-text').textContent = `Lv.${from} → Lv.${to}`;
@@ -1276,7 +1298,9 @@ function render() {
   setText('level', fmt(state.level));
   setText('coins', fmt(state.coins));
   setText('patches', fmt(state.patches));
-  setText('power', fmt(attack(state) * 5 + maxHp(state) / 2 + state.training.speed * 3));
+  const power = powerScore();
+  setText('power', fmt(power));
+  notePowerGain(power);
   bar($('xp-fill'), $('xp-fill').parentElement, state.xp, xpTarget(state));
   const gearScore = id => { const stats = gearStats(state, id); return stats.attack * 5 + stats.hp / 2; };
   $('bag-dot').hidden = !state.bag.some(id => gearScore(id) > gearScore(state.equipped[GEAR[id].slot]));
@@ -1299,6 +1323,8 @@ function render() {
   $('speed').classList.toggle('fast', state.speed === 2);
   $('speed').setAttribute('aria-pressed', String(state.speed === 2));
   if (lastLevel !== null && state.level > lastLevel) showLevelUp(lastLevel, state.level);
+  if (lastCycle !== null && state.cycle > lastCycle) showSchool();
+  lastCycle = state.cycle;
   lastLevel = state.level;
   renderSnacks();
   renderBattle();
@@ -1307,8 +1333,8 @@ function render() {
   renderAllies();
   const viewModels = {
     battle: [state.log, state.dungeons, state.daily?.keys, Boolean(state.dungeon), state.totalClears, state.prestige.count, state.prestige.perks, state.stickers],
-    training: [growthTab, Object.keys(TRAINING).map(id => { const plan = trainingPlan(id); return [plan.count, plan.total, state.coins >= plan.total]; }), state.training, firstGradeWon(state), state.classId, buyMode, state.tier, state.level, state.prestige, state.autoSkills, state.skillId, Boolean(state.dungeon), bestProgress(state)],
-    party: [state.companions, state.party, state.tier],
+    training: [growthTab, Object.keys(TRAINING).map(id => { const plan = trainingPlan(id); return [plan.count, plan.total, state.coins >= plan.total]; }), state.training, firstGradeWon(state), state.classId, buyMode, state.tier, state.level, state.prestige, state.autoSkills, state.autoTrain, state.skillLv, Object.keys(ACTIVE).map(id => state.coins >= skillCost(state, id)), state.skillId, Boolean(state.dungeon), bestProgress(state)],
+    party: [state.companions, state.party, state.tier, state.allyLv, state.party.map(id => (id ? state.coins >= allyTrainCost(state, id) : null))],
     shop: [state.gems, state.daily?.shop, state.premium],
     bag: [state.bag, state.equipped, state.ranks, state.patches, gearFilter, state.profile.gender],
     gacha: [gachaTab, state.tickets, state.coins >= gachaCoinCost(1), state.coins >= gachaCoinCost(10), state.stickers, state.cleared, state.recruits, state.gems],
@@ -1339,6 +1365,44 @@ function render() {
 }
 
 function commit() { save(); render(); }
+
+// 실력(전투력) 숫자와 오를 때 뜨는 '+N' 표시: 성장하는 맛
+function powerScore() { return attack(state) * 5 + maxHp(state) / 2 + state.training.speed * 3; }
+let lastPower = null;
+let powerGain = 0;
+let powerGainTimer = null;
+function notePowerGain(power) {
+  if (lastPower !== null && power > lastPower * 1.0005) {
+    powerGain += power - lastPower;
+    if (!powerGainTimer) powerGainTimer = setTimeout(flushPowerGain, 260);
+  }
+  lastPower = power;
+}
+function flushPowerGain() {
+  powerGainTimer = null;
+  const box = document.querySelector('.hud-power');
+  if (!box || powerGain <= 0) return;
+  box.querySelectorAll('.power-gain').forEach(old => old.remove());
+  const pop = document.createElement('span');
+  pop.className = 'power-gain';
+  pop.setAttribute('aria-hidden', 'true');
+  pop.textContent = `▲ ${fmt(powerGain)}`;
+  box.append(pop);
+  powerGain = 0;
+  setTimeout(() => pop.remove(), 1100);
+}
+
+let lastAutoTrain = 0;
+function runAutoTrain(force = false) {
+  if (!state.autoTrain || !state.profile) return;
+  const now = Date.now();
+  if (!force && now - lastAutoTrain < 900) return;
+  lastAutoTrain = now;
+  const bought = autoTrain(state);
+  if (!bought) return;
+  refreshDay(state, todayKey());
+  state.daily.trains += bought;
+}
 
 function train(id, repeat = false) {
   const { count, total } = trainingPlan(id);

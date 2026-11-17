@@ -55,18 +55,18 @@ function snacksActive(on) {
 
 function dps(crowd = false) {
   const crit = g.critChance(state);
-  const avg = (3 * (1 + crit * 0.8) + 2.2) / 4;
+  const avg = (3 * (1 + crit * (g.critPower(state) - 1)) + 2.2) / 4;
   const tier = state.tier;
-  const cheer = tier >= 2 ? 1 + 0.5 * 6 / 15 : 1;
-  const sprint = tier >= 4 ? 1 + 0.5 * 6 / 18 : 1;
+  const cheer = tier >= 2 ? 1 + (g.cheerMult(state) - 1) * 6 / 15 : 1;
+  const sprint = tier >= 4 ? 1 + (g.sprintMult(state) - 1) * 6 / 18 : 1;
   const attackNow = g.attack(state);
   const player = attackNow * avg / g.interval(state) * sprint;
   let allies = 0;
   for (let slot = 0; slot < g.partySlots(state); slot++) if (state.party[slot]) allies += attackNow * g.allyPower(state, state.party[slot]) / g.ALLY_INTERVAL;
-  const pencil = tier >= 1 ? attackNow * 2 * (1 + 0.15 * Math.max(0, tier - 1)) / 8 * (crowd ? 3 : 1) : 0;
+  const pencil = tier >= 1 ? attackNow * g.skillPower(state) / 8 * (crowd ? 3 : 1) : 0;
   return (player + allies + pencil) * cheer;
 }
-function effectiveHp() { return g.maxHp(state) * (state.tier >= 3 ? 1.35 : 1); }
+function effectiveHp(ttk = 0) { return g.maxHp(state) * ((state.tier >= 3 ? 1.35 : 1) + g.regenRate(state) * ttk); }
 
 function fight(map, wave, hpNow, easy = 0) {
   return withFight(map, wave, () => {
@@ -81,7 +81,7 @@ function fight(map, wave, hpNow, easy = 0) {
     const crowd = wave < g.BOSS_WAVE;
     const damage = hits * baseHit(map, wave) * 0.64 ** easy * (crowd ? 0.73 : 1);
     const inTime = crowd || easy || ttk <= g.BOSS_TIME;
-    return { win: damage < hpNow * (state.tier >= 3 ? 1.35 : 1) && inTime, time: Math.min(ttk, crowd ? Infinity : g.BOSS_TIME) + 1.35 + (crowd ? 0.9 : 0), damage };
+    return { win: damage < hpNow * (state.tier >= 3 ? 1.35 : 1) + g.maxHp(state) * g.regenRate(state) * ttk && inTime, time: Math.min(ttk, crowd ? Infinity : g.BOSS_TIME) + 1.35 + (crowd ? 0.9 : 0), damage };
   });
 }
 
@@ -93,7 +93,7 @@ function canClearDungeon(id, level) {
   const total = g.atProgress(reached, 'hp') * dungeon.hp;
   const ttk = total / dps() + 4 * 0.3 + 1;
   const damage = (ttk / 1.9) * g.atProgress(reached, 'hit') * dungeon.hit * 0.75;
-  return ttk <= g.DUNGEON_TIME && damage < effectiveHp();
+  return ttk <= g.DUNGEON_TIME && damage < effectiveHp(ttk);
 }
 
 function tryPromote() {
@@ -102,7 +102,7 @@ function tryPromote() {
     const total = g.atProgress(reach, 'hp') * 2.6;
     const ttk = total / dps() + 1;
     const damage = (ttk / 1.9) * g.atProgress(reach, 'hit') * 1.15;
-    if (ttk > g.DUNGEON_TIME || damage >= effectiveHp()) return;
+    if (ttk > g.DUNGEON_TIME || damage >= effectiveHp(ttk)) return;
     state.tier++;
   }
 }
@@ -207,7 +207,7 @@ function buyTraining() {
   for (let guard = 0; guard < 10000; guard++) {
     const cost = id => g.trainingCost(state, id);
     const options = [];
-    for (const id of ['speed', 'focus']) if (state.training[id] < g.TRAINING[id].cap && cost(id) <= state.coins * 0.4) options.push([id, cost(id)]);
+    for (const id of ['speed', 'focus', 'critDmg', 'recover']) if (state.training[id] < g.TRAINING[id].cap && cost(id) <= state.coins * 0.4) options.push([id, cost(id)]);
     const power = cost('power');
     const health = cost('health');
     options.push(power <= health * 1.4 ? ['power', power] : ['health', health]);
@@ -215,6 +215,19 @@ function buyTraining() {
     if (price > state.coins) return;
     state.coins -= price;
     state.training[id]++;
+  }
+}
+
+function buyLevels() {
+  for (let guard = 0; guard < 5000; guard++) {
+    const options = [];
+    for (const id of state.party) if (id && g.allyTrainLevel(state, id) < g.allyTrainCap(state, id)) options.push(['ally', id, g.allyTrainCost(state, id)]);
+    for (const id of Object.keys(g.ACTIVE)) if (g.skillUnlocked(state, id) && g.skillLevel(state, id) < g.ACTIVE[id].lvCap) options.push(['skill', id, g.skillCost(state, id)]);
+    if (!options.length) return;
+    options.sort((a, b) => a[2] - b[2]);
+    const [kind, id, price] = options[0];
+    if (price > state.coins * 0.4) return;
+    if (kind === 'ally') g.trainAlly(state, id); else g.trainSkill(state, id);
   }
 }
 
@@ -300,6 +313,7 @@ while (time < total) {
   const hour = Math.floor(time / 3600) % 24;
   snacksActive(hour % 10 < 6);
   buyTraining();
+  buyLevels();
   upgradeGear();
   pullAll();
   spendGems();

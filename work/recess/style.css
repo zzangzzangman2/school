@@ -859,42 +859,80 @@ p, small, .item-body p, .muted { font-weight: 400; }
   .mate-grid, .shop-grid { gap: 6px; }
 }
 
-/* ════ 놀이 대결 연출: 주먹 스파크 대신 먼지 구름·의성어·종목 도구 ════ */
+/* 놀이 대결 효과와 종목 도구 */
 .impact.fx-dust::before, .impact.fx-cloud::before {
-  width: 70px; height: 52px; clip-path: none; border-radius: 50%;
-  background: radial-gradient(circle at 28% 62%, #fffdf6 0 20%, transparent 21%), radial-gradient(circle at 52% 40%, #f4efe3 0 24%, transparent 25%), radial-gradient(circle at 74% 64%, #fffdf6 0 19%, transparent 20%), radial-gradient(circle at 50% 70%, #e9e1d0 0 22%, transparent 23%);
-  filter: drop-shadow(0 2px 0 rgba(60, 40, 20, .25));
-  animation: dust-puff .45s ease-out both;
+  width: 88px; height: 66px; clip-path: none; border-radius: 0;
+  background: url('assets/fx-dust.webp') 0 50% / 600% 100% no-repeat;
+  animation: dust-puff .51s steps(6, end) both;
 }
-.impact.fx-cloud::before { width: 96px; height: 64px; }
-.impact.fx-dust.strong::before, .impact.fx-cloud.strong::before { width: 120px; height: 82px; }
-.impact.fx-dust.strong::after, .impact.fx-cloud.strong::after { border-style: dashed; border-color: rgba(255, 255, 255, .8); }
-@keyframes dust-puff { 0% { opacity: .95; scale: .35; } 45% { opacity: .9; scale: 1.05; } 100% { opacity: 0; scale: 1.25; translate: -50% -60%; } }
+.impact.fx-cloud::before { width: 112px; height: 84px; background-image: url('assets/fx-cloud.webp'); }
+.impact.fx-dust.strong::before, .impact.fx-cloud.strong::before { width: 128px; height: 96px; }
+.impact.fx-dust.strong::after, .impact.fx-cloud.strong::after { display: none; }
+.arena[data-motion='toss'] .impact.fx-dust::before { top: 88%; }
+@keyframes dust-puff { from { background-position-x: 0; } to { background-position-x: 120%; } }
 .onomatopoeia { position: absolute; left: 50%; top: 4%; translate: -50% 0; rotate: -8deg; color: #fff; font-size: 21px; font-weight: 700; white-space: nowrap; text-shadow: 0 2px 0 #c2412a, 1.5px 0 0 #c2412a, -1.5px 0 0 #c2412a, 0 -1.5px 0 #c2412a, 1px 1px 0 #c2412a, -1px -1px 0 #c2412a; animation: sound-pop .6s ease-out both; }
 .fx-spark .onomatopoeia { text-shadow: var(--ol-purple); }
 .strong .onomatopoeia { font-size: 27px; }
 @keyframes sound-pop { 0% { opacity: 0; scale: .5; } 25% { opacity: 1; scale: 1.15; } 70% { opacity: 1; scale: 1; } 100% { opacity: 0; translate: -50% -10px; } }
 
-/* 종목 도구가 날아간다 */
-.prop { position: absolute; z-index: 5; bottom: 46%; width: 24px; height: 24px; pointer-events: none; }
+/* 공은 호를 그리며 움직이고 딱지와 지우개는 바닥 놀이판에 놓인다. */
+.prop { position: absolute; z-index: 5; bottom: 46%; width: 32px; height: 32px; background: var(--contest-prop) center / contain no-repeat; pointer-events: none; }
 .prop.to-right { animation: prop-right .38s cubic-bezier(.3, .2, .6, 1) both; }
 .prop.to-left { animation: prop-left .38s cubic-bezier(.3, .2, .6, 1) both; }
 @keyframes prop-right { 0% { left: 34%; translate: 0 0; rotate: 0deg; } 50% { translate: 0 -34px; } 100% { left: 66%; translate: 0 6px; rotate: 300deg; } }
 @keyframes prop-left { 0% { left: 62%; translate: 0 0; rotate: 0deg; } 50% { translate: 0 -34px; } 100% { left: 30%; translate: 0 6px; rotate: -300deg; } }
-.prop-ddakji { border-radius: 3px; background: linear-gradient(45deg, transparent 46%, rgba(255, 255, 255, .7) 47% 53%, transparent 54%), linear-gradient(-45deg, transparent 46%, rgba(255, 255, 255, .7) 47% 53%, transparent 54%), linear-gradient(135deg, #ff6a4a 50%, #3a86e8 50%); box-shadow: 0 0 0 2px #fff, 0 2px 3px rgba(0, 0, 0, .3); }
-.prop-eraser { width: 24px; height: 14px; border-radius: 4px; background: linear-gradient(90deg, #fff 0 45%, #3a86e8 45% 100%); box-shadow: 0 0 0 1.5px #2a5fae, 0 2px 3px rgba(0, 0, 0, .3); }
-.prop-dodgeball { border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffb3a0 0 18%, transparent 19%), radial-gradient(circle, #f0566a 0 60%, #c9364f 61%); box-shadow: 0 2px 3px rgba(0, 0, 0, .3); }
-.prop-basketball { border-radius: 50%; background: linear-gradient(90deg, transparent 47%, #5a2a00 47% 53%, transparent 53%), linear-gradient(0deg, transparent 47%, #5a2a00 47% 53%, transparent 53%), radial-gradient(circle, #ff9a3d 0 62%, #d0651a 63%); box-shadow: 0 2px 3px rgba(0, 0, 0, .3); }
+.prop-ddakji, .arena[data-contest='ddakji'], .contest-chip[data-contest='ddakji'] { --contest-prop: url('assets/prop-ddakji.webp'); }
+.prop-eraser, .arena[data-contest='eraser'], .contest-chip[data-contest='eraser'] { --contest-prop: url('assets/prop-eraser.webp'); }
+.prop-dodgeball, .contest-chip:is([data-contest='dodge'], [data-contest='dodgeLeague']) { --contest-prop: url('assets/prop-dodgeball.webp'); }
+.prop-basketball, .contest-chip:is([data-contest='basket'], [data-contest='basketLeague']) { --contest-prop: url('assets/prop-basketball.webp'); }
+.prop-eraser { height: 19px; }
+.prop:is(.prop-ddakji, .prop-eraser).to-right { --from-x: 29%; --turn: 145deg; animation-name: prop-floor; }
+.prop:is(.prop-ddakji, .prop-eraser).to-left { --from-x: 64%; --turn: -145deg; animation-name: prop-floor; }
+@keyframes prop-floor {
+  0% { left: var(--from-x); bottom: 38%; rotate: 0deg; }
+  62% { left: 47%; bottom: 11%; rotate: var(--turn); }
+  82% { left: 47%; bottom: 16%; }
+  100% { left: 49%; bottom: 11%; rotate: 12deg; opacity: 0; }
+}
+.arena:is([data-contest='ddakji'], [data-contest='eraser']) .fight::before {
+  content: ''; position: absolute; z-index: 0; left: 50%; bottom: 9%; translate: -50% 0;
+  width: 49px; height: 25px; border: 1px dashed #fff0beab; border-radius: 50%; background-color: #dfbb6c20;
+}
+.arena:is([data-contest='ddakji'], [data-contest='eraser']) .fight::after {
+  content: ''; position: absolute; left: 50%; bottom: 10%; translate: -50% 0; rotate: 8deg;
+  width: 20px; height: 18px; background: var(--contest-prop) center / contain no-repeat;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .arena[data-motion='toss'] .fighter .sprite[data-pose='strike'] { --shift: 14px; }
+  .arena[data-motion='toss'] .fighter .sprite:is([data-pose='follow'], [data-pose='launch']) { --shift: 9px; }
+  .arena[data-motion='push'] .fighter .sprite[data-pose='strike'] { --shift: clamp(18px, 9vw, 41px); }
+}
 
 /* 지금 종목 칩 */
 .contest-chip { flex: 0 0 auto; padding-right: 8px; border-color: #ffd27a; background: rgba(90, 50, 10, .78); }
 .contest-chip b { color: #fff3c2; }
-.contest-mark { display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: linear-gradient(135deg, #ff6a4a 50%, #3a86e8 50%); box-shadow: 0 0 0 1.5px #fff; }
-.contest-chip[data-contest='eraser'] .contest-mark { height: 8px; border-radius: 2px; background: linear-gradient(90deg, #fff 50%, #3a86e8 50%); }
-.contest-chip[data-contest='dodge'] .contest-mark, .contest-chip[data-contest='dodgeLeague'] .contest-mark { border-radius: 50%; background: #f0566a; }
-.contest-chip[data-contest='basket'] .contest-mark, .contest-chip[data-contest='basketLeague'] .contest-mark { border-radius: 50%; background: #ff9a3d; }
+.contest-mark { display: inline-block; width: 15px; height: 15px; background: var(--contest-prop, none) center / contain no-repeat; }
 .contest-chip[data-contest='scuffle'] .contest-mark, .contest-chip[data-contest='ssireum'] .contest-mark, .contest-chip[data-contest='judo'] .contest-mark { border-radius: 50%; background: #f4efe3; }
+.contest-chip[data-contest='ssireum'] .contest-mark { border-radius: 0; background: url('assets/prop-satba.webp') center / contain no-repeat; }
 .contest-chip[data-contest='arm'] .contest-mark { border-radius: 6px 6px 2px 2px; background: #ffcf9a; }
-.contest-chip[data-contest='taekwondo'] .contest-mark, .contest-chip[data-contest='sparring'] .contest-mark { border-radius: 4px; background: linear-gradient(#3a86e8 50%, #f0566a 50%); }
+.contest-chip[data-contest='taekwondo'] { --contest-prop: url('assets/prop-headgear.webp'); }
+.contest-chip[data-contest='sparring'] { --contest-prop: url('assets/prop-glove.webp'); }
 .status-line .kill-bar { min-width: 0; }
 @media (max-width: 360px) { .contest-chip b { font-size: 9px; } }
+
+/* ════ 코인 성장: 자동 훈련, 실력 상승 표시, 동료 레벨업 ════ */
+.auto-train-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 8px; padding: 8px 10px; border-radius: 14px; background: #fff7e3; border: 1px solid #f1dfb4; }
+.auto-train-row p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.35; }
+.auto-train-row p b { display: block; color: var(--ink, #3b2f52); font-size: 13px; }
+.hud-power { position: relative; }
+.power-gain { position: absolute; left: 50%; top: 100%; z-index: 30; translate: -50% 0; padding: 1px 6px; border-radius: 8px; background: rgba(30, 120, 60, .85); color: #eaffd8; font-size: 11px; font-weight: 700; white-space: nowrap; pointer-events: none; animation: power-rise 1.1s ease-out both; }
+@keyframes power-rise { 0% { opacity: 0; translate: -50% 6px; } 18% { opacity: 1; translate: -50% 0; } 75% { opacity: 1; } 100% { opacity: 0; translate: -50% -8px; } }
+.party-slot .mate-card { gap: 3px; }
+.party-slot button.lvup { display: inline-flex; flex-direction: column; align-items: center; gap: 0; min-height: 34px; margin-bottom: 4px; padding: 2px 8px; background: linear-gradient(#ffd45c, #ffb21e); color: #5a3a00; line-height: 1.1; }
+.party-slot button.lvup small { font-size: 10px; font-weight: 700; }
+.party-slot button.lvup.short, .party-slot button.lvup:disabled { background: #ece6f0; color: #9b90ad; }
+.school-dialog { text-align: center; }
+.school-art { display: grid; place-items: end center; height: 150px; margin: -6px auto 6px; border-radius: 18px; background: radial-gradient(ellipse at 50% 85%, #ffe7a8 0 34%, transparent 35%), linear-gradient(#cfe8ff, #fff6dc); }
+.school-art .sprite { position: relative; width: 90px; height: 148px; background: var(--sprite-image) center bottom / contain no-repeat; }
+.school-dialog p { margin: 6px 0 14px; color: var(--muted); font-size: 13px; line-height: 1.5; }

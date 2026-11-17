@@ -189,6 +189,7 @@
         </div>
         <div class="subpanel" data-panel="train">
         <div class="section-head"><div><h2 id="training-title">훈련</h2><p>꾹 누르고 있으면 연속으로 올라가요.</p></div><div class="buy-mode" id="buy-mode" role="group" aria-label="한 번에 올릴 횟수"><button type="button" data-buy="1" aria-pressed="true">x1</button><button type="button" data-buy="10" aria-pressed="false">x10</button><button type="button" data-buy="max" aria-pressed="false">MAX</button></div></div>
+        <div class="auto-train-row"><p><b>자동 훈련</b> 코인이 모이면 가장 싼 훈련부터 알아서 올려요.</p><button type="button" class="auto-skill small" id="auto-train" role="switch" aria-checked="false" aria-label="자동 훈련"><span>자동</span><span class="switch"></span></button></div>
         <div class="stack" id="training-list"></div>
         <div class="section-head sub"><div><h3 class="subhead">오늘의 시간표</h3><p class="muted" id="class-note">1학년 반장에게 이기면 과목을 고를 수 있어요.</p></div></div>
         <div class="stack" id="class-list"></div>
@@ -304,10 +305,14 @@
     <div class="dialog-icon" aria-hidden="true"><svg><use href="#i-school"/></svg></div><h2 id="transfer-title">정말 전학 갈까요?</h2>
     <p class="transfer-gain"><i class="cur badge" aria-hidden="true"></i>명예 배지 <b id="transfer-gain">+0</b></p>
     <ul class="transfer-list">
-      <li class="reset"><b>처음부터</b>학교·맵, 레벨, 코인, 훈련</li>
-      <li class="keep"><b>그대로</b>장비·강화, 스티커, 뽑기권, 천 조각, 방과 후 학원, 출석·미션</li>
+      <li class="reset"><b>처음부터</b>학교·맵, 레벨, 코인, 훈련, 동료·스킬 레벨</li>
+      <li class="keep"><b>그대로</b>장비·강화, 스티커, 뽑기권, 천 조각, 동료(★)·승급, 보석, 방과 후 학원, 출석·미션</li>
     </ul>
     <div class="dialog-actions"><form method="dialog"><button class="confirm ghost-light">다음에</button></form><form method="dialog"><button class="confirm gold" id="transfer-confirm">전학 가기</button></form></div>
+  </dialog>
+  <dialog id="school-dialog" class="school-dialog" aria-labelledby="school-title">
+    <div class="school-art" aria-hidden="true"><span class="sprite" id="school-sprite" data-sprite="boy-middle"></span></div><h2 id="school-title">해솔중 진학!</h2><p id="school-text"></p>
+    <form method="dialog"><button class="confirm gold">좋아요</button></form>
   </dialog>
   <dialog id="attend-dialog" aria-labelledby="attend-dialog-title">
     <div class="dialog-icon" aria-hidden="true"><svg><use href="#i-calendar"/></svg></div><h2 id="attend-dialog-title">오늘의 출석 보상</h2><p>매일 들어와서 7일째 큰 보상을 받으세요.</p>

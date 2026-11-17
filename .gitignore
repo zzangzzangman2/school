@@ -12,3 +12,6 @@ work/*-inspect.jpg
 outputs/recess-king-source.zip
 __pycache__/
 *.pyc
+
+# 그림 작업 검토용 시트(용량 큼)
+work/art*-review-*.jpg

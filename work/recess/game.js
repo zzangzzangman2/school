@@ -64,7 +64,7 @@ const MAX_RANK = 30;
 const RANK_BONUS = 0.03;
 // ── 장기 성장: 6-3을 깨면 다음 년차로 넘어가며 적·보상이 지수적으로 커진다 ──
 // 2년차부터는 맵 하나 넘어갈 때마다 아래 비율로 이어서 커진다(1년차 마지막 보스 기준).
-const GROWTH = { hp: 1.24, hit: 1.23, coin: 1.25, xp: 1.03 };
+const GROWTH = { hp: 1.243, hit: 1.233, coin: 1.25, xp: 1.03 };
 const MILESTONE = 25;
 const COST_TAIL = 1.05;
 const GRADE_SCALING = [
@@ -82,6 +82,8 @@ const TRAINING = {
   health: { name: '체력 훈련', glyph: '♥', bonus: '최대 체력 +15', base: 18, cap: 1e9, scale: 1.13, milestone: true },
   speed: { name: '순발력 훈련', glyph: 'ϟ', bonus: '동작 간격 −0.04초', base: 31, cap: 11, scale: 1.31 },
   focus: { name: '집중력 훈련', glyph: '◎', bonus: '크리티컬 확률 +1%', base: 45, cap: 30, scale: 1.2 },
+  critDmg: { name: '크리티컬 파워 훈련', glyph: '✹', bonus: '크리티컬 피해 +5%', base: 80, cap: 60, scale: 1.25 },
+  recover: { name: '회복 훈련', glyph: '✚', bonus: '대결 중 초당 체력 회복 +0.1%', base: 50, cap: 30, scale: 1.3 },
 };
 const CLASSES = {
   gym: { name: '체육', glyph: '↗', bonus: '동작 간격 18% 단축' },
@@ -214,13 +216,16 @@ const COMPANIONS = {
 const ALLY_POWER = { common: 0.12, uncommon: 0.16, rare: 0.24, epic: 0.36, legend: 0.5 };
 const ALLY_OWNED = { common: 0.01, uncommon: 0.015, rare: 0.02, epic: 0.03, legend: 0.05 };
 const ALLY_INTERVAL = 1.6;
+const ALLY_TRAIN = { base: 40, scale: 1.14, step: 0.05, capBase: 20, capPerStar: 20 };
+const ALLY_RARITY_COST = { common: 1, uncommon: 1.5, rare: 2.5, epic: 4, legend: 6 };
+const CRIT_BASE = 1.8;
 
 // ── 액티브 스킬: 승급할 때마다 한 칸씩 열리고, 쿨타임이 돌면 자동으로 쓴다 ──
 const ACTIVE = {
-  pencil: { name: '딱지 연타', tier: 1, cd: 8, desc: '딱지를 연달아 쳐서 앞 상대와 뒤의 팀 모두를 몰아붙여요' },
-  cheer: { name: '응원 함성', tier: 2, cd: 15, dur: 6, desc: '6초 동안 나와 동료 파워 1.5배' },
-  lunch: { name: '급식 충전', tier: 3, cd: 12, desc: '체력 35% 회복' },
-  sprint: { name: '체육 대장', tier: 4, cd: 18, dur: 6, desc: '6초 동안 동작 속도 1.5배' },
+  pencil: { name: '딱지 연타', tier: 1, cd: 8, desc: '딱지를 연달아 쳐서 앞 상대와 뒤의 팀 모두를 몰아붙여요', lvBonus: '피해 +5%', lvBase: 120, lvScale: 1.2, lvCap: 60 },
+  cheer: { name: '응원 함성', tier: 2, cd: 15, dur: 6, desc: '6초 동안 나와 동료 파워 배율 증가', lvBonus: '배율 +0.01', lvBase: 300, lvScale: 1.2, lvCap: 50 },
+  lunch: { name: '급식 충전', tier: 3, cd: 12, desc: '체력을 크게 회복', lvBonus: '회복 +1%p', lvBase: 600, lvScale: 1.2, lvCap: 40 },
+  sprint: { name: '체육 대장', tier: 4, cd: 18, dur: 6, desc: '6초 동안 동작 속도 배율 증가', lvBonus: '배율 +0.01', lvBase: 1200, lvScale: 1.2, lvCap: 50 },
 };
 
 // ── 보석(유료 재화 자리)·상점·우편·퀘스트·성장 패스 ──
@@ -298,10 +303,17 @@ function fmt(value) {
   if (!Number.isFinite(number)) return '∞';
   if (Math.abs(number) < 100000) return number.toLocaleString('ko-KR');
   const tier = Math.floor(Math.log10(Math.abs(number)) / 4);
-  if (tier >= NUMBER_UNITS.length) return number.toExponential(2).replace('e+', 'e');
   const scaled = number / 10 ** (tier * 4);
   const shown = scaled >= 1000 ? Math.floor(scaled).toLocaleString('ko-KR') : scaled >= 100 ? String(Math.floor(scaled)) : String(Math.floor(scaled * (scaled >= 10 ? 10 : 100)) / (scaled >= 10 ? 10 : 100));
-  return `${shown}${NUMBER_UNITS[tier]}`;
+  return `${shown}${numberUnit(tier)}`;
+}
+// 무량대수(10^68) 다음은 A(10^72), B, … Z, AA, AB … 로 4자리씩 이어 간다
+function numberUnit(tier) {
+  if (tier < NUMBER_UNITS.length) return NUMBER_UNITS[tier];
+  let index = tier - NUMBER_UNITS.length;
+  let name = '';
+  do { name = String.fromCharCode(65 + (index % 26)) + name; index = Math.floor(index / 26) - 1; } while (index >= 0);
+  return name;
 }
 
 function newGame() {
@@ -320,7 +332,7 @@ function freshState() {
     cooldowns: {}, buffs: {}, autoSkills: true, quest: 0, stats: { pulls: 0, recruits: 0, dungeons: 0 },
     pass: { free: 0, premium: 0 }, premium: { pass: false, adFree: false, monthly: 0, bought: {} }, mail: [], mailSeq: 0,
     profile: null, level: 1, xp: 0, coins: 12, map: 0, wave: 0, wins: 0,
-    cleared: MAPS.map(() => false), training: { power: 0, health: 0, speed: 0, focus: 0 },
+    cleared: MAPS.map(() => false), training: Object.fromEntries(Object.keys(TRAINING).map(id => [id, 0])), allyLv: {}, skillLv: {}, autoTrain: false,
     tickets: WELCOME_TICKETS, stickers: {}, snacks: { choco: 0, banana: 0, berry: 0 }, speed: 1,
     attendance: { count: 0, last: '' }, daily: null, prestige: freshPrestige(), cycle: 0, totalClears: 0,
     bag: Object.values(STARTER_GEAR), equipped: { ...STARTER_GEAR }, ranks: {}, patches: 0,
@@ -391,7 +403,7 @@ function transfer(state) {
   const keep = {};
   for (const key of ['profile', 'wins', 'bag', 'equipped', 'ranks', 'patches', 'missions', 'classId', 'autoNext', 'autoSkill', 'skillId', 'sound',
     'tickets', 'stickers', 'snacks', 'speed', 'attendance', 'daily', 'totalClears', 'dungeons', 'dungeonResult',
-    'gems', 'recruits', 'companions', 'party', 'tier', 'autoSkills', 'quest', 'stats', 'pass', 'premium', 'mail', 'mailSeq']) keep[key] = state[key];
+    'gems', 'recruits', 'companions', 'party', 'tier', 'autoSkills', 'quest', 'stats', 'pass', 'premium', 'mail', 'mailSeq', 'autoTrain']) keep[key] = state[key];
   const before = state.prestige;
   Object.assign(state, newGame(), keep);
   state.prestige = { ...before, count: before.count + 1, badges: before.badges + gain, earned: before.earned + gain, best: Math.max(before.best, reached) };
@@ -399,6 +411,8 @@ function transfer(state) {
   state.log = [`${state.prestige.count}번째 전학! 새 학교 1-1 신발장 입구에서 다시 시작해요.`];
   return gain;
 }
+function critPower(state) { return CRIT_BASE + 0.05 * (state.training.critDmg || 0); }
+function regenRate(state) { return 0.001 * (state.training.recover || 0); }
 function critChance(state) { return Math.min(0.6, (state.training.focus || 0) * 0.01 + stickerBonus(state, 'crit')); }
 function coinUnit(state) { return Math.round((8 + 6 * gradeIndex(state.map) + 2 * (state.map % MAPS_PER_GRADE)) * cycleScale(state, 'coin')); }
 function pullCost(state) { return Math.round(30 * 1.22 ** clearedCount(state) * cycleScale(state, 'coin')); }
@@ -542,6 +556,14 @@ function contestId(state) {
   return cycle < CONTEST_PLAN.length ? CONTEST_PLAN[cycle][block] : LEAGUE_PLAN[(block + cycle) % LEAGUE_PLAN.length];
 }
 function contest(state) { return CONTESTS[contestId(state)]; }
+// 중학교부터는 종목에 맞는 대결장(체육관·씨름장·도장·링·농구장) 배경을 쓴다. 초등학교는 학교 곳곳 맵 그대로
+const VENUES = { dodgeLeague: 'm01', arm: 'm01', ssireum: 'm02', taekwondo: 'h01', judo: 'h01', sparring: 'h02', basketLeague: 'h04' };
+function venueMap(state) {
+  if (state.dungeon || (state.cycle || 0) < 1) return null;
+  const id = contestId(state);
+  return id === 'basketLeague' && state.cycle === 1 ? 'h03' : VENUES[id] || null;
+}
+function uniformSprite(gender, cycle) { return cycle >= 2 ? `${gender}-high` : cycle === 1 ? `${gender}-middle` : gender; }
 function dungeonInfo(id) { return id === 'trial' ? TRIAL : DUNGEONS[id]; }
 function dungeonReach(state) { return state.dungeon.id === 'trial' ? tierReq(state.dungeon.level) : dungeonProgress(state.dungeon.level); }
 function dungeonUnlocked(state, id) {
@@ -803,7 +825,7 @@ function strike(state, move, emit) {
   if (opening(state)) multiplier *= move === 'rush' ? 1.7 : 1.35;
   const chance = move === 'attack' && !blocked ? critChance(state) : 0;
   const lucky = chance > 0 && Math.random() < chance;
-  if (lucky) multiplier *= 1.8;
+  if (lucky) multiplier *= critPower(state);
   const damage = Math.round(attack(state) * multiplier * buffMult(state));
   const amount = Math.min(state.enemyHp, Math.max(1, damage));
   let overflow = Math.max(0, damage - state.enemyHp);
@@ -843,7 +865,7 @@ function queuePlayer(state, move, emit) {
   const skill = SKILLS[move];
   const windup = skill?.windup ?? 0.2;
   if (skill) state.charge -= skill.cost;
-  state.nextAttack = interval(state) / (state.buffs?.sprint > 0 ? 1.5 : 1);
+  state.nextAttack = interval(state) / (state.buffs?.sprint > 0 ? sprintMult(state) : 1);
   state.playerMove = { move, left: windup };
   emit?.('windup', { side: 'player', move, windup });
 }
@@ -886,6 +908,8 @@ function step(state, emit) {
     state.pause = Math.max(0, state.pause - STEP);
     return;
   }
+  const regen = regenRate(state);
+  if (regen > 0 && state.hp > 0) state.hp = Math.min(maxHp(state), state.hp + maxHp(state) * regen * STEP);
   if (state.dungeon) {
     state.dungeon.time -= STEP;
     if (state.dungeon.time <= 0) {
@@ -999,7 +1023,19 @@ function companionOwned(state) {
   return Object.entries(COMPANIONS).reduce((sum, [id, mate]) => sum + ALLY_OWNED[mate.rarity] * companionLevel(state, id), 0);
 }
 function partySlots(state) { return 1 + (state.tier >= 2 ? 1 : 0) + (state.tier >= 4 ? 1 : 0); }
-function allyPower(state, id) { return ALLY_POWER[COMPANIONS[id].rarity] * (1 + 0.15 * (companionLevel(state, id) - 1)); }
+function allyPower(state, id) { return ALLY_POWER[COMPANIONS[id].rarity] * (1 + 0.15 * (companionLevel(state, id) - 1)) * (1 + ALLY_TRAIN.step * allyTrainLevel(state, id)); }
+// 동료 레벨업(코인): 레벨마다 +5%, 최대 레벨은 별(겹친 수)마다 20씩 늘어난다. 동료 공격은 내 파워에 비례하므로 무한히 곱하지 않는다
+function allyTrainLevel(state, id) { return state.allyLv?.[id] || 0; }
+function allyTrainCap(state, id) { return companionLevel(state, id) ? ALLY_TRAIN.capBase + ALLY_TRAIN.capPerStar * companionLevel(state, id) : 0; }
+function allyTrainCost(state, id) { return Math.ceil(ALLY_TRAIN.base * ALLY_RARITY_COST[COMPANIONS[id].rarity] * ALLY_TRAIN.scale ** allyTrainLevel(state, id)); }
+function trainAlly(state, id) {
+  if (!state.companions[id] || allyTrainLevel(state, id) >= allyTrainCap(state, id)) return false;
+  const cost = allyTrainCost(state, id);
+  if (state.coins < cost) return false;
+  state.coins -= cost;
+  state.allyLv = { ...state.allyLv, [id]: allyTrainLevel(state, id) + 1 };
+  return true;
+}
 function allyDamage(state, id) { return attack(state) * allyPower(state, id); }
 function recruit(state, count, rng = Math.random) {
   const results = [];
@@ -1028,7 +1064,7 @@ function setParty(state, slot, id) {
   state.party[slot] = id;
   return true;
 }
-function buffMult(state) { return state.buffs?.cheer > 0 ? 1.5 : 1; }
+function buffMult(state) { return state.buffs?.cheer > 0 ? cheerMult(state) : 1; }
 
 // 앞 상대가 쓰러지면 다음 상대로, 넘친 피해는 이어서(관통). 무리가 다 쓰러지면 승리.
 function resolveKills(state, overflow, emit) {
@@ -1069,7 +1105,40 @@ function allyStrike(state, slot, emit) {
 
 // ── 액티브 스킬 ──
 function skillUnlocked(state, id) { return state.tier >= ACTIVE[id].tier; }
-function skillPower(state) { return 2 * (1 + 0.15 * Math.max(0, state.tier - 1)); }
+function skillPower(state) { return 2 * (1 + 0.15 * Math.max(0, state.tier - 1)) * (1 + 0.05 * skillLevel(state, 'pencil')); }
+// 스킬 레벨업(코인): 딱지 연타 피해 +5%, 응원 함성·체육 대장 배율 +0.01, 급식 충전 회복 +1%p
+function skillLevel(state, id) { return state.skillLv?.[id] || 0; }
+function skillCost(state, id) { return Math.ceil(ACTIVE[id].lvBase * ACTIVE[id].lvScale ** skillLevel(state, id)); }
+function cheerMult(state) { return 1.5 + 0.01 * skillLevel(state, 'cheer'); }
+function sprintMult(state) { return 1.5 + 0.01 * skillLevel(state, 'sprint'); }
+function lunchHeal(state) { return 0.35 + 0.01 * skillLevel(state, 'lunch'); }
+// 자동 훈련: 코인이 모이면 가장 싼 훈련부터 올린다(방치형 '자동 강화')
+function autoTrain(state, limit = 200) {
+  let bought = 0;
+  for (let guard = 0; guard < limit; guard++) {
+    let pick = null;
+    for (const id of Object.keys(TRAINING)) {
+      if (state.training[id] >= TRAINING[id].cap) continue;
+      const cost = trainingCost(state, id);
+      if (!pick || cost < pick[1]) pick = [id, cost];
+    }
+    if (!pick || pick[1] > state.coins) break;
+    const before = maxHp(state);
+    state.coins -= pick[1];
+    state.training[pick[0]]++;
+    if (pick[0] === 'health' && state.hp > 0) state.hp += maxHp(state) - before;
+    bought++;
+  }
+  return bought;
+}
+function trainSkill(state, id) {
+  if (!skillUnlocked(state, id) || skillLevel(state, id) >= ACTIVE[id].lvCap) return false;
+  const cost = skillCost(state, id);
+  if (state.coins < cost) return false;
+  state.coins -= cost;
+  state.skillLv = { ...state.skillLv, [id]: skillLevel(state, id) + 1 };
+  return true;
+}
 function castSkill(state, id, emit) {
   if (!skillUnlocked(state, id) || (state.cooldowns[id] || 0) > 0 || state.roundEnd || state.pause > 0) return false;
   state.cooldowns[id] = ACTIVE[id].cd;
@@ -1082,7 +1151,7 @@ function castSkill(state, id, emit) {
     sweepPack(state, damage, emit);
     resolveKills(state, overflow, emit);
   } else if (id === 'lunch') {
-    const heal = Math.round(maxHp(state) * 0.35);
+    const heal = Math.round(maxHp(state) * lunchHeal(state));
     state.hp = Math.min(maxHp(state), state.hp + heal);
     emit?.('active', { id, amount: heal });
   } else {
@@ -1208,7 +1277,13 @@ function claimPass(state) {
 
 function migrateFeatures(s) {
   const count = value => Number.isSafeInteger(value) && value >= 0;
-  if (s.training && typeof s.training === 'object' && s.training.focus === undefined) s.training.focus = 0;
+  if (s.training && typeof s.training === 'object') for (const id of Object.keys(TRAINING)) if (s.training[id] === undefined) s.training[id] = 0;
+  for (const key of ['allyLv', 'skillLv']) {
+    const levels = s[key] && typeof s[key] === 'object' && !Array.isArray(s[key]) ? s[key] : {};
+    const ids = key === 'allyLv' ? COMPANIONS : ACTIVE;
+    s[key] = Object.fromEntries(Object.keys(ids).filter(id => count(levels[id]) && levels[id] > 0).map(id => [id, levels[id]]));
+  }
+  if (typeof s.autoTrain !== 'boolean') s.autoTrain = false;
   if (!count(s.tickets)) s.tickets = WELCOME_TICKETS;
   const stickers = s.stickers && typeof s.stickers === 'object' ? s.stickers : {};
   s.stickers = Object.fromEntries(Object.keys(STICKERS).filter(id => count(stickers[id]) && stickers[id] > 0).map(id => [id, stickers[id]]));
@@ -1343,6 +1418,7 @@ function restore(snapshot) {
 
 if (typeof module !== 'undefined') {
   module.exports = {
+    skillPower, skillUnlocked, venueMap, uniformSprite, autoTrain, critPower, regenRate, allyTrainLevel, allyTrainCap, allyTrainCost, trainAlly, skillLevel, skillCost, cheerMult, sprintMult, lunchHeal, trainSkill, ALLY_TRAIN, CRIT_BASE,
     SCHOOLS, CONTESTS, schoolName, gradeLabel, placeLabel, contestId, contest,
     newGame, simulate, restore, trainingCost, maxHp, attack, enemyMaxHp, openFight, activateSkill, gearStats, nextMission, MAPS, GEAR, SLOTS, MAP_REWARDS, BOSS_REWARDS, TRAINING, SKILLS, makeProfile,
     trainingCostAt, enemyHit, winCoins, winXp, interval, critChance, prestigeGain, transfer, perkCost, PERKS, pullStickers, pullCost, progress, xpTarget,

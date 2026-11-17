@@ -45,3 +45,14 @@
 [data-map='d-coin'] { --map-image: url('assets/dungeon-store.webp'); }
 [data-map='d-ticket'] { --map-image: url('assets/dungeon-quiz.webp'); }
 [data-map='d-badge'] { --map-image: url('assets/dungeon-sports.webp'); }
+/* 중·고교 대결장 배경과 교복 모습(진학 축하) */
+[data-map='m01'] { --map-image: url('assets/map-m01.webp'); }
+[data-map='m02'] { --map-image: url('assets/map-m02.webp'); }
+[data-map='h01'] { --map-image: url('assets/map-h01.webp'); }
+[data-map='h02'] { --map-image: url('assets/map-h02.webp'); }
+[data-map='h03'] { --map-image: url('assets/map-h03.webp'); }
+[data-map='h04'] { --map-image: url('assets/map-h04.webp'); }
+[data-sprite='boy-middle'] { --sprite-image: url('assets/boy-middle.webp'); }
+[data-sprite='boy-high'] { --sprite-image: url('assets/boy-high.webp'); }
+[data-sprite='girl-middle'] { --sprite-image: url('assets/girl-middle.webp'); }
+[data-sprite='girl-high'] { --sprite-image: url('assets/girl-high.webp'); }

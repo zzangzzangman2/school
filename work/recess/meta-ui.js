@@ -156,6 +156,7 @@ function renderAllies() {
       const sprite = document.createElement('span');
       sprite.className = 'sprite';
       sprite.dataset.sprite = id;
+      sprite.dataset.spar = protectiveSprite(id);
       sprite.dataset.pose = 'ready';
       ally.append(sprite);
       return ally;
@@ -175,7 +176,7 @@ function onAlly(event) {
   allyPoses.set(String(event.slot), [{ pose: 'windup', until: now + 80 / rate }, { pose: 'strike', until: now + 260 / rate }]);
   if (!reducedMotion.matches) {
     const effect = document.createElement('span');
-    effect.className = 'impact ally-hit';
+    effect.className = `impact ally-hit fx-${contest(state).fx}`;
     effect.setAttribute('aria-hidden', 'true');
     const number = document.createElement('span');
     number.className = 'damage';
@@ -199,9 +200,21 @@ function renderSkillsPanel() {
   $('auto-actives').setAttribute('aria-checked', String(state.autoSkills));
   $('active-list').replaceChildren(...Object.entries(ACTIVE).map(([id, skill]) => {
     const open = skillUnlocked(state, id);
-    return row(ACTIVE_ICONS[id], skill.name, `${skill.desc} · 쿨타임 ${skill.cd}초`, open ? '사용' : '잠김', () => {
-      if (castSkill(state, id, combatEvent)) commit();
-    }, { tone: ACTIVE_TONES[id], level: open ? '해금' : `${tierName(skill.tier)} 승급`, kind: open ? 'equip' : '', disabled: !open, description: `${skill.name} ${open ? '사용' : '잠김'}` });
+    const level = skillLevel(state, id);
+    const maxed = level >= skill.lvCap;
+    const cost = skillCost(state, id);
+    const now = { pencil: `피해 ×${skillPower(state).toFixed(1)}`, cheer: `파워 ×${cheerMult(state).toFixed(2)}`, lunch: `회복 ${Math.round(lunchHeal(state) * 100)}%`, sprint: `속도 ×${sprintMult(state).toFixed(2)}` }[id];
+    const detail = open ? `${skill.desc} · 지금 ${now} · 쿨타임 ${skill.cd}초${maxed ? '' : ` · 레벨마다 ${skill.lvBonus}`}` : `${skill.desc} · 쿨타임 ${skill.cd}초`;
+    return row(ACTIVE_ICONS[id], skill.name, detail, !open ? '잠김' : maxed ? '최대' : '레벨업', () => {
+      if (!trainSkill(state, id)) return;
+      message(`${skill.name} Lv.${skillLevel(state, id)}`);
+      commit();
+    }, {
+      tone: ACTIVE_TONES[id], level: open ? `Lv.${level}/${skill.lvCap}` : `${tierName(skill.tier)} 승급`,
+      cost: open && !maxed ? { currency: 'coin', amount: fmt(cost), short: state.coins < cost } : null,
+      disabled: !open || maxed || state.coins < cost,
+      description: !open ? `${skill.name} 잠김` : maxed ? `${skill.name} 최대 레벨` : `${skill.name} 레벨업, 코인 ${fmt(cost)}개`,
+    });
   }));
   const move = SKILLS[state.skillId];
   $('ultimate-card').replaceChildren(row(ICONS.skills[state.skillId] || move.glyph, move.name, move.detail, '사용 중', () => {}, {
@@ -290,7 +303,7 @@ function mateCard(id) {
 function renderParty() {
   const slots = partySlots(state);
   setText('party-owned', `${Object.keys(state.companions).length} / ${Object.keys(COMPANIONS).length}명`);
-  setText('party-summary', `보유 효과 파워 +${Math.round(companionOwned(state) * 100)}% · 출전한 동료는 ${ALLY_INTERVAL}초마다 함께 대결해요.`);
+  setText('party-summary', `보유 효과 파워 +${Math.round(companionOwned(state) * 100)}% · 출전한 동료는 ${ALLY_INTERVAL}초마다 함께 대결해요. 코인으로 레벨업하면 레벨마다 +5%(★마다 최대 레벨 +20).`);
   $('party-slots').replaceChildren(...[0, 1, 2].map(slot => {
     const box = document.createElement('div');
     const id = state.party[slot];
@@ -306,13 +319,36 @@ function renderParty() {
     }
     const card = mateCard(id);
     const power = document.createElement('em');
-    power.textContent = `Lv.${companionLevel(state, id)} · 내 파워의 ${Math.round(allyPower(state, id) * 100)}%`;
+    const trained = allyTrainLevel(state, id);
+    const cap = allyTrainCap(state, id);
+    power.textContent = `★${companionLevel(state, id)} · Lv.${trained}/${cap} · 내 파워의 ${fmt(Math.round(allyPower(state, id) * 100))}%`;
+    const up = document.createElement('button');
+    up.type = 'button';
+    up.className = 'buy lvup';
+    const upCost = allyTrainCost(state, id);
+    if (trained >= cap) {
+      up.textContent = '최대';
+      up.disabled = true;
+      up.ariaLabel = `${COMPANIONS[id].name} 최대 레벨`;
+    } else {
+      const caption = document.createElement('small');
+      caption.textContent = '레벨업';
+      up.append(caption, costLabel('coin', fmt(upCost)));
+      up.classList.toggle('short', state.coins < upCost);
+      up.disabled = state.coins < upCost;
+      up.ariaLabel = `${COMPANIONS[id].name} 레벨업, 코인 ${fmt(upCost)}개`;
+    }
+    up.addEventListener('click', () => {
+      if (!trainAlly(state, id)) return;
+      message(`${COMPANIONS[id].name} Lv.${allyTrainLevel(state, id)}`);
+      commit();
+    });
     const out = document.createElement('button');
     out.type = 'button';
     out.textContent = '빼기';
     out.ariaLabel = `${COMPANIONS[id].name} 출전 빼기`;
     out.addEventListener('click', () => { setParty(state, slot, null); commit(); });
-    card.append(power, out);
+    card.append(power, up, out);
     box.append(card);
     return box;
   }));
@@ -329,7 +365,7 @@ function renderParty() {
     fill.style.width = `${level ? clamp((copies - prev) / (nextNeed - prev), 0, 1) * 100 : 0}%`;
     meter.append(fill);
     const info = document.createElement('em');
-    info.textContent = level ? `Lv.${level} · 보유 파워 +${(ALLY_OWNED[mate.rarity] * level * 100).toFixed(1)}%` : '미보유';
+    info.textContent = level ? `★${level} · Lv.${allyTrainLevel(state, id)} · 보유 파워 +${(ALLY_OWNED[mate.rarity] * level * 100).toFixed(1)}%` : '미보유';
     const button = document.createElement('button');
     button.type = 'button';
     const inParty = state.party.includes(id);
@@ -571,6 +607,12 @@ function bindMetaUI() {
   $('pass-claim').addEventListener('click', () => {
     const given = claimPass(state);
     if (Object.keys(given).length) message(`성장 패스 · ${giftLine(given)}`);
+    commit();
+  });
+  $('auto-train').addEventListener('click', () => {
+    state.autoTrain = !state.autoTrain;
+    message(state.autoTrain ? '자동 훈련을 켰어요. 코인이 모이면 알아서 올려요.' : '자동 훈련을 껐어요.');
+    if (state.autoTrain) runAutoTrain(true);
     commit();
   });
   $('auto-actives').addEventListener('click', () => {

@@ -62,7 +62,8 @@ function recolorClothes(base, mask, fabrics) {
 
 function renderOutfit(sprite, equipped) {
   const styles = CLOTHING_SLOTS.map(slot => GEAR[equipped[slot]]?.style || '');
-  const key = [sprite.dataset.sprite, sprite.dataset.pose, ...styles].join(':');
+  const arenaMode = sprite.closest('.arena')?.dataset.motion;
+  const key = [sprite.dataset.sprite, sprite.dataset.pose, ...styles, ...(arenaMode ? [arenaMode] : [])].join(':');
   if (displayedOutfits.get(sprite) === key) return;
   displayedOutfits.set(sprite, key);
   const active = styles.some(Boolean);

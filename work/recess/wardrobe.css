@@ -1,18 +1,30 @@
 [data-sprite='boy'][data-pose='ready'] { --wardrobe-base: url('assets/motion-boy-ready.webp'); --wardrobe-mask: url('assets/wardrobe-boy-ready.webp'); }
 [data-sprite='boy'][data-pose='step'] { --wardrobe-base: url('assets/motion-boy-step.webp'); --wardrobe-mask: url('assets/wardrobe-boy-step.webp'); }
-[data-sprite='boy'][data-pose='windup'] { --wardrobe-base: url('assets/motion-boy-windup.webp'); --wardrobe-mask: url('assets/wardrobe-boy-windup.webp'); }
-[data-sprite='boy'][data-pose='strike'] { --wardrobe-base: url('assets/motion-boy-strike.webp'); --wardrobe-mask: url('assets/wardrobe-boy-strike.webp'); }
-[data-sprite='boy'][data-pose='follow'] { --wardrobe-base: url('assets/motion-boy-follow.webp'); --wardrobe-mask: url('assets/wardrobe-boy-follow.webp'); }
+[data-sprite='boy'][data-pose='run'] { --wardrobe-base: url('assets/motion-boy-run.webp'); --wardrobe-mask: url('assets/wardrobe-boy-run.webp'); }
 [data-sprite='boy'][data-pose='hit'] { --wardrobe-base: url('assets/motion-boy-hit.webp'); --wardrobe-mask: url('assets/wardrobe-boy-hit.webp'); }
 [data-sprite='boy'][data-pose='down'] { --wardrobe-base: url('assets/motion-boy-down.webp'); --wardrobe-mask: url('assets/wardrobe-boy-down.webp'); }
 [data-sprite='boy'][data-pose='victory'] { --wardrobe-base: url('assets/motion-boy-victory.webp'); --wardrobe-mask: url('assets/wardrobe-boy-victory.webp'); }
-[data-sprite='boy'][data-pose='run'] { --wardrobe-base: url('assets/motion-boy-run.webp'); --wardrobe-mask: url('assets/wardrobe-boy-run.webp'); }
+.arena[data-motion='toss'] [data-sprite='boy'][data-pose='windup'] { --wardrobe-base: url('assets/motion-boy-toss-windup.webp'); --wardrobe-mask: url('assets/wardrobe-boy-toss-windup.webp'); }
+[data-sprite='boy'][data-pose='windup'] { --wardrobe-base: url('assets/motion-boy-toss-windup.webp'); --wardrobe-mask: url('assets/wardrobe-boy-toss-windup.webp'); }
+.arena[data-motion='toss'] [data-sprite='boy'][data-pose='strike'] { --wardrobe-base: url('assets/motion-boy-toss-strike.webp'); --wardrobe-mask: url('assets/wardrobe-boy-toss-strike.webp'); }
+[data-sprite='boy'][data-pose='strike'] { --wardrobe-base: url('assets/motion-boy-toss-strike.webp'); --wardrobe-mask: url('assets/wardrobe-boy-toss-strike.webp'); }
+.arena[data-motion='toss'] [data-sprite='boy'][data-pose='follow'] { --wardrobe-base: url('assets/motion-boy-toss-follow.webp'); --wardrobe-mask: url('assets/wardrobe-boy-toss-follow.webp'); }
+[data-sprite='boy'][data-pose='follow'] { --wardrobe-base: url('assets/motion-boy-toss-follow.webp'); --wardrobe-mask: url('assets/wardrobe-boy-toss-follow.webp'); }
+.arena[data-motion='push'] [data-sprite='boy'][data-pose='windup'] { --wardrobe-base: url('assets/motion-boy-push-windup.webp'); --wardrobe-mask: url('assets/wardrobe-boy-push-windup.webp'); }
+.arena[data-motion='push'] [data-sprite='boy'][data-pose='strike'] { --wardrobe-base: url('assets/motion-boy-push-strike.webp'); --wardrobe-mask: url('assets/wardrobe-boy-push-strike.webp'); }
+.arena[data-motion='push'] [data-sprite='boy'][data-pose='follow'] { --wardrobe-base: url('assets/motion-boy-push-follow.webp'); --wardrobe-mask: url('assets/wardrobe-boy-push-follow.webp'); }
 [data-sprite='girl'][data-pose='ready'] { --wardrobe-base: url('assets/motion-girl-ready.webp'); --wardrobe-mask: url('assets/wardrobe-girl-ready.webp'); }
 [data-sprite='girl'][data-pose='step'] { --wardrobe-base: url('assets/motion-girl-step.webp'); --wardrobe-mask: url('assets/wardrobe-girl-step.webp'); }
-[data-sprite='girl'][data-pose='windup'] { --wardrobe-base: url('assets/motion-girl-windup.webp'); --wardrobe-mask: url('assets/wardrobe-girl-windup.webp'); }
-[data-sprite='girl'][data-pose='strike'] { --wardrobe-base: url('assets/motion-girl-strike.webp'); --wardrobe-mask: url('assets/wardrobe-girl-strike.webp'); }
-[data-sprite='girl'][data-pose='follow'] { --wardrobe-base: url('assets/motion-girl-follow.webp'); --wardrobe-mask: url('assets/wardrobe-girl-follow.webp'); }
+[data-sprite='girl'][data-pose='run'] { --wardrobe-base: url('assets/motion-girl-run.webp'); --wardrobe-mask: url('assets/wardrobe-girl-run.webp'); }
 [data-sprite='girl'][data-pose='hit'] { --wardrobe-base: url('assets/motion-girl-hit.webp'); --wardrobe-mask: url('assets/wardrobe-girl-hit.webp'); }
 [data-sprite='girl'][data-pose='down'] { --wardrobe-base: url('assets/motion-girl-down.webp'); --wardrobe-mask: url('assets/wardrobe-girl-down.webp'); }
 [data-sprite='girl'][data-pose='victory'] { --wardrobe-base: url('assets/motion-girl-victory.webp'); --wardrobe-mask: url('assets/wardrobe-girl-victory.webp'); }
-[data-sprite='girl'][data-pose='run'] { --wardrobe-base: url('assets/motion-girl-run.webp'); --wardrobe-mask: url('assets/wardrobe-girl-run.webp'); }
+.arena[data-motion='toss'] [data-sprite='girl'][data-pose='windup'] { --wardrobe-base: url('assets/motion-girl-toss-windup.webp'); --wardrobe-mask: url('assets/wardrobe-girl-toss-windup.webp'); }
+[data-sprite='girl'][data-pose='windup'] { --wardrobe-base: url('assets/motion-girl-toss-windup.webp'); --wardrobe-mask: url('assets/wardrobe-girl-toss-windup.webp'); }
+.arena[data-motion='toss'] [data-sprite='girl'][data-pose='strike'] { --wardrobe-base: url('assets/motion-girl-toss-strike.webp'); --wardrobe-mask: url('assets/wardrobe-girl-toss-strike.webp'); }
+[data-sprite='girl'][data-pose='strike'] { --wardrobe-base: url('assets/motion-girl-toss-strike.webp'); --wardrobe-mask: url('assets/wardrobe-girl-toss-strike.webp'); }
+.arena[data-motion='toss'] [data-sprite='girl'][data-pose='follow'] { --wardrobe-base: url('assets/motion-girl-toss-follow.webp'); --wardrobe-mask: url('assets/wardrobe-girl-toss-follow.webp'); }
+[data-sprite='girl'][data-pose='follow'] { --wardrobe-base: url('assets/motion-girl-toss-follow.webp'); --wardrobe-mask: url('assets/wardrobe-girl-toss-follow.webp'); }
+.arena[data-motion='push'] [data-sprite='girl'][data-pose='windup'] { --wardrobe-base: url('assets/motion-girl-push-windup.webp'); --wardrobe-mask: url('assets/wardrobe-girl-push-windup.webp'); }
+.arena[data-motion='push'] [data-sprite='girl'][data-pose='strike'] { --wardrobe-base: url('assets/motion-girl-push-strike.webp'); --wardrobe-mask: url('assets/wardrobe-girl-push-strike.webp'); }
+.arena[data-motion='push'] [data-sprite='girl'][data-pose='follow'] { --wardrobe-base: url('assets/motion-girl-push-follow.webp'); --wardrobe-mask: url('assets/wardrobe-girl-push-follow.webp'); }
