@@ -782,6 +782,184 @@ function bindMetaUI() {
   $('offline-double').addEventListener('click', takeOfflineDouble);
   for (const id of ['profile-button', 'help']) $(id).addEventListener('click', () => $('settings-dialog').close());
   bindTestTools();
+  bindPartyBar();
+}
+
+// ── 대결 화면 출전 카드 4칸: 초상, 전열·후열, 남은 스킬 시간 ──
+// 평소: 카드를 누르면 동료 정보(스킬 자동을 끄면 준비된 카드를 눌러 바로 발동). 편성 모드: 두 칸을 차례로 눌러 자리 바꾸기
+let partyBarKey = '';
+let formationMode = false;
+let formationPick = null;
+let mateDialogSlot = null;
+
+function mateReady(slot) { return (state.cooldowns[`mate${slot}`] || 0) <= 0; }
+
+function partyCard(slot, open) {
+  const id = state.party[slot];
+  const row = slot < 2 ? '전열' : '후열';
+  const card = document.createElement('button');
+  card.type = 'button';
+  card.dataset.slot = slot;
+  card.className = `party-card ${slot < 2 ? 'front' : 'back'}${slot >= open ? ' locked' : id ? ' filled' : ' empty'}${formationPick === slot ? ' picked' : ''}`;
+  const tag = document.createElement('small');
+  tag.className = 'pc-tag';
+  tag.textContent = `${slot + 1}${row[0]}`;
+  card.append(tag);
+  if (slot >= open) {
+    const lock = document.createElement('span');
+    lock.className = 'pc-lock';
+    lock.textContent = '잠김';
+    card.append(lock);
+    card.ariaLabel = `${slot + 1}번 ${row} 잠김, ${PARTY_UNLOCK_TEXT[slot]}`;
+  } else if (!id) {
+    const plus = document.createElement('span');
+    plus.className = 'pc-plus';
+    plus.textContent = formationMode ? '빈칸' : '+';
+    card.append(plus);
+    card.ariaLabel = formationMode ? `${slot + 1}번 ${row} 빈 자리` : `${slot + 1}번 ${row} 빈 자리, 동료 출전시키기`;
+  } else {
+    const mate = COMPANIONS[id];
+    const face = document.createElement('span');
+    face.className = 'pc-face';
+    const cd = document.createElement('b');
+    cd.className = 'pc-cd';
+    face.append(mateFace(id), cd);
+    const info = document.createElement('span');
+    info.className = 'pc-info';
+    const name = document.createElement('b');
+    name.textContent = mate.name;
+    const status = document.createElement('small');
+    status.className = 'pc-status';
+    info.append(name, status);
+    card.append(face, info);
+    card.ariaLabel = `${slot + 1}번 ${row} ${mate.name}, ${mate.skill.name}`;
+  }
+  return card;
+}
+
+function renderPartyBar() {
+  const box = $('party-bar-slots');
+  const open = partySlots(state);
+  const auto = state.autoMates !== false;
+  const key = [open, state.party.join(','), formationMode, formationPick, auto].join('|');
+  if (key !== partyBarKey) {
+    partyBarKey = key;
+    box.replaceChildren(...Array.from({ length: PARTY_MAX }, (_, slot) => partyCard(slot, open)));
+    $('party-bar').classList.toggle('arranging', formationMode);
+    $('mate-auto').setAttribute('aria-checked', String(auto));
+    $('party-arrange').textContent = formationMode ? '완료' : '편성';
+    $('party-arrange').setAttribute('aria-pressed', String(formationMode));
+  }
+  for (const card of box.children) {
+    const slot = Number(card.dataset.slot);
+    const id = state.party[slot];
+    if (!id || slot >= open) continue;
+    const left = Math.max(0, state.cooldowns[`mate${slot}`] || 0);
+    const ready = left <= 0;
+    card.style.setProperty('--cd', `${clamp(left / COMPANIONS[id].skill.cd, 0, 1) * 360}deg`);
+    card.classList.toggle('ready', ready);
+    const status = ready ? (auto ? '스킬 준비' : '눌러 발동') : COMPANIONS[id].skill.name; // 남은 초는 얼굴 위 숫자
+    const label = card.querySelector('.pc-status');
+    if (label.textContent !== status) label.textContent = status;
+    const count = ready ? '' : String(Math.ceil(left));
+    const cd = card.querySelector('.pc-cd');
+    if (cd.textContent !== count) cd.textContent = count;
+  }
+  if (mateDialogSlot !== null && $('mate-dialog').open) fillMateDialog(mateDialogSlot);
+}
+
+function onPartyCard(slot) {
+  const open = partySlots(state);
+  if (slot >= open) {
+    message(`${slot + 1}번 칸은 ${PARTY_UNLOCK_TEXT[slot]}`);
+    return;
+  }
+  const id = state.party[slot];
+  if (formationMode) {
+    if (formationPick === null) {
+      if (id) formationPick = slot;
+      else message('먼저 옮길 동료 카드를 누르세요');
+    } else if (formationPick === slot) {
+      formationPick = null;
+    } else {
+      const from = formationPick;
+      formationPick = null;
+      if (swapParty(state, from, slot)) message(`${from + 1}번 ↔ ${slot + 1}번 자리를 바꿨어요`);
+      commit();
+      return;
+    }
+    render();
+    return;
+  }
+  if (!id) {
+    openView('party');
+    return;
+  }
+  if (state.autoMates === false && mateReady(slot) && useMate(state, slot, combatEvent)) {
+    commit();
+    return;
+  }
+  showMateDialog(slot);
+}
+
+function fillMateDialog(slot) {
+  const id = state.party[slot];
+  if (!id) return;
+  const mate = COMPANIONS[id];
+  const left = Math.max(0, state.cooldowns[`mate${slot}`] || 0);
+  $('mate-dialog-art').dataset.portrait = mate.portrait || mate.sprite;
+  setText('mate-dialog-meta', `${slot + 1}번 · ${slot < 2 ? '전열' : '후열'} · ${GRADES[mate.grade].name} · ${mate.style}`);
+  setText('mate-dialog-name', mate.name);
+  const star = starLine(id);
+  setText('mate-dialog-stars', `${star.textContent} · Lv.${allyTrainLevel(state, id)} · 내 파워의 ${fmt(Math.round(allyPower(state, id) * 100))}%`);
+  setText('mate-dialog-skill', mate.skill.name);
+  setText('mate-dialog-desc', mate.skill.desc);
+  setText('mate-dialog-cd', `쿨타임 ${mate.skill.cd}초 · ${left > 0 ? `${Math.ceil(left)}초 남음` : '준비됨'}${state.autoMates === false ? '' : ' · 자동 사용 중'}`);
+  const use = $('mate-dialog-use');
+  use.hidden = state.autoMates !== false;
+  use.disabled = left > 0;
+}
+
+function showMateDialog(slot) {
+  mateDialogSlot = slot;
+  fillMateDialog(slot);
+  $('mate-dialog').showModal();
+}
+
+function bindPartyBar() {
+  $('party-bar-slots').addEventListener('click', event => {
+    const card = event.target.closest('.party-card');
+    if (card) onPartyCard(Number(card.dataset.slot));
+  });
+  $('mate-auto').addEventListener('click', () => {
+    state.autoMates = state.autoMates === false;
+    message(state.autoMates ? '동료 스킬을 자동으로 써요.' : '동료 스킬을 직접 써요. 준비된 카드를 누르세요.');
+    commit();
+  });
+  $('party-arrange').addEventListener('click', () => {
+    formationMode = !formationMode;
+    formationPick = null;
+    if (formationMode) message('바꿀 두 칸을 차례로 누르세요. 1·2번은 전열, 3·4번은 후열이에요.');
+    render();
+  });
+  $('mate-dialog-use').addEventListener('click', () => {
+    if (mateDialogSlot !== null && useMate(state, mateDialogSlot, combatEvent)) {
+      $('mate-dialog').close();
+      commit();
+    }
+  });
+  $('mate-dialog-move').addEventListener('click', () => {
+    formationMode = true;
+    formationPick = mateDialogSlot;
+    $('mate-dialog').close();
+    message('옮길 자리를 누르세요.');
+    render();
+  });
+  $('mate-dialog-party').addEventListener('click', () => {
+    $('mate-dialog').close();
+    openView('party');
+  });
+  $('mate-dialog').addEventListener('close', () => { mateDialogSlot = null; });
 }
 
 // ── 테스트 도구: 주소에 ?test를 붙여 열면(설정 → 테스트 모드) 진짜 저장과 따로 놀면서 기능을 바로 확인한다 ──

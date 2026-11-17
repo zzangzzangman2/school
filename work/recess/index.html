@@ -155,6 +155,14 @@
       </div>
     </section>
 
+    <div class="party-bar" id="party-bar" role="group" aria-label="출전 동료">
+      <div class="party-bar-slots" id="party-bar-slots"></div>
+      <div class="party-bar-side">
+        <button type="button" class="pb-toggle" id="mate-auto" role="switch" aria-checked="true" aria-label="동료 스킬 자동 사용">자동</button>
+        <button type="button" class="pb-toggle" id="party-arrange" aria-pressed="false" aria-label="출전 자리 편성">편성</button>
+      </div>
+    </div>
+
     <div class="quest-bar">
       <div class="loot-offer" id="first-loot" hidden><span class="loot-icon" aria-hidden="true"><svg><use href="#i-gift"/></svg></span><div><small>첫 장비 획득!</small><b>별무늬 손목띠 <em>파워 +4</em></b></div><button type="button" id="equip-first">바로 장착</button></div>
       <div class="objective">
@@ -356,6 +364,19 @@
       <button type="button" data-test="boss">이 경기장 보스로</button>
     </div>
     <p class="test-note" id="test-note" role="status"></p>
+    <form method="dialog"><button class="confirm">닫기</button></form>
+  </dialog>
+  <dialog id="mate-dialog" class="mate-dialog" aria-labelledby="mate-dialog-name">
+    <div class="mate-dialog-art"><span class="portrait-figure" id="mate-dialog-art" aria-hidden="true"></span></div>
+    <p class="mate-dialog-meta" id="mate-dialog-meta"></p>
+    <h2 id="mate-dialog-name"></h2>
+    <p class="mate-stars" id="mate-dialog-stars"></p>
+    <div class="mate-dialog-skill"><b id="mate-dialog-skill"></b><p id="mate-dialog-desc"></p><small id="mate-dialog-cd"></small></div>
+    <div class="mate-dialog-actions">
+      <button type="button" id="mate-dialog-use">지금 쓰기</button>
+      <button type="button" id="mate-dialog-move">자리 바꾸기</button>
+      <button type="button" id="mate-dialog-party">동료 탭</button>
+    </div>
     <form method="dialog"><button class="confirm">닫기</button></form>
   </dialog>
   <dialog id="portrait-dialog" class="portrait-dialog" aria-labelledby="portrait-title">

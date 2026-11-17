@@ -1360,6 +1360,7 @@ function render() {
   renderMetaHud();
   renderActives();
   renderAllies();
+  renderPartyBar();
   const viewModels = {
     battle: [state.log, state.dungeons, state.daily?.keys, Boolean(state.dungeon), state.totalClears, state.prestige.count, state.prestige.perks, state.stickers],
     training: [growthTab, Object.keys(TRAINING).map(id => { const plan = trainingPlan(id); return [plan.count, plan.total, state.coins >= plan.total]; }), state.training, firstGradeWon(state), state.classId, buyMode, state.tier, state.level, state.prestige, state.autoSkills, state.autoTrain, state.skillLv, Object.keys(ACTIVE).map(id => state.coins >= skillCost(state, id)), state.skillId, Boolean(state.dungeon), bestProgress(state)],

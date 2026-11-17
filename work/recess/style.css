@@ -1055,3 +1055,51 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .party-slot.filled .mate-style { top: 22px; }
 /* 달려간 동료가 상대 그림 뒤로 숨지 않게 동료 줄을 앞에 그린다(대기 자리는 주인공과 몸이 겹치지 않음) */
 .allies { z-index: 2; }
+/* ════ 대결 화면 출전 카드 4칸(초상·전열/후열·스킬 쿨타임), 편성 모드, 동료 정보 창 ════ */
+/* 새 줄 높이만큼 아래 목록이 양보해서 대결 칸 크기는 그대로(대결 2.1 : 목록 1) */
+.game { grid-template-rows: minmax(292px, 2.1fr) auto auto minmax(150px, 1fr) auto; }
+.party-bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px; padding: 5px 8px 0; background: var(--night); }
+.party-bar-slots { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.party-card { position: relative; display: flex; align-items: center; gap: 4px; min-width: 0; height: 42px; padding: 3px 4px 3px 3px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, .18); background: rgba(255, 255, 255, .07); color: #fff; text-align: left; }
+.party-card .pc-tag { position: absolute; z-index: 2; left: -1px; top: -1px; padding: 0 3px; border-radius: 9px 0 7px 0; color: #fff; font-size: 8px; font-weight: 900; line-height: 13px; }
+.party-card.front .pc-tag { background: #f08a24; }
+.party-card.back .pc-tag { background: #3d86e0; }
+.pc-face { position: relative; flex: 0 0 34px; height: 34px; overflow: hidden; border-radius: 8px; background: rgba(255, 255, 255, .12); }
+.pc-face > span { position: absolute; inset: 0; width: 100%; height: 100%; background-position: center 9%; background-size: 200% auto; }
+.pc-face > span.sprite { background-image: var(--sprite-image); background-size: 160% auto; }
+.pc-face::after { content: ""; position: absolute; inset: 0; background: conic-gradient(rgba(14, 8, 28, .7) var(--cd, 0deg), transparent 0); pointer-events: none; }
+.pc-cd { position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; font-size: 13px; font-weight: 900; text-shadow: var(--ol-dark); }
+.pc-info { display: grid; gap: 1px; min-width: 0; }
+.pc-info b { overflow: hidden; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.pc-status { color: #d9cbff; font-size: 9px; white-space: nowrap; }
+.party-card.ready { border-color: #ffd36b; box-shadow: 0 0 8px rgba(255, 211, 107, .55); }
+.party-card.ready .pc-status { color: #ffe27a; font-weight: 800; }
+.party-card.empty { justify-content: center; border-style: dashed; color: rgba(255, 255, 255, .6); }
+.party-card.locked { justify-content: center; opacity: .45; }
+.pc-plus { font-size: 18px; font-weight: 800; line-height: 1; }
+.party-card.empty .pc-plus:not(:only-of-type) { font-size: 10px; }
+.pc-lock { font-size: 10px; font-weight: 700; }
+.party-bar.arranging .party-card:not(.locked) { border-style: dashed; border-color: #7cf0c0; animation: pc-wiggle .9s ease-in-out infinite; }
+.party-bar.arranging .party-card.picked { border-style: solid; background: rgba(124, 240, 192, .22); box-shadow: 0 0 0 2px #7cf0c0; animation: none; }
+@keyframes pc-wiggle { 0%, 100% { rotate: 0deg; } 25% { rotate: -1.2deg; } 75% { rotate: 1.2deg; } }
+.party-bar-side { display: grid; gap: 4px; align-content: center; }
+.pb-toggle { min-width: 42px; height: 19px; padding: 0 6px; border: 0; border-radius: 7px; background: rgba(255, 255, 255, .12); color: #d9cbff; font-size: 10px; font-weight: 800; }
+.pb-toggle[aria-checked='true'] { background: linear-gradient(#62d892, #2fae66); color: #fff; }
+.pb-toggle[aria-pressed='true'] { background: linear-gradient(#7cf0c0, #2fae8a); color: #0b2b22; }
+@media (max-width: 360px) { .pc-info { display: none; } .party-card { justify-content: center; } }
+@media (prefers-reduced-motion: reduce) { .party-bar.arranging .party-card { animation: none; } }
+.mate-dialog { width: min(92vw, 360px); text-align: center; }
+.mate-dialog-art { height: 200px; margin: -6px -6px 6px; border-radius: 14px; background: linear-gradient(#f3ecff, #fff); }
+.mate-dialog-art .portrait-figure { width: 100%; height: 100%; background-position: center top; background-size: auto 150%; }
+.mate-dialog-meta { margin: 0; color: var(--muted); font-size: 11px; font-weight: 700; }
+.mate-dialog h2 { margin: 2px 0; font-size: 20px; }
+.mate-dialog .mate-stars { margin: 0 0 8px; font-size: 12px; }
+.mate-dialog-skill { padding: 8px 10px; border-radius: 12px; background: #f6f1ff; text-align: left; }
+.mate-dialog-skill b { color: #5236c9; font-size: 14px; }
+.mate-dialog-skill p { margin: 3px 0; font-size: 12px; line-height: 1.45; }
+.mate-dialog-skill small { color: var(--muted); font-size: 11px; }
+.mate-dialog-actions { display: flex; gap: 6px; margin-top: 10px; }
+.mate-dialog-actions button { flex: 1; min-height: 36px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: inherit; font-size: 12px; font-weight: 700; }
+.mate-dialog-actions button[hidden] { display: none; }
+#mate-dialog-use { border: 0; background: linear-gradient(#ffcf5a, #f29a00); color: #fff; text-shadow: 0 1px 0 rgba(120, 60, 0, .5); }
+#mate-dialog-use:disabled { background: #ebe5ee; color: #8d849a; text-shadow: none; }

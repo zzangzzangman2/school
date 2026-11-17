@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -91,6 +92,38 @@ with sync_playwright() as playwright:
     page.clock.run_for(1200)
     back = page.evaluate("(() => { const a = document.querySelector('#allies .ally[data-slot=\"1\"]'); return [a.style.translate, a.classList.contains('running'), a.firstElementChild.dataset.pose]; })()")
     assert back[0] in ('0px', '0px 0px') and not back[1] and back[2] == 'ready', back
+
+    # 대결 화면 출전 카드 4칸: 전열·후열 표시, 남은 스킬 시간, 편성 모드로 자리 바꾸기(쿨타임도 함께), 정보 창, 자동 끄고 직접 발동
+    page.evaluate('window.partyBackup = structuredClone(state)')
+    page.clock.run_for(100)
+    expect(page.locator('#party-bar .party-card')).to_have_count(4)
+    assert page.evaluate("[...document.querySelectorAll('#party-bar .pc-tag')].map(e => e.textContent)") == ['1전', '2전', '3후', '4후']
+    expect(page.locator('#party-bar .party-card').nth(0)).to_have_class(re.compile('empty'))
+    page.evaluate("state.cooldowns = { mate3: 6 }; state.allyTimers = [1.1, 1.5, 1.9, 2.3]; commit()")
+    page.clock.run_for(100)
+    expect(page.locator('#party-bar .party-card').nth(3).locator('.pc-cd')).to_have_text(re.compile(r'^[56]$'))
+    page.get_by_role('button', name='출전 자리 편성').click()
+    page.locator('#party-bar .party-card').nth(3).click()
+    page.locator('#party-bar .party-card').nth(0).click()
+    swapped = page.evaluate("[state.party[0], state.party[3], state.cooldowns.mate0, state.cooldowns.mate3 || 0]")
+    assert swapped[:2] == ["mate8", None] and swapped[2] > 4 and swapped[3] == 0, swapped
+    page.get_by_role('button', name='출전 자리 편성').click()
+    page.locator('#party-bar .party-card').nth(1).click()
+    expect(page.locator('#mate-dialog')).to_be_visible()
+    expect(page.locator('#mate-dialog-name')).to_have_text('정하린')
+    expect(page.locator('#mate-dialog-meta')).to_contain_text('2번 · 전열')
+    page.locator('#mate-dialog').get_by_role('button', name='닫기').click()
+    page.get_by_role('switch', name='동료 스킬 자동 사용').click()
+    assert page.evaluate('state.autoMates') is False
+    page.evaluate("state.cooldowns.mate1 = 0; state.hp = maxHp(state); commit()")
+    page.clock.run_for(1500)
+    assert page.evaluate('state.cooldowns.mate1 || 0') == 0
+    cast = page.evaluate("(() => { for (let i = 0; i < 80 && (state.roundEnd || state.pause > 0 || state.enemyHp <= 0); i++) simulate(state, 0.05, combatEvent); document.querySelector('#party-bar .party-card[data-slot=\"1\"]').click(); return state.cooldowns.mate1; })()")
+    assert cast > 10, cast
+    page.get_by_role('switch', name='동료 스킬 자동 사용').click()
+    assert page.evaluate('state.autoMates') is True
+    # 위 대결 진행으로 2승째 '첫 장비 획득' 안내가 퀘스트 줄을 가리지 않게 승수를 넘겨 둔다
+    page.evaluate('Object.assign(state, window.partyBackup); state.wins = Math.max(state.wins, 3); commit()')
     page.evaluate("delete state.test; state.party = ['mate1', null, null, null]; state.allyTimers = [1.1, 1.5, 1.9, 2.3]; state.cooldowns = {}; commit()")
 
     # 퀘스트: 힘 훈련 Lv.3 → 받기 → 보석

@@ -384,7 +384,7 @@ function newGame() {
 function freshState() {
   return {
     dungeons: Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, 0])), dungeon: null, dungeonResult: null, front: null, pack: [],
-    gems: 0, recruits: 0, companions: {}, mateShards: {}, mateGrade: 1, party: [null, null, null, null], allyTimers: [1.1, 1.5, 1.9, 2.3], mateBuffs: {}, shield: 0, tier: 0,
+    gems: 0, recruits: 0, companions: {}, mateShards: {}, mateGrade: 1, autoMates: true, party: [null, null, null, null], allyTimers: [1.1, 1.5, 1.9, 2.3], mateBuffs: {}, shield: 0, tier: 0,
     cooldowns: {}, buffs: {}, autoSkills: true, quest: 0, stats: { pulls: 0, recruits: 0, dungeons: 0 },
     pass: { free: 0, premium: 0 }, premium: { pass: false, adFree: false, monthly: 0, bought: {} }, mail: [], mailSeq: 0,
     profile: null, level: 1, xp: 0, coins: 12, map: 0, wave: 0, wins: 0,
@@ -459,7 +459,7 @@ function transfer(state) {
   const keep = {};
   for (const key of ['profile', 'wins', 'bag', 'equipped', 'ranks', 'patches', 'missions', 'classId', 'autoNext', 'autoSkill', 'skillId', 'sound',
     'tickets', 'stickers', 'snacks', 'speed', 'attendance', 'daily', 'totalClears', 'dungeons', 'dungeonResult',
-    'gems', 'recruits', 'companions', 'mateShards', 'mateGrade', 'test', 'party', 'tier', 'autoSkills', 'quest', 'stats', 'pass', 'premium', 'mail', 'mailSeq', 'autoTrain']) keep[key] = state[key];
+    'gems', 'recruits', 'companions', 'mateShards', 'mateGrade', 'autoMates', 'test', 'party', 'tier', 'autoSkills', 'quest', 'stats', 'pass', 'premium', 'mail', 'mailSeq', 'autoTrain']) keep[key] = state[key];
   const before = state.prestige;
   Object.assign(state, newGame(), keep);
   state.prestige = { ...before, count: before.count + 1, badges: before.badges + gain, earned: before.earned + gain, best: Math.max(before.best, reached) };
@@ -1069,7 +1069,7 @@ function step(state, emit) {
     tickBleed(state, emit);
     if (state.roundEnd || state.pause > 0) return;
     for (let slot = 0; slot < partySlots(state); slot++) {
-      if (!state.party[slot] || (state.cooldowns[`mate${slot}`] || 0) > 0) continue;
+      if (state.autoMates === false || !state.party[slot] || (state.cooldowns[`mate${slot}`] || 0) > 0) continue;
       if (castMate(state, slot, emit) && (state.roundEnd || state.pause > 0)) return;
     }
     autoCast(state, emit);
@@ -1286,8 +1286,24 @@ function allyStrike(state, slot, emit) {
   resolveKills(state, overflow, emit);
 }
 
-// ── 동료 스킬: 출전한 동료가 각자 쿨타임마다 자동으로 쓴다 ──
+// ── 동료 스킬: 출전한 동료가 각자 쿨타임마다 자동으로 쓴다(state.autoMates를 끄면 출전 카드를 눌러 직접) ──
 function mateScale(state, id) { return (1 + STAR_STEP * (companionLevel(state, id) - 1)) * (1 + ALLY_TRAIN.step * allyTrainLevel(state, id)); }
+// 직접 쓰기: 자동과 같은 쿨타임. 대결 중일 때만(다음 상대가 들어오는 중이거나 판이 끝났으면 안 됨)
+function useMate(state, slot, emit) {
+  if (slot < 0 || slot >= partySlots(state) || !state.party[slot] || (state.cooldowns[`mate${slot}`] || 0) > 0 || state.roundEnd || state.pause > 0 || state.enemyHp <= 0) return false;
+  return castMate(state, slot, emit);
+}
+// 출전 자리 바꾸기: 동료와 함께 스킬 쿨타임·공격 박자도 옮긴다(자리를 바꿔 쿨타임을 지우지 못하게)
+function swapParty(state, a, b) {
+  const open = partySlots(state);
+  if (a === b || a < 0 || b < 0 || a >= open || b >= open || (!state.party[a] && !state.party[b])) return false;
+  [state.party[a], state.party[b]] = [state.party[b], state.party[a]];
+  const left = state.cooldowns[`mate${a}`] || 0;
+  state.cooldowns[`mate${a}`] = state.cooldowns[`mate${b}`] || 0;
+  state.cooldowns[`mate${b}`] = left;
+  [state.allyTimers[a], state.allyTimers[b]] = [state.allyTimers[b] ?? ALLY_INTERVAL, state.allyTimers[a] ?? ALLY_INTERVAL];
+  return true;
+}
 function mateBuff(state, key) { const buff = state.mateBuffs?.[key]; return buff && buff.t > 0 ? buff.v : 0; }
 function castMate(state, slot, emit) {
   const id = state.party[slot];
@@ -1584,6 +1600,7 @@ function migrateFeatures(s) {
   if (!Number.isFinite(s.shield) || s.shield < 0) s.shield = 0;
   if (s.profile && typeof s.profile === 'object') s.profile.gender = 'boy'; // 주인공은 남자로 고정(사용자 결정)
   if (typeof s.autoSkills !== 'boolean') s.autoSkills = true;
+  if (typeof s.autoMates !== 'boolean') s.autoMates = true;
   s.stats = isObject(s.stats) ? s.stats : {};
   for (const key of ['pulls', 'recruits', 'dungeons']) if (!count(s.stats[key])) s.stats[key] = 0;
   s.pass = isObject(s.pass) ? { free: count(s.pass.free) ? s.pass.free : 0, premium: count(s.pass.premium) ? s.pass.premium : 0 } : { free: 0, premium: 0 };
@@ -1698,7 +1715,7 @@ function restore(snapshot) {
 
 if (typeof module !== 'undefined') {
   module.exports = {
-    castMate, mateScale, mateBuff, mateSkillDps, PARTY_MAX, PARTY_UNLOCKS, PARTY_UNLOCK_TEXT, LEGACY_MATES, BOSS_SPRITES, REGION_ROUNDS, REGION_START, regionIndex, regionRound, lastRound, roundTag, stageLabel, skillPower, skillUnlocked, venueMap, stagePlace, stageNames, stageArt, regionConquered, REGIONS, ZONES, ACADEMY, autoTrain, critPower, regenRate, allyTrainLevel, allyTrainCap, allyTrainCost, trainAlly, skillLevel, skillCost, cheerMult, sprintMult, lunchHeal, trainSkill, ALLY_TRAIN, CRIT_BASE,
+    castMate, useMate, swapParty, mateScale, mateBuff, mateSkillDps, PARTY_MAX, PARTY_UNLOCKS, PARTY_UNLOCK_TEXT, LEGACY_MATES, BOSS_SPRITES, REGION_ROUNDS, REGION_START, regionIndex, regionRound, lastRound, roundTag, stageLabel, skillPower, skillUnlocked, venueMap, stagePlace, stageNames, stageArt, regionConquered, REGIONS, ZONES, ACADEMY, autoTrain, critPower, regenRate, allyTrainLevel, allyTrainCap, allyTrainCost, trainAlly, skillLevel, skillCost, cheerMult, sprintMult, lunchHeal, trainSkill, ALLY_TRAIN, CRIT_BASE,
     CONTESTS, schoolName, gradeLabel, placeLabel, contestId, contest,
     newGame, simulate, restore, trainingCost, maxHp, attack, enemyMaxHp, openFight, activateSkill, gearStats, nextMission, MAPS, GEAR, SLOTS, MAP_REWARDS, BOSS_REWARDS, TRAINING, SKILLS, makeProfile,
     trainingCostAt, enemyHit, winCoins, winXp, interval, critChance, prestigeGain, transfer, perkCost, PERKS, pullStickers, pullCost, progress, xpTarget,

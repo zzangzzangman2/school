@@ -1063,6 +1063,54 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .party-slot.filled .mate-style { top: 22px; }
 /* 달려간 동료가 상대 그림 뒤로 숨지 않게 동료 줄을 앞에 그린다(대기 자리는 주인공과 몸이 겹치지 않음) */
 .allies { z-index: 2; }
+/* ════ 대결 화면 출전 카드 4칸(초상·전열/후열·스킬 쿨타임), 편성 모드, 동료 정보 창 ════ */
+/* 새 줄 높이만큼 아래 목록이 양보해서 대결 칸 크기는 그대로(대결 2.1 : 목록 1) */
+.game { grid-template-rows: minmax(292px, 2.1fr) auto auto minmax(150px, 1fr) auto; }
+.party-bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px; padding: 5px 8px 0; background: var(--night); }
+.party-bar-slots { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.party-card { position: relative; display: flex; align-items: center; gap: 4px; min-width: 0; height: 42px; padding: 3px 4px 3px 3px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, .18); background: rgba(255, 255, 255, .07); color: #fff; text-align: left; }
+.party-card .pc-tag { position: absolute; z-index: 2; left: -1px; top: -1px; padding: 0 3px; border-radius: 9px 0 7px 0; color: #fff; font-size: 8px; font-weight: 900; line-height: 13px; }
+.party-card.front .pc-tag { background: #f08a24; }
+.party-card.back .pc-tag { background: #3d86e0; }
+.pc-face { position: relative; flex: 0 0 34px; height: 34px; overflow: hidden; border-radius: 8px; background: rgba(255, 255, 255, .12); }
+.pc-face > span { position: absolute; inset: 0; width: 100%; height: 100%; background-position: center 9%; background-size: 200% auto; }
+.pc-face > span.sprite { background-image: var(--sprite-image); background-size: 160% auto; }
+.pc-face::after { content: ""; position: absolute; inset: 0; background: conic-gradient(rgba(14, 8, 28, .7) var(--cd, 0deg), transparent 0); pointer-events: none; }
+.pc-cd { position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; font-size: 13px; font-weight: 900; text-shadow: var(--ol-dark); }
+.pc-info { display: grid; gap: 1px; min-width: 0; }
+.pc-info b { overflow: hidden; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.pc-status { color: #d9cbff; font-size: 9px; white-space: nowrap; }
+.party-card.ready { border-color: #ffd36b; box-shadow: 0 0 8px rgba(255, 211, 107, .55); }
+.party-card.ready .pc-status { color: #ffe27a; font-weight: 800; }
+.party-card.empty { justify-content: center; border-style: dashed; color: rgba(255, 255, 255, .6); }
+.party-card.locked { justify-content: center; opacity: .45; }
+.pc-plus { font-size: 18px; font-weight: 800; line-height: 1; }
+.party-card.empty .pc-plus:not(:only-of-type) { font-size: 10px; }
+.pc-lock { font-size: 10px; font-weight: 700; }
+.party-bar.arranging .party-card:not(.locked) { border-style: dashed; border-color: #7cf0c0; animation: pc-wiggle .9s ease-in-out infinite; }
+.party-bar.arranging .party-card.picked { border-style: solid; background: rgba(124, 240, 192, .22); box-shadow: 0 0 0 2px #7cf0c0; animation: none; }
+@keyframes pc-wiggle { 0%, 100% { rotate: 0deg; } 25% { rotate: -1.2deg; } 75% { rotate: 1.2deg; } }
+.party-bar-side { display: grid; gap: 4px; align-content: center; }
+.pb-toggle { min-width: 42px; height: 19px; padding: 0 6px; border: 0; border-radius: 7px; background: rgba(255, 255, 255, .12); color: #d9cbff; font-size: 10px; font-weight: 800; }
+.pb-toggle[aria-checked='true'] { background: linear-gradient(#62d892, #2fae66); color: #fff; }
+.pb-toggle[aria-pressed='true'] { background: linear-gradient(#7cf0c0, #2fae8a); color: #0b2b22; }
+@media (max-width: 360px) { .pc-info { display: none; } .party-card { justify-content: center; } }
+@media (prefers-reduced-motion: reduce) { .party-bar.arranging .party-card { animation: none; } }
+.mate-dialog { width: min(92vw, 360px); text-align: center; }
+.mate-dialog-art { height: 200px; margin: -6px -6px 6px; border-radius: 14px; background: linear-gradient(#f3ecff, #fff); }
+.mate-dialog-art .portrait-figure { width: 100%; height: 100%; background-position: center top; background-size: auto 150%; }
+.mate-dialog-meta { margin: 0; color: var(--muted); font-size: 11px; font-weight: 700; }
+.mate-dialog h2 { margin: 2px 0; font-size: 20px; }
+.mate-dialog .mate-stars { margin: 0 0 8px; font-size: 12px; }
+.mate-dialog-skill { padding: 8px 10px; border-radius: 12px; background: #f6f1ff; text-align: left; }
+.mate-dialog-skill b { color: #5236c9; font-size: 14px; }
+.mate-dialog-skill p { margin: 3px 0; font-size: 12px; line-height: 1.45; }
+.mate-dialog-skill small { color: var(--muted); font-size: 11px; }
+.mate-dialog-actions { display: flex; gap: 6px; margin-top: 10px; }
+.mate-dialog-actions button { flex: 1; min-height: 36px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: inherit; font-size: 12px; font-weight: 700; }
+.mate-dialog-actions button[hidden] { display: none; }
+#mate-dialog-use { border: 0; background: linear-gradient(#ffcf5a, #f29a00); color: #fff; text-shadow: 0 1px 0 rgba(120, 60, 0, .5); }
+#mate-dialog-use:disabled { background: #ebe5ee; color: #8d849a; text-shadow: none; }
 
 </style>
   <style>
@@ -2173,6 +2221,14 @@ p, small, .item-body p, .muted { font-weight: 400; }
       </div>
     </section>
 
+    <div class="party-bar" id="party-bar" role="group" aria-label="출전 동료">
+      <div class="party-bar-slots" id="party-bar-slots"></div>
+      <div class="party-bar-side">
+        <button type="button" class="pb-toggle" id="mate-auto" role="switch" aria-checked="true" aria-label="동료 스킬 자동 사용">자동</button>
+        <button type="button" class="pb-toggle" id="party-arrange" aria-pressed="false" aria-label="출전 자리 편성">편성</button>
+      </div>
+    </div>
+
     <div class="quest-bar">
       <div class="loot-offer" id="first-loot" hidden><span class="loot-icon" aria-hidden="true"><svg><use href="#i-gift"/></svg></span><div><small>첫 장비 획득!</small><b>별무늬 손목띠 <em>파워 +4</em></b></div><button type="button" id="equip-first">바로 장착</button></div>
       <div class="objective">
@@ -2374,6 +2430,19 @@ p, small, .item-body p, .muted { font-weight: 400; }
       <button type="button" data-test="boss">이 경기장 보스로</button>
     </div>
     <p class="test-note" id="test-note" role="status"></p>
+    <form method="dialog"><button class="confirm">닫기</button></form>
+  </dialog>
+  <dialog id="mate-dialog" class="mate-dialog" aria-labelledby="mate-dialog-name">
+    <div class="mate-dialog-art"><span class="portrait-figure" id="mate-dialog-art" aria-hidden="true"></span></div>
+    <p class="mate-dialog-meta" id="mate-dialog-meta"></p>
+    <h2 id="mate-dialog-name"></h2>
+    <p class="mate-stars" id="mate-dialog-stars"></p>
+    <div class="mate-dialog-skill"><b id="mate-dialog-skill"></b><p id="mate-dialog-desc"></p><small id="mate-dialog-cd"></small></div>
+    <div class="mate-dialog-actions">
+      <button type="button" id="mate-dialog-use">지금 쓰기</button>
+      <button type="button" id="mate-dialog-move">자리 바꾸기</button>
+      <button type="button" id="mate-dialog-party">동료 탭</button>
+    </div>
     <form method="dialog"><button class="confirm">닫기</button></form>
   </dialog>
   <dialog id="portrait-dialog" class="portrait-dialog" aria-labelledby="portrait-title">
@@ -2798,7 +2867,7 @@ function newGame() {
 function freshState() {
   return {
     dungeons: Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, 0])), dungeon: null, dungeonResult: null, front: null, pack: [],
-    gems: 0, recruits: 0, companions: {}, mateShards: {}, mateGrade: 1, party: [null, null, null, null], allyTimers: [1.1, 1.5, 1.9, 2.3], mateBuffs: {}, shield: 0, tier: 0,
+    gems: 0, recruits: 0, companions: {}, mateShards: {}, mateGrade: 1, autoMates: true, party: [null, null, null, null], allyTimers: [1.1, 1.5, 1.9, 2.3], mateBuffs: {}, shield: 0, tier: 0,
     cooldowns: {}, buffs: {}, autoSkills: true, quest: 0, stats: { pulls: 0, recruits: 0, dungeons: 0 },
     pass: { free: 0, premium: 0 }, premium: { pass: false, adFree: false, monthly: 0, bought: {} }, mail: [], mailSeq: 0,
     profile: null, level: 1, xp: 0, coins: 12, map: 0, wave: 0, wins: 0,
@@ -2873,7 +2942,7 @@ function transfer(state) {
   const keep = {};
   for (const key of ['profile', 'wins', 'bag', 'equipped', 'ranks', 'patches', 'missions', 'classId', 'autoNext', 'autoSkill', 'skillId', 'sound',
     'tickets', 'stickers', 'snacks', 'speed', 'attendance', 'daily', 'totalClears', 'dungeons', 'dungeonResult',
-    'gems', 'recruits', 'companions', 'mateShards', 'mateGrade', 'test', 'party', 'tier', 'autoSkills', 'quest', 'stats', 'pass', 'premium', 'mail', 'mailSeq', 'autoTrain']) keep[key] = state[key];
+    'gems', 'recruits', 'companions', 'mateShards', 'mateGrade', 'autoMates', 'test', 'party', 'tier', 'autoSkills', 'quest', 'stats', 'pass', 'premium', 'mail', 'mailSeq', 'autoTrain']) keep[key] = state[key];
   const before = state.prestige;
   Object.assign(state, newGame(), keep);
   state.prestige = { ...before, count: before.count + 1, badges: before.badges + gain, earned: before.earned + gain, best: Math.max(before.best, reached) };
@@ -3483,7 +3552,7 @@ function step(state, emit) {
     tickBleed(state, emit);
     if (state.roundEnd || state.pause > 0) return;
     for (let slot = 0; slot < partySlots(state); slot++) {
-      if (!state.party[slot] || (state.cooldowns[`mate${slot}`] || 0) > 0) continue;
+      if (state.autoMates === false || !state.party[slot] || (state.cooldowns[`mate${slot}`] || 0) > 0) continue;
       if (castMate(state, slot, emit) && (state.roundEnd || state.pause > 0)) return;
     }
     autoCast(state, emit);
@@ -3700,8 +3769,24 @@ function allyStrike(state, slot, emit) {
   resolveKills(state, overflow, emit);
 }
 
-// ── 동료 스킬: 출전한 동료가 각자 쿨타임마다 자동으로 쓴다 ──
+// ── 동료 스킬: 출전한 동료가 각자 쿨타임마다 자동으로 쓴다(state.autoMates를 끄면 출전 카드를 눌러 직접) ──
 function mateScale(state, id) { return (1 + STAR_STEP * (companionLevel(state, id) - 1)) * (1 + ALLY_TRAIN.step * allyTrainLevel(state, id)); }
+// 직접 쓰기: 자동과 같은 쿨타임. 대결 중일 때만(다음 상대가 들어오는 중이거나 판이 끝났으면 안 됨)
+function useMate(state, slot, emit) {
+  if (slot < 0 || slot >= partySlots(state) || !state.party[slot] || (state.cooldowns[`mate${slot}`] || 0) > 0 || state.roundEnd || state.pause > 0 || state.enemyHp <= 0) return false;
+  return castMate(state, slot, emit);
+}
+// 출전 자리 바꾸기: 동료와 함께 스킬 쿨타임·공격 박자도 옮긴다(자리를 바꿔 쿨타임을 지우지 못하게)
+function swapParty(state, a, b) {
+  const open = partySlots(state);
+  if (a === b || a < 0 || b < 0 || a >= open || b >= open || (!state.party[a] && !state.party[b])) return false;
+  [state.party[a], state.party[b]] = [state.party[b], state.party[a]];
+  const left = state.cooldowns[`mate${a}`] || 0;
+  state.cooldowns[`mate${a}`] = state.cooldowns[`mate${b}`] || 0;
+  state.cooldowns[`mate${b}`] = left;
+  [state.allyTimers[a], state.allyTimers[b]] = [state.allyTimers[b] ?? ALLY_INTERVAL, state.allyTimers[a] ?? ALLY_INTERVAL];
+  return true;
+}
 function mateBuff(state, key) { const buff = state.mateBuffs?.[key]; return buff && buff.t > 0 ? buff.v : 0; }
 function castMate(state, slot, emit) {
   const id = state.party[slot];
@@ -3998,6 +4083,7 @@ function migrateFeatures(s) {
   if (!Number.isFinite(s.shield) || s.shield < 0) s.shield = 0;
   if (s.profile && typeof s.profile === 'object') s.profile.gender = 'boy'; // 주인공은 남자로 고정(사용자 결정)
   if (typeof s.autoSkills !== 'boolean') s.autoSkills = true;
+  if (typeof s.autoMates !== 'boolean') s.autoMates = true;
   s.stats = isObject(s.stats) ? s.stats : {};
   for (const key of ['pulls', 'recruits', 'dungeons']) if (!count(s.stats[key])) s.stats[key] = 0;
   s.pass = isObject(s.pass) ? { free: count(s.pass.free) ? s.pass.free : 0, premium: count(s.pass.premium) ? s.pass.premium : 0 } : { free: 0, premium: 0 };
@@ -4112,7 +4198,7 @@ function restore(snapshot) {
 
 if (typeof module !== 'undefined') {
   module.exports = {
-    castMate, mateScale, mateBuff, mateSkillDps, PARTY_MAX, PARTY_UNLOCKS, PARTY_UNLOCK_TEXT, LEGACY_MATES, BOSS_SPRITES, REGION_ROUNDS, REGION_START, regionIndex, regionRound, lastRound, roundTag, stageLabel, skillPower, skillUnlocked, venueMap, stagePlace, stageNames, stageArt, regionConquered, REGIONS, ZONES, ACADEMY, autoTrain, critPower, regenRate, allyTrainLevel, allyTrainCap, allyTrainCost, trainAlly, skillLevel, skillCost, cheerMult, sprintMult, lunchHeal, trainSkill, ALLY_TRAIN, CRIT_BASE,
+    castMate, useMate, swapParty, mateScale, mateBuff, mateSkillDps, PARTY_MAX, PARTY_UNLOCKS, PARTY_UNLOCK_TEXT, LEGACY_MATES, BOSS_SPRITES, REGION_ROUNDS, REGION_START, regionIndex, regionRound, lastRound, roundTag, stageLabel, skillPower, skillUnlocked, venueMap, stagePlace, stageNames, stageArt, regionConquered, REGIONS, ZONES, ACADEMY, autoTrain, critPower, regenRate, allyTrainLevel, allyTrainCap, allyTrainCost, trainAlly, skillLevel, skillCost, cheerMult, sprintMult, lunchHeal, trainSkill, ALLY_TRAIN, CRIT_BASE,
     CONTESTS, schoolName, gradeLabel, placeLabel, contestId, contest,
     newGame, simulate, restore, trainingCost, maxHp, attack, enemyMaxHp, openFight, activateSkill, gearStats, nextMission, MAPS, GEAR, SLOTS, MAP_REWARDS, BOSS_REWARDS, TRAINING, SKILLS, makeProfile,
     trainingCostAt, enemyHit, winCoins, winXp, interval, critChance, prestigeGain, transfer, perkCost, PERKS, pullStickers, pullCost, progress, xpTarget,
@@ -5015,6 +5101,184 @@ function bindMetaUI() {
   $('offline-double').addEventListener('click', takeOfflineDouble);
   for (const id of ['profile-button', 'help']) $(id).addEventListener('click', () => $('settings-dialog').close());
   bindTestTools();
+  bindPartyBar();
+}
+
+// ── 대결 화면 출전 카드 4칸: 초상, 전열·후열, 남은 스킬 시간 ──
+// 평소: 카드를 누르면 동료 정보(스킬 자동을 끄면 준비된 카드를 눌러 바로 발동). 편성 모드: 두 칸을 차례로 눌러 자리 바꾸기
+let partyBarKey = '';
+let formationMode = false;
+let formationPick = null;
+let mateDialogSlot = null;
+
+function mateReady(slot) { return (state.cooldowns[`mate${slot}`] || 0) <= 0; }
+
+function partyCard(slot, open) {
+  const id = state.party[slot];
+  const row = slot < 2 ? '전열' : '후열';
+  const card = document.createElement('button');
+  card.type = 'button';
+  card.dataset.slot = slot;
+  card.className = `party-card ${slot < 2 ? 'front' : 'back'}${slot >= open ? ' locked' : id ? ' filled' : ' empty'}${formationPick === slot ? ' picked' : ''}`;
+  const tag = document.createElement('small');
+  tag.className = 'pc-tag';
+  tag.textContent = `${slot + 1}${row[0]}`;
+  card.append(tag);
+  if (slot >= open) {
+    const lock = document.createElement('span');
+    lock.className = 'pc-lock';
+    lock.textContent = '잠김';
+    card.append(lock);
+    card.ariaLabel = `${slot + 1}번 ${row} 잠김, ${PARTY_UNLOCK_TEXT[slot]}`;
+  } else if (!id) {
+    const plus = document.createElement('span');
+    plus.className = 'pc-plus';
+    plus.textContent = formationMode ? '빈칸' : '+';
+    card.append(plus);
+    card.ariaLabel = formationMode ? `${slot + 1}번 ${row} 빈 자리` : `${slot + 1}번 ${row} 빈 자리, 동료 출전시키기`;
+  } else {
+    const mate = COMPANIONS[id];
+    const face = document.createElement('span');
+    face.className = 'pc-face';
+    const cd = document.createElement('b');
+    cd.className = 'pc-cd';
+    face.append(mateFace(id), cd);
+    const info = document.createElement('span');
+    info.className = 'pc-info';
+    const name = document.createElement('b');
+    name.textContent = mate.name;
+    const status = document.createElement('small');
+    status.className = 'pc-status';
+    info.append(name, status);
+    card.append(face, info);
+    card.ariaLabel = `${slot + 1}번 ${row} ${mate.name}, ${mate.skill.name}`;
+  }
+  return card;
+}
+
+function renderPartyBar() {
+  const box = $('party-bar-slots');
+  const open = partySlots(state);
+  const auto = state.autoMates !== false;
+  const key = [open, state.party.join(','), formationMode, formationPick, auto].join('|');
+  if (key !== partyBarKey) {
+    partyBarKey = key;
+    box.replaceChildren(...Array.from({ length: PARTY_MAX }, (_, slot) => partyCard(slot, open)));
+    $('party-bar').classList.toggle('arranging', formationMode);
+    $('mate-auto').setAttribute('aria-checked', String(auto));
+    $('party-arrange').textContent = formationMode ? '완료' : '편성';
+    $('party-arrange').setAttribute('aria-pressed', String(formationMode));
+  }
+  for (const card of box.children) {
+    const slot = Number(card.dataset.slot);
+    const id = state.party[slot];
+    if (!id || slot >= open) continue;
+    const left = Math.max(0, state.cooldowns[`mate${slot}`] || 0);
+    const ready = left <= 0;
+    card.style.setProperty('--cd', `${clamp(left / COMPANIONS[id].skill.cd, 0, 1) * 360}deg`);
+    card.classList.toggle('ready', ready);
+    const status = ready ? (auto ? '스킬 준비' : '눌러 발동') : COMPANIONS[id].skill.name; // 남은 초는 얼굴 위 숫자
+    const label = card.querySelector('.pc-status');
+    if (label.textContent !== status) label.textContent = status;
+    const count = ready ? '' : String(Math.ceil(left));
+    const cd = card.querySelector('.pc-cd');
+    if (cd.textContent !== count) cd.textContent = count;
+  }
+  if (mateDialogSlot !== null && $('mate-dialog').open) fillMateDialog(mateDialogSlot);
+}
+
+function onPartyCard(slot) {
+  const open = partySlots(state);
+  if (slot >= open) {
+    message(`${slot + 1}번 칸은 ${PARTY_UNLOCK_TEXT[slot]}`);
+    return;
+  }
+  const id = state.party[slot];
+  if (formationMode) {
+    if (formationPick === null) {
+      if (id) formationPick = slot;
+      else message('먼저 옮길 동료 카드를 누르세요');
+    } else if (formationPick === slot) {
+      formationPick = null;
+    } else {
+      const from = formationPick;
+      formationPick = null;
+      if (swapParty(state, from, slot)) message(`${from + 1}번 ↔ ${slot + 1}번 자리를 바꿨어요`);
+      commit();
+      return;
+    }
+    render();
+    return;
+  }
+  if (!id) {
+    openView('party');
+    return;
+  }
+  if (state.autoMates === false && mateReady(slot) && useMate(state, slot, combatEvent)) {
+    commit();
+    return;
+  }
+  showMateDialog(slot);
+}
+
+function fillMateDialog(slot) {
+  const id = state.party[slot];
+  if (!id) return;
+  const mate = COMPANIONS[id];
+  const left = Math.max(0, state.cooldowns[`mate${slot}`] || 0);
+  $('mate-dialog-art').dataset.portrait = mate.portrait || mate.sprite;
+  setText('mate-dialog-meta', `${slot + 1}번 · ${slot < 2 ? '전열' : '후열'} · ${GRADES[mate.grade].name} · ${mate.style}`);
+  setText('mate-dialog-name', mate.name);
+  const star = starLine(id);
+  setText('mate-dialog-stars', `${star.textContent} · Lv.${allyTrainLevel(state, id)} · 내 파워의 ${fmt(Math.round(allyPower(state, id) * 100))}%`);
+  setText('mate-dialog-skill', mate.skill.name);
+  setText('mate-dialog-desc', mate.skill.desc);
+  setText('mate-dialog-cd', `쿨타임 ${mate.skill.cd}초 · ${left > 0 ? `${Math.ceil(left)}초 남음` : '준비됨'}${state.autoMates === false ? '' : ' · 자동 사용 중'}`);
+  const use = $('mate-dialog-use');
+  use.hidden = state.autoMates !== false;
+  use.disabled = left > 0;
+}
+
+function showMateDialog(slot) {
+  mateDialogSlot = slot;
+  fillMateDialog(slot);
+  $('mate-dialog').showModal();
+}
+
+function bindPartyBar() {
+  $('party-bar-slots').addEventListener('click', event => {
+    const card = event.target.closest('.party-card');
+    if (card) onPartyCard(Number(card.dataset.slot));
+  });
+  $('mate-auto').addEventListener('click', () => {
+    state.autoMates = state.autoMates === false;
+    message(state.autoMates ? '동료 스킬을 자동으로 써요.' : '동료 스킬을 직접 써요. 준비된 카드를 누르세요.');
+    commit();
+  });
+  $('party-arrange').addEventListener('click', () => {
+    formationMode = !formationMode;
+    formationPick = null;
+    if (formationMode) message('바꿀 두 칸을 차례로 누르세요. 1·2번은 전열, 3·4번은 후열이에요.');
+    render();
+  });
+  $('mate-dialog-use').addEventListener('click', () => {
+    if (mateDialogSlot !== null && useMate(state, mateDialogSlot, combatEvent)) {
+      $('mate-dialog').close();
+      commit();
+    }
+  });
+  $('mate-dialog-move').addEventListener('click', () => {
+    formationMode = true;
+    formationPick = mateDialogSlot;
+    $('mate-dialog').close();
+    message('옮길 자리를 누르세요.');
+    render();
+  });
+  $('mate-dialog-party').addEventListener('click', () => {
+    $('mate-dialog').close();
+    openView('party');
+  });
+  $('mate-dialog').addEventListener('close', () => { mateDialogSlot = null; });
 }
 
 // ── 테스트 도구: 주소에 ?test를 붙여 열면(설정 → 테스트 모드) 진짜 저장과 따로 놀면서 기능을 바로 확인한다 ──
@@ -6466,6 +6730,7 @@ function render() {
   renderMetaHud();
   renderActives();
   renderAllies();
+  renderPartyBar();
   const viewModels = {
     battle: [state.log, state.dungeons, state.daily?.keys, Boolean(state.dungeon), state.totalClears, state.prestige.count, state.prestige.perks, state.stickers],
     training: [growthTab, Object.keys(TRAINING).map(id => { const plan = trainingPlan(id); return [plan.count, plan.total, state.coins >= plan.total]; }), state.training, firstGradeWon(state), state.classId, buyMode, state.tier, state.level, state.prestige, state.autoSkills, state.autoTrain, state.skillLv, Object.keys(ACTIVE).map(id => state.coins >= skillCost(state, id)), state.skillId, Boolean(state.dungeon), bestProgress(state)],
