@@ -495,6 +495,10 @@ function renderParty() {
     return box;
   }));
   renderSynergyPanel();
+  const picks = state.shardPicks || 0;
+  const pickNote = $('shard-pick-note');
+  pickNote.hidden = !picks;
+  pickNote.textContent = picks ? `동료 조각 선택권 ${picks}개 · 원하는 동료 카드의 '선택권'을 누르면 다음 별(아직 없는 동료는 영입)까지 필요한 만큼만 써요` : '';
   $('mate-grid').replaceChildren(...Object.keys(COMPANIONS).map(id => {
     const mate = COMPANIONS[id];
     const level = companionLevel(state, id);
@@ -544,6 +548,21 @@ function renderParty() {
     familyTag.textContent = MATE_FAMILIES[family].name;
     skillLine.append(familyTag, level ? `${mate.skill.name} · ${mate.skill.desc}` : `${mate.style} · ${mate.skill.name}`);
     card.append(meter, info, skillLine, star, button);
+    const pickNeed = Math.min(picks, Math.max(0, need - shards));
+    if (pickNeed > 0) {
+      const use = document.createElement('button');
+      use.type = 'button';
+      use.className = 'shard-pick';
+      use.textContent = `선택권 +${pickNeed}`;
+      use.ariaLabel = `${mate.name}에게 조각 선택권 ${pickNeed}개 쓰기`;
+      use.addEventListener('click', () => {
+        const used = useShardPicks(state, id);
+        if (!used) return;
+        message(`${mate.name} 조각 +${used}${starCost(state, id) <= mateShards(state, id) ? ` · ${level ? '성급업' : '영입'}할 수 있어요` : ''}`);
+        commit();
+      });
+      card.append(use);
+    }
     return card;
   }));
 }

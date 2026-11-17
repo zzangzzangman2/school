@@ -1241,3 +1241,33 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .today-dialog #today-claim { width: 100%; margin-top: 0; }
 .today-dialog #today-claim:disabled { filter: grayscale(.7); opacity: .7; }
 .today-close { width: 100%; min-height: 32px; margin-top: 2px; border: 0; border-radius: 11px; background: transparent; color: var(--muted); font-weight: 800; }
+
+/* ── 주간 전국대회 ── */
+.weekly-card { display: grid; gap: 6px; padding: 10px 11px 11px; border-radius: 16px; border: 2px solid #b48cff; background: linear-gradient(160deg, #f6f0ff, #fffaf0 70%); box-shadow: 0 2px 0 #d9c8ff; }
+.weekly-head { display: flex; gap: 8px; align-items: baseline; justify-content: space-between; }
+.weekly-head b { font-size: 14px; color: #3a2470; }
+.weekly-score { color: #6a3fd8; font-size: 13px; font-style: normal; font-weight: 900; }
+.weekly-rule { margin: 0; padding: 5px 8px; border-radius: 10px; background: color-mix(in srgb, var(--fam) 14%, #fff); box-shadow: inset 3px 0 0 var(--fam); color: #4b3a66; font-size: 11px; line-height: 1.35; }
+.weekly-rule strong { color: #2a1640; }
+.weekly-bar { height: 8px; overflow: hidden; border-radius: 4px; background: rgba(60, 40, 100, .12); }
+.weekly-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #8b6cf0, #ffb02e); }
+.weekly-tiers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin: 0; padding: 0; list-style: none; }
+.weekly-tier { display: grid; gap: 2px; justify-items: center; align-content: start; padding: 4px 2px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); }
+.weekly-tier small { color: var(--muted); font-size: 10px; font-weight: 800; }
+.weekly-tier .reward-chips { justify-content: center; flex-wrap: wrap; }
+.weekly-tier.ready { border: 2px solid var(--gold); background: #fffaf0; }
+.weekly-tier.ready small { color: #c26a00; }
+.weekly-tier.claimed { opacity: .5; }
+.weekly-actions { display: grid; grid-template-columns: 1fr 1.2fr auto; gap: 5px; }
+.weekly-actions button { min-height: 34px; padding: 0 8px; border: 0; border-radius: 11px; font-size: 12px; font-weight: 900; }
+.weekly-claim { background: linear-gradient(#ffd36b, #ffb02e); color: #5a3200; }
+.weekly-enter { background: linear-gradient(#8b6cf0, #6a3fd8); color: #fff; }
+.weekly-team { background: #efe8ff; color: #4a2f8f; }
+.weekly-actions button:disabled { filter: grayscale(.8); opacity: .55; }
+.weekly-how, .weekly-period { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.35; }
+.title-chip { padding: 0 5px; border-radius: 6px; background: linear-gradient(#ffe39a, #f0c75a); color: #6b4300; font-size: 10px; font-weight: 900; }
+.cur.shard-pick { width: 16px; height: 18px; background: linear-gradient(160deg, #ffd1f0, #b48cff); clip-path: polygon(50% 0, 100% 30%, 82% 100%, 18% 100%, 0 30%); }
+.cur.key { width: 18px; height: 12px; background: radial-gradient(circle at 25% 50%, transparent 2.5px, #f0b429 3px 6px, transparent 6.5px), linear-gradient(#f0b429, #f0b429) 55% 45% / 50% 3px no-repeat, linear-gradient(#f0b429, #f0b429) 88% 70% / 3px 5px no-repeat; }
+.shard-pick-note { margin: 6px 0 0; padding: 6px 9px; border-radius: 10px; background: #f6f0ff; color: #4a2f8f; font-size: 11px; font-weight: 700; }
+.shard-pick-note[hidden] { display: none; }
+.mate-card .shard-pick { min-height: 26px; padding: 0 8px; border: 0; border-radius: 9px; background: linear-gradient(#d9c8ff, #b48cff); color: #2a1640; font-size: 11px; font-weight: 900; }

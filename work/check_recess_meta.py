@@ -300,8 +300,48 @@ with sync_playwright() as playwright:
       return [back.prestige.earned, back.prestige.badges];
     }''')
     assert badges == [3.44e16, 2e17], badges
+
+    # ── 주간 전국대회(12/1 화요일 → 11/30 주간, 잡기형: 추천 기공 계열) ──
+    today.evaluate("state.prestige.earned = 0; state.prestige.badges = 0; state.totalClears = 0; selectView('battle'); commit()")  # 방치 2시간에 1-3을 넘겼을 수 있어 잠금 상태로
+    card = today.locator('#weekly-card')
+    expect(card).to_be_visible()
+    expect(card.locator('.weekly-head b')).to_have_text('주간 전국대회 · 11월 30일 주간')
+    expect(card.locator('.weekly-rule')).to_contain_text('이번 주 잡기형')
+    assert today.evaluate('state.weekly.points') == 10  # 위에서 받은 오늘 목표 하나
+    expect(card.get_by_role('button', name=re.compile('챔피언전'))).to_be_disabled()  # 1-3 전이라 잠김
+    before = today.evaluate('[state.gems, state.recruits, state.shardPicks]')
+    today.evaluate("state.weekly.points = 170; commit()")
+    card.get_by_role('button', name='구간 보상 받기 2').click()
+    after = today.evaluate('[state.gems, state.recruits, state.shardPicks]')
+    assert [after[0] - before[0], after[1] - before[1], after[2] - before[2]] == [50, 2, 10], (before, after)
+    expect(card.locator('.weekly-tier.claimed')).to_have_count(2)
+    # 조각 선택권: 동료 탭에서 원하는 동료에게
+    today.get_by_role('button', name='동료', exact=True).click()
+    expect(today.locator('#shard-pick-note')).to_contain_text('조각 선택권 10개')
+    today.locator('#mate-grid .shard-pick').first.click()
+    assert today.evaluate('state.shardPicks') == 0 and today.evaluate('Object.values(state.mateShards).includes(10)')
+    # 챔피언전: 이번 주 첫 단계, 우승하면 30점·입장권 차감·다음 단계
+    today.evaluate("state.totalClears = 5; state.companions.mate10 = 1; state.companions.mate11 = 1; state.test = { slots: true }; state.party = ['mate10', 'mate11', null, null]; selectView('battle'); commit()")
+    assert today.evaluate('weeklyFamilyCount(state)') == 2
+    enter = card.get_by_role('button', name=re.compile('챔피언전'))
+    expect(enter).to_have_text('챔피언전 1단계 · 1번')
+    enter.click()
+    cup = today.evaluate("[state.dungeon.id, state.dungeon.level === Math.max(2, progress(state) - 12), document.getElementById('stage-number').textContent, Math.round(cupDamage(state) * 100)]")
+    assert cup == ['cup', True, '주간 전국대회 · 잡기형', 130], cup
+    today.evaluate('leaveDungeon(state, true, null); commit()')
+    weekly = today.evaluate('[state.weekly.points, state.weekly.cupWins, cupKeys(state), cupStep(state)]')
+    assert weekly == [170 + 36, 1, 0, 2], weekly  # 30 × (1 + 0.1 × 2)
+    expect(card.get_by_role('button', name=re.compile('챔피언전'))).to_be_disabled()
+    # 다음 주 첫 접속: 받지 않은 구간은 우편 한 통, 지난주 기록
+    rollover = today.evaluate('''() => {
+      state.weekly.points = 250;
+      refreshDay(state, '2026-12-08');
+      const mail = state.mail.find(item => item.title === '11월 30일 주간 전국대회 보상');
+      return [state.weekly.week, state.weekly.points, mail && mail.reward, state.weeklyLog[0].tiers, state.weeklyLog[0].rule, cupRule(state.weekly.week).id];
+    }''')
+    assert rollover == ['2026-12-07', 0, {'keys': 1, 'gems': 100}, 3, 'grapple', 'attack'], rollover
     today.close()
     assert not issues, issues
     chrome.close()
 
-print('Mail, recruit/party/allies, party slot unlocks, team synergy, 16 companion skills, quest reward, daily shop, promotion trial, pass + premium grant, offline double, KST day rollover (midnight offline split, rollback, monthly catch-up, big badges) and today screen verified.')
+print('Mail, recruit/party/allies, party slot unlocks, team synergy, 16 companion skills, quest reward, daily shop, promotion trial, pass + premium grant, offline double, KST day rollover (midnight offline split, rollback, monthly catch-up, big badges), today screen and weekly tournament (rules, tiers, shard picks, champion ladder, rollover mail) verified.')

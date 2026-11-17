@@ -416,7 +416,7 @@ function renderDungeonTimer() {
   if (!active) return;
   const left = Math.max(0, state.dungeon ? state.dungeon.time : state.bossTime);
   const total = state.dungeon ? DUNGEON_TIME : BOSS_TIME;
-  setText('dungeon-timer-title', state.dungeon ? `${dungeonInfo(state.dungeon.id).name} Lv.${state.dungeon.level}` : `보스 도전 · ${currentEnemy(state)}`);
+  setText('dungeon-timer-title', state.dungeon ? (state.dungeon.id === 'cup' ? `${CUP.name} ${cupStep(state)}단계 · ${cupInfo(state).rule.name}` : `${dungeonInfo(state.dungeon.id).name} Lv.${state.dungeon.level}`) : `보스 도전 · ${currentEnemy(state)}`);
   const left2 = Math.ceil(left);
   setText('dungeon-timer-text', state.dungeon
     ? (state.dungeon.id === 'trial' ? `승급 시험 남은 ${left2}초` : `던전 남은 ${left2}초${state.front?.leader ? ' · 보스!' : ` · 참가자 ${aliveBehind(state) + 1}`}`)
@@ -545,7 +545,7 @@ function renderBattle() {
   const map = MAPS[state.map];
   const gradeNumber = gradeIndex(state.map) + 1;
   const dungeon = state.dungeon ? dungeonInfo(state.dungeon.id) : null;
-  if (!(travel && state.roundEnd)) setText('stage-number', dungeon ? (state.dungeon.id === 'trial' ? `승급 심사 · ${tierName(state.dungeon.level)}` : `던전 · Lv.${state.dungeon.level}`) : stageLabel(state.cycle || 0, state.map));
+  if (!(travel && state.roundEnd)) setText('stage-number', dungeon ? (state.dungeon.id === 'trial' ? `승급 심사 · ${tierName(state.dungeon.level)}` : state.dungeon.id === 'cup' ? `주간 전국대회 · ${cupInfo(state).rule.name}` : `던전 · Lv.${state.dungeon.level}`) : stageLabel(state.cycle || 0, state.map));
   if (!(travel && state.roundEnd)) setText('battle-title', dungeon ? dungeon.name : stagePlace(state.cycle || 0, state.map));
   $('arena').classList.toggle('dungeon-round', Boolean(dungeon));
   const status = $('battle-status');
@@ -940,6 +940,14 @@ function rewardChips(reward, unitCoins = true) {
   if (reward.gems) add('gem', reward.gems);
   if (reward.recruits) add('recruit', reward.recruits);
   if (reward.badges) add('badge', reward.badges);
+  if (reward.keys) add('key', reward.keys);
+  if (reward.shardPicks) add('shard-pick', reward.shardPicks);
+  if (reward.title) {
+    const chip = document.createElement('span');
+    chip.className = 'reward-chip title-chip';
+    chip.textContent = '칭호';
+    wrap.append(chip);
+  }
   return wrap;
 }
 
@@ -1027,6 +1035,9 @@ function todayLinks() {
   const keys = Object.keys(DUNGEONS).filter(id => dungeonUnlocked(state, id)).reduce((sum, id) => sum + (state.daily.keys[id] || 0), 0);
   if (keys > 0) links.push(['dungeon', `오늘 열린 특별 대회 · 열쇠 ${keys}개`]);
   if (recordUnlocked(state) && recordKeys(state) > 0) links.push(['record', `30초 기록전 · ${recordKeys(state)}번 남음`]);
+  refreshWeek(state, gameDay(state));
+  const cupLeft = cupUnlocked(state) ? cupKeys(state) : 0;
+  links.push(['weekly', `주간 전국대회 · ${fmt(state.weekly.points)}/${WEEKLY.tiers.at(-1).points}점${cupLeft ? ` · 챔피언전 ${cupLeft}번` : ''}`]);
   return links;
 }
 
@@ -1097,7 +1108,7 @@ function onTodayLink(kind) {
   $('today-dialog').close();
   selectView('battle');
   if (kind === 'retry') $('retry-map').click();
-  else document.querySelector(kind === 'record' ? '#dungeon-list .dungeon-card.record' : '#dungeon-list')?.scrollIntoView({ block: 'center', behavior: reducedMotion.matches ? 'auto' : 'smooth' });
+  else document.querySelector(kind === 'record' ? '#dungeon-list .dungeon-card.record' : kind === 'weekly' ? '#weekly-card' : '#dungeon-list')?.scrollIntoView({ block: 'center', behavior: reducedMotion.matches ? 'auto' : 'smooth' });
 }
 
 function renderMissions() {
@@ -1530,7 +1541,100 @@ function renderDungeons() {
     card.append(icon, body, actions);
     return card;
   }).flatMap(card => (card.classList.contains('coin') ? [card, recordCard()] : [card])));
+  $('dungeon-list').prepend(weeklyCard());
 }
+
+// ── 주간 전국대회 카드(대결 탭 '오늘의 특별 대회' 맨 위) ──
+// 이번 주 규칙과 추천 계열(동료를 바꿀 이유), 주간 점수와 구간 보상, 챔피언전 입장, 달성 기간·지난주 기록
+function weeklyCard() {
+  refreshWeek(state, gameDay(state));
+  const weekly = state.weekly;
+  const rule = cupRule(weekly.week);
+  const family = MATE_FAMILIES[rule.family];
+  const deployed = weeklyFamilyCount(state);
+  const reached = weeklyTier(weekly.points);
+  const maxPoints = WEEKLY.tiers.at(-1).points;
+  const card = document.createElement('article');
+  card.className = 'weekly-card';
+  card.id = 'weekly-card';
+  const head = document.createElement('div');
+  head.className = 'weekly-head';
+  const title = document.createElement('b');
+  title.textContent = `주간 전국대회 · ${weekLabel(weekly.week)}`;
+  const score = document.createElement('em');
+  score.className = 'weekly-score';
+  score.textContent = `${fmt(weekly.points)} / ${maxPoints}점`;
+  head.append(title, score);
+  const ruleLine = document.createElement('p');
+  ruleLine.className = `weekly-rule fam-${rule.family}`;
+  ruleLine.append(Object.assign(document.createElement('strong'), { textContent: `이번 주 ${rule.name}` }),
+    ` ${rule.champion} · ${rule.desc}. 추천 ${family.name} 계열(${family.mates.map(id => COMPANIONS[id].style).join('·')}) 1명당 주간 점수 +${Math.round(WEEKLY.familyPoint * 100)}%·챔피언전 피해 +${Math.round(WEEKLY.familyDamage * 100)}% · 지금 ${deployed}명`);
+  const bar = document.createElement('div');
+  bar.className = 'weekly-bar';
+  bar.ariaLabel = `주간 점수 ${weekly.points}점, ${reached}구간 도달`;
+  const fill = document.createElement('i');
+  fill.style.width = `${Math.min(1, weekly.points / maxPoints) * 100}%`;
+  bar.append(fill);
+  const tiers = document.createElement('ol');
+  tiers.className = 'weekly-tiers';
+  tiers.append(...WEEKLY.tiers.map((tier, index) => {
+    const item = document.createElement('li');
+    const claimed = weekly.claimed.includes(index);
+    const ready = index < reached && !claimed;
+    item.className = `weekly-tier${claimed ? ' claimed' : ready ? ' ready' : ''}`;
+    item.dataset.tier = index;
+    item.append(Object.assign(document.createElement('small'), { textContent: claimed ? '받음' : `${tier.points}점` }), rewardChips(weeklyReward(weekly.week, index), false));
+    return item;
+  }));
+  const actions = document.createElement('div');
+  actions.className = 'weekly-actions';
+  const claim = document.createElement('button');
+  claim.type = 'button';
+  claim.className = 'weekly-claim';
+  const ready = Array.from({ length: reached }, (_, index) => index).filter(index => !weekly.claimed.includes(index)).length;
+  claim.textContent = ready ? `구간 보상 받기 ${ready}` : '구간 보상';
+  claim.disabled = !ready;
+  claim.addEventListener('click', () => {
+    const given = claimWeeklyAll(state);
+    if (!given) return;
+    message(`주간 전국대회 보상 · ${giftLine(given)}`);
+    commit();
+  });
+  const open = cupUnlocked(state);
+  const keys = cupKeys(state);
+  const weekend = weekendDay(state.daily?.date || gameDay(state));
+  const enter = document.createElement('button');
+  enter.type = 'button';
+  enter.className = 'weekly-enter';
+  enter.textContent = open ? `챔피언전 ${cupStep(state)}단계 · ${keys}번` : '챔피언전 잠김';
+  enter.ariaLabel = `${CUP.name} 도전, 오늘 ${keys}번 남음`;
+  enter.disabled = !open || keys <= 0 || Boolean(state.dungeon);
+  enter.addEventListener('click', () => {
+    refreshDay(state, gameDay(state));
+    if (!enterCup(state)) return;
+    combatEvent('enter', {});
+    message(`${CUP.name} 시작! 30초 안에 참가자와 ${rule.champion}을 이기세요.`);
+    commit();
+  });
+  const team = document.createElement('button');
+  team.type = 'button';
+  team.className = 'weekly-team';
+  team.textContent = '편성 바꾸기';
+  team.addEventListener('click', () => selectView('party'));
+  actions.append(claim, enter, team);
+  const how = document.createElement('p');
+  how.className = 'weekly-how';
+  const p = WEEKLY.points;
+  how.textContent = !open ? '챔피언전은 1-3 1학년 대표를 이기면 열려요. 오늘 목표로도 점수가 쌓여요.'
+    : `점수 · 오늘 목표 ${p.goal}(모두 완료 +${p.allDone}) · 던전 ${p.dungeon} · 기록전 ${p.record} · 챔피언전 우승 ${p.cupWin}${weekend ? '(오늘은 주말 2배)' : '(토·일 2배)'}, 탈락 ${p.cupTry}. 챔피언전은 하루 1번, 토·일 2번 · 이길 때마다 다음 단계 챔피언이 세져요`;
+  const period = document.createElement('p');
+  period.className = 'weekly-period';
+  const last = state.weeklyLog?.[0];
+  period.textContent = `달성 기간 ${weekLabel(weekly.week).replace(' 주간', '')}(월) 0시 ~ ${weekEndLabel(weekly.week)} 24시 · 받지 않은 구간은 다음 주 첫 접속 때 우편으로${last ? ` · 지난주 ${fmt(last.points)}점 ${last.tiers}구간` : ''}${state.titles?.[0] ? ` · 칭호 ${state.titles[0]}` : ''}`;
+  card.append(head, ruleLine, bar, tiers, actions, how, period);
+  return card;
+}
+
 
 // 상금 토너먼트 30초 기록전 카드: 개인 최고, 보상 구간, 다음 구간까지 남은 피해
 function recordCard() {
@@ -1710,6 +1814,7 @@ function render() {
       if (result.id === 'record' && !result.sweep) showRunResult(result);
       else if (result.chain) showRunResult(result);
       else if (result.id === 'record') message(`${RECORD.name} 소탕 · 최고 기록 구간 ${result.level} · ${result.text}`);
+      else if (result.id === 'cup') message(`${CUP.name} ${result.win ? '우승!' : result.reason === 'timeout' ? '시간 초과' : '탈락'} · ${result.text}`);
       else message(`${dungeonInfo(result.id).name}${result.id === 'trial' ? '' : ` Lv.${result.level}`} ${result.sweep ? '소탕' : result.win ? '클리어' : result.reason === 'timeout' ? '시간 초과' : '실패'} · ${result.text}`);
     }
     shownDungeonResult = state.dungeonResult.serial;
@@ -1731,9 +1836,9 @@ function render() {
   renderPartyBar();
   renderRule();
   const viewModels = {
-    battle: [state.log, state.dungeons, state.daily?.keys, Boolean(state.dungeon), state.totalClears, state.prestige.count, state.prestige.perks, state.stickers],
+    battle: [state.log, state.dungeons, state.daily?.keys, Boolean(state.dungeon), state.totalClears, state.prestige.count, state.prestige.perks, state.stickers, state.weekly, state.party, state.weeklyLog?.[0], state.titles?.[0]],
     training: [growthTab, Object.keys(TRAINING).map(id => { const plan = trainingPlan(id); return [plan.count, plan.total, state.coins >= plan.total]; }), state.training, firstGradeWon(state), state.classId, buyMode, state.tier, state.level, state.prestige, state.autoSkills, state.autoTrain, state.skillLv, Object.keys(ACTIVE).map(id => state.coins >= skillCost(state, id)), state.skillId, Boolean(state.dungeon), bestProgress(state)],
-    party: [state.companions, state.party, state.tier, state.allyLv, state.party.map(id => (id ? state.coins >= allyTrainCost(state, id) : null))],
+    party: [state.companions, state.party, state.tier, state.allyLv, state.party.map(id => (id ? state.coins >= allyTrainCost(state, id) : null)), state.shardPicks, state.mateShards],
     shop: [state.gems, state.daily?.shop, state.premium],
     bag: [state.bag, state.equipped, state.ranks, state.patches, gearFilter, state.profile.gender],
     gacha: [gachaTab, state.tickets, state.coins >= gachaCoinCost(1), state.coins >= gachaCoinCost(10), state.stickers, state.cleared, state.recruits, state.gems],
@@ -1868,7 +1973,7 @@ function openPortrait(view) {
   $('lobby-figure').dataset.portrait = state.profile.gender;
   setText('portrait-title', PORTRAIT_TITLES[view]);
   setText('lobby-name', state.profile.name);
-  setText('lobby-rank', `Lv.${state.level} · ${tierName(state.tier)}`);
+  setText('lobby-rank', `Lv.${state.level} · ${tierName(state.tier)}${state.titles?.[0] ? ` · ${state.titles[0]}` : ''}`);
   dialog.querySelectorAll('[data-portrait-view]').forEach(button => {
     button.setAttribute('aria-pressed', String(button.dataset.portraitView === view));
   });

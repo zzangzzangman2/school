@@ -235,6 +235,33 @@ const EXAMINERS = [
   ['기초반 수석 코치', 'rival1'], ['심판 위원장', 'boss2'], ['아마추어 대회 우승자', 'rival3'], ['세미프로 랭킹 1위', 'boss4'],
   ['프로 심사 위원', 'boss5'], ['랭킹 1위 선배', 'boss6'], ['현역 챔피언', 'dboss-sports'], ['전설의 챔피언', 'dboss-store'],
 ];
+// ── 주간 전국대회: 한국 시간 월요일 0시 ~ 일요일 24시가 한 주 ──
+// 주간 점수: 오늘 목표 하나 10 · 오늘 목표 모두 완료 10 · 던전 승리/소탕 5 · 기록전 5 · 챔피언전 우승 30(토·일 2배), 탈락 5.
+// 이번 주 규칙의 추천 계열 동료가 출전해 있으면 1명당 모든 주간 점수 +10%, 챔피언전 피해 +15%(동료를 바꿀 이유).
+// 구간 보상 4개. 달성 기간 = 그 주. 받지 않은 구간은 다음 주 첫 접속 때 우편 한 통으로 온다(한 구간은 한 번만).
+// 지난 기록은 weeklyLog에 12주까지(주·점수·규칙·구간·보상표 버전). 규칙과 보상표를 바꾸려면 아래 데이터만 고치고 version을 올린다
+const WEEKLY = {
+  version: 1,
+  points: { goal: 10, allDone: 10, dungeon: 5, record: 5, cupWin: 30, cupTry: 5 },
+  familyPoint: 0.1,
+  familyDamage: 0.15,
+  weekendCup: 2,
+  tiers: [
+    { points: 80, reward: { recruits: 2, gems: 50 } },
+    { points: 160, reward: { shardPicks: 10 } },
+    { points: 240, reward: { keys: 1, gems: 100 } },
+    { points: 320, reward: { shardPicks: 20, title: true } },
+  ],
+};
+const WEEK_ZERO = '2026-11-16'; // 첫 주(월요일). 규칙은 이 주부터 공격형 → 방어형 → 잡기형 순서로 돈다
+// 챔피언전: 하루 1번(토·일 2번), 30초 안에 대회 참가자 다섯과 챔피언을 이기면 우승.
+// 상대 세기는 주마다 오르는 사다리: 첫 판은 지금 위치보다 한 바퀴(12맵) 아래, 이번 주에 이길 때마다 3맵씩 세진다(CUP.start·CUP.step)
+const CUP = { name: '주간 전국대회 챔피언전', minion: '대회 참가자', start: 12, step: 3, hp: 3, hit: 1.1, background: 'd-badge', minionSprites: ['rival1', 'mob3', 'rival3'], map: 11 };
+const CUP_RULES = [
+  { id: 'attack', name: '공격형', champion: '강타의 챔피언', sprite: 'boss5', desc: '챔피언 쪽 공격 +50%', hp: 1, hit: 1.5, family: 'grapple', tip: '받는 피해를 줄이는 잡기 계열로 버티기' },
+  { id: 'guard', name: '방어형', champion: '철벽의 챔피언', sprite: 'boss4', desc: '챔피언 쪽 체력 +50%', hp: 1.5, hit: 1, family: 'strike', tip: '팀 피해를 올리는 타격 계열로 뚫기' },
+  { id: 'grapple', name: '잡기형', champion: '그래플링 챔피언', sprite: 'boss6', desc: '챔피언 쪽 체력·공격 +25%', hp: 1.25, hit: 1.25, family: 'special', tip: '쿨타임을 줄이는 기공 계열로 스킬 몰아치기' },
+];
 const TRIAL = { name: '승급 심사', minion: '심사 위원', reward: 'tier', hp: 2.6, hit: 1.15, background: 'd-exam', map: 9, solo: true };
 
 // ── 동료: 전원 여성 파이터(성인). 모집권으로 모집, 등급(S~F)별로 성급업, 보유 효과. 각자 고유 스킬을 쿨타임마다 알아서 쓴다 ──
@@ -410,7 +437,7 @@ function freshState() {
     profile: null, level: 1, xp: 0, coins: 12, map: 0, wave: 0, wins: 0,
     cleared: MAPS.map(() => false), training: Object.fromEntries(Object.keys(TRAINING).map(id => [id, 0])), allyLv: {}, skillLv: {}, autoTrain: false,
     tickets: WELCOME_TICKETS, stickers: {}, snacks: { choco: 0, banana: 0, berry: 0 }, speed: 1,
-    attendance: { count: 0, last: '' }, daily: null, prestige: freshPrestige(), cycle: 0, totalClears: 0,
+    attendance: { count: 0, last: '' }, daily: null, weekly: null, weeklyLog: [], shardPicks: 0, titles: [], prestige: freshPrestige(), cycle: 0, totalClears: 0,
     bag: Object.values(STARTER_GEAR), equipped: { ...STARTER_GEAR }, ranks: {}, patches: 0,
     mapWins: MAPS.map(() => 0), missions: { wins: 0, clears: 0, closet: 0 }, farm: null,
     classId: null, autoNext: true, autoSkill: true, skillId: 'rush', sound: true, charge: 0, hp: 84, enemyHp: MAPS[0].hp[0],
@@ -478,7 +505,7 @@ function transfer(state) {
   const reached = progress(state);
   const keep = {};
   for (const key of ['profile', 'wins', 'bag', 'equipped', 'ranks', 'patches', 'missions', 'classId', 'autoNext', 'autoSkill', 'skillId', 'sound',
-    'tickets', 'stickers', 'snacks', 'speed', 'attendance', 'daily', 'totalClears', 'dungeons', 'dungeonResult',
+    'tickets', 'stickers', 'snacks', 'speed', 'attendance', 'daily', 'weekly', 'weeklyLog', 'shardPicks', 'titles', 'totalClears', 'dungeons', 'dungeonResult',
     'gems', 'recruits', 'companions', 'mateShards', 'mateGrade', 'autoMates', 'record', 'dungeonAuto', 'test', 'party', 'tier', 'autoSkills', 'quest', 'stats', 'pass', 'premium', 'mail', 'mailSeq', 'autoTrain']) keep[key] = state[key];
   const before = state.prestige;
   Object.assign(state, newGame(), keep);
@@ -511,7 +538,7 @@ function attack(state) {
 }
 function enemyHit(state) {
   const base = state.dungeon
-    ? atProgress(dungeonReach(state), 'hit') * dungeonInfo(state.dungeon.id).hit
+    ? atProgress(dungeonReach(state), 'hit') * dungeonStats(state).hit
     : MAPS[state.map].hit[state.wave] * GRADE_SCALING[gradeIndex(state.map)].attack * cycleScale(state, 'hit');
   const rule = ruleId(state);
   return base * (state.front?.hit ?? 1) * (1 + GANG_UP * aliveBehind(state)) * (1 - mateBuff(state, 'weaken')) * (1 - teamSynergy(state).weaken) * ((rule && RULES[rule].hit) || 1);
@@ -547,11 +574,121 @@ function daysBetween(from, to) { return Math.round((dayStart(to) - dayStart(from
 function gameDay(state, now = new Date()) {
   return [todayKey(now), state.daily?.date, state.attendance?.last].filter(Boolean).reduce((latest, key) => (key > latest ? key : latest));
 }
+// ── 주간 전국대회 ──
+function weekKey(day) {
+  const [year, month, date] = day.split('-').map(Number);
+  const monday = new Date(Date.UTC(year, month - 1, date));
+  monday.setUTCDate(date - ((monday.getUTCDay() + 6) % 7));
+  return monday.toISOString().slice(0, 10);
+}
+function weekendDay(day) {
+  const [year, month, date] = day.split('-').map(Number);
+  return [0, 6].includes(new Date(Date.UTC(year, month - 1, date)).getUTCDay());
+}
+function weekLabel(week) {
+  const [, month, date] = week.split('-').map(Number);
+  return `${month}월 ${date}일 주간`;
+}
+function weekEndLabel(week) {
+  const end = new Date(dayStart(week) + DAY_OFFSET + 6 * DAY_MS);
+  return `${end.getUTCMonth() + 1}/${end.getUTCDate()}(일)`;
+}
+function cupRule(week) {
+  const index = Math.floor(daysBetween(WEEK_ZERO, week) / 7);
+  return CUP_RULES[((index % CUP_RULES.length) + CUP_RULES.length) % CUP_RULES.length];
+}
+function freshWeekly(week) { return { week, version: WEEKLY.version, points: 0, sources: {}, claimed: [], cupWins: 0 }; }
+function weeklyTier(points) { return WEEKLY.tiers.filter(tier => points >= tier.points).length; }
+function weeklyReward(week, index) {
+  const { reward } = WEEKLY.tiers[index];
+  return reward.title ? { ...reward, title: `${weekLabel(week)} 전국대회 입상` } : reward;
+}
+function mergeRewards(rewards) {
+  const total = {};
+  for (const reward of rewards) for (const [key, value] of Object.entries(reward)) total[key] = typeof value === 'number' ? (total[key] || 0) + value : value;
+  return total;
+}
+// 새 주면 지난 주를 마감한다: 도달했지만 안 받은 구간은 우편 한 통, 기록은 weeklyLog로. 기기 시계를 되돌려 지난 주로 가지는 않는다
+function refreshWeek(state, today) {
+  const week = weekKey(today);
+  if (!state.weekly) state.weekly = freshWeekly(week);
+  if (state.weekly.week >= week) return;
+  const last = state.weekly;
+  const reached = weeklyTier(last.points);
+  const unclaimed = Array.from({ length: reached }, (_, index) => index).filter(index => !last.claimed.includes(index));
+  if (unclaimed.length) {
+    sendMail(state, `${weekLabel(last.week)} 전국대회 보상`, mergeRewards(unclaimed.map(index => weeklyReward(last.week, index))), `${last.points}점 · 받지 않은 ${unclaimed.length}구간`);
+    last.claimed.push(...unclaimed);
+  }
+  state.weeklyLog = [{ week: last.week, points: last.points, rule: cupRule(last.week).id, tiers: reached, version: last.version }, ...(state.weeklyLog || [])].slice(0, 12);
+  state.weekly = freshWeekly(week);
+}
+function weeklyFamilyCount(state) {
+  const family = cupRule(state.weekly?.week || weekKey(gameDay(state))).family;
+  return (state.party || []).slice(0, partySlots(state)).filter(id => id && mateFamily(id) === family).length;
+}
+function addWeekly(state, source, base) {
+  refreshWeek(state, state.daily?.date || gameDay(state));
+  const points = Math.round(base * (1 + WEEKLY.familyPoint * weeklyFamilyCount(state)));
+  state.weekly.points += points;
+  state.weekly.sources = { ...state.weekly.sources, [source]: (state.weekly.sources[source] || 0) + points };
+  return points;
+}
+function claimWeekly(state, index) {
+  const weekly = state.weekly;
+  if (!weekly || index >= weeklyTier(weekly.points) || weekly.claimed.includes(index)) return null;
+  weekly.claimed.push(index);
+  return grantAny(state, weeklyReward(weekly.week, index));
+}
+function claimWeeklyAll(state) {
+  const given = [];
+  for (let index = 0; index < WEEKLY.tiers.length; index++) {
+    const reward = claimWeekly(state, index);
+    if (reward) given.push(reward);
+  }
+  return given.length ? mergeRewards(given) : null;
+}
+// 조각 선택권: 고른 동료에게 다음 별(미보유면 영입)까지 필요한 만큼만 쓴다
+function useShardPicks(state, id) {
+  const need = starCost(state, id) - mateShards(state, id);
+  const amount = Math.min(state.shardPicks || 0, need);
+  if (!COMPANIONS[id] || amount <= 0) return 0;
+  state.shardPicks -= amount;
+  addShards(state, id, amount);
+  return amount;
+}
+function cupKeysFor(day) { return weekendDay(day) ? 2 : 1; }
+function cupKeys(state) { return state.daily?.keys?.cup ?? cupKeysFor(state.daily?.date || gameDay(state)); }
+function cupUnlocked(state) { return dungeonUnlocked(state, 'coin'); }
+function cupReach(state) { return Math.max(2, progress(state) - CUP.start + CUP.step * (state.weekly?.cupWins || 0)); }
+function cupStep(state) { return (state.weekly?.cupWins || 0) + 1; }
+function cupInfo(state) {
+  const rule = cupRule(state.weekly?.week || weekKey(gameDay(state)));
+  return { ...CUP, boss: rule.champion, sprite: rule.sprite, hp: CUP.hp * rule.hp, hit: CUP.hit * rule.hit, rule };
+}
+function cupDamage(state) { return state.dungeon?.id === 'cup' ? 1 + WEEKLY.familyDamage * weeklyFamilyCount(state) : 1; }
+function enterCup(state) {
+  if (!cupUnlocked(state) || state.dungeon || state.roundEnd?.leaveDungeon || cupKeys(state) <= 0) return false;
+  if (state.roundEnd) {
+    const end = state.roundEnd;
+    state.farm = end.nextFarm;
+    state.map = end.nextMap;
+    state.wave = end.nextWave;
+    state.roundEnd = null;
+  }
+  refreshWeek(state, state.daily?.date || gameDay(state));
+  state.dungeon = { id: 'cup', level: cupReach(state), time: DUNGEON_TIME };
+  state.hp = maxHp(state);
+  openFight(state, state.map, state.wave, 0.6);
+  return true;
+}
+
 // 새 날이면 오늘 기록을 새로 연다. carriedWins = 자정을 넘긴 방치에서 오늘 0시 이후에 이긴 수(오늘 목표에 넣는다)
 function refreshDay(state, today, carriedWins = 0) {
+  refreshWeek(state, today);
   if (state.daily && state.daily.date >= today) return; // 같은 날이거나 기기 시계를 되돌림: 확정한 날짜의 기록을 그대로 둔다
   state.daily = { date: today, baseWins: state.wins - Math.max(0, Math.min(carriedWins, state.wins)), trains: 0, pulls: 0, snacks: 0, dungeons: 0, claimed: [], shop: {},
-    keys: { ...Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, DUNGEON_KEYS])), record: DUNGEON_KEYS } };
+    keys: { ...Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, DUNGEON_KEYS])), record: DUNGEON_KEYS, cup: cupKeysFor(today) } };
   state.daily.picks = pickDaily(state, today);
   settleMonthly(state, today);
 }
@@ -588,7 +725,9 @@ function claimDaily(state, id) {
   const mission = DAILY_MISSIONS[id];
   if (!state.daily || state.daily.claimed.includes(id) || (id !== 'all' && !dailyPicks(state).includes(id)) || mission.value(state) < mission.target) return null;
   state.daily.claimed.push(id);
-  return grant(state, mission.reward);
+  const given = grant(state, mission.reward);
+  addWeekly(state, 'goal', id === 'all' ? WEEKLY.points.allDone : WEEKLY.points.goal);
+  return given;
 }
 // 한 번에 받기: 출석 + 다 채운 오늘 목표 + (그걸로 다 채워지면) 모두 완료 보상. 같은 날 두 번 눌러도 한 번만 받는다
 function claimToday(state, today = gameDay(state)) {
@@ -637,7 +776,7 @@ function pullStickers(state, count, rng = Math.random) {
   return results;
 }
 function waveHp(state) {
-  if (state.dungeon) return atProgress(dungeonReach(state), 'hp') * dungeonInfo(state.dungeon.id).hp;
+  if (state.dungeon) return atProgress(dungeonReach(state), 'hp') * dungeonStats(state).hp;
   const hp = MAPS[state.map].hp[state.wave] * GRADE_SCALING[gradeIndex(state.map)].hp * cycleScale(state, 'hp');
   return hp * 0.64 ** (state.farm?.easy || 0);
 }
@@ -664,6 +803,10 @@ function makeMobs(state) {
   }
   if (state.dungeon?.id === 'record') {
     return [{ name: RECORD.boss, share: 1, hit: 1, sprite: RECORD.sprite, leader: true, key, max: Math.max(1, Math.round(attack(state) * RECORD.hpMult)) }];
+  }
+  if (state.dungeon?.id === 'cup') {
+    const cup = cupInfo(state);
+    return DUNGEON_PACK.map((slot, index) => make(slot, slot.leader ? cup.boss : `${CUP.minion} ${index + 1}`, slot.leader ? cup.sprite : CUP.minionSprites[index % CUP.minionSprites.length]));
   }
   if (state.dungeon) {
     const dungeon = DUNGEONS[state.dungeon.id];
@@ -753,8 +896,10 @@ function venueMap(state) {
   return stageArt(cycle, state.map);
 }
 function regionConquered(state, index) { return bestProgress(state) >= REGION_START[index + 1] * MAPS.length; }
-function dungeonInfo(id) { return id === 'trial' ? TRIAL : id === 'record' ? RECORD : DUNGEONS[id]; }
-function dungeonReach(state) { return state.dungeon.id === 'trial' ? tierReq(state.dungeon.level) : state.dungeon.id === 'record' ? progress(state) : dungeonProgress(state.dungeon.level); }
+function dungeonInfo(id) { return id === 'trial' ? TRIAL : id === 'record' ? RECORD : id === 'cup' ? CUP : DUNGEONS[id]; }
+// 지금 던전의 체력·공격 배율(챔피언전은 이번 주 규칙까지)
+function dungeonStats(state) { return state.dungeon.id === 'cup' ? cupInfo(state) : dungeonInfo(state.dungeon.id); }
+function dungeonReach(state) { return state.dungeon.id === 'cup' ? state.dungeon.level : state.dungeon.id === 'trial' ? tierReq(state.dungeon.level) : state.dungeon.id === 'record' ? progress(state) : dungeonProgress(state.dungeon.level); }
 function recordTierHp(tier) { return atProgress(dungeonProgress(tier), 'hp') * RECORD.tierHp; }
 // 피해량으로 도달한 보상 구간과 다음 구간까지 남은 피해
 function recordTier(damage) {
@@ -791,6 +936,7 @@ function useRecordKey(state) {
   state.daily.keys = { ...state.daily.keys, record: recordKeys(state) - 1 };
   state.daily.dungeons = (state.daily.dungeons || 0) + 1;
   state.stats.dungeons++;
+  addWeekly(state, 'record', WEEKLY.points.record);
 }
 function sweepRecord(state) {
   const best = state.record?.tier || 0;
@@ -845,6 +991,7 @@ function sweepDungeon(state, id) {
   state.daily.keys[id]--;
   state.daily.dungeons = (state.daily.dungeons || 0) + 1;
   state.stats.dungeons++;
+  addWeekly(state, 'dungeon', WEEKLY.points.dungeon);
   const reward = grantDungeon(state, id, best);
   state.dungeonResult = { id, level: best, win: true, sweep: true, text: rewardLine(reward), serial: (state.dungeonResult?.serial || 0) + 1 };
   return reward;
@@ -865,6 +1012,21 @@ function leaveDungeon(state, win, emit, reason = '') {
     state.roundEnd.leaveDungeon = true;
     return;
   }
+  if (id === 'cup') {
+    // 입장권은 이겨도 져도 한 장. 우승이면 주간 점수 30(토·일 2배), 탈락도 참가 점수 5
+    state.daily.keys = { ...state.daily.keys, cup: cupKeys(state) - 1 };
+    state.daily.dungeons = (state.daily.dungeons || 0) + 1;
+    state.stats.dungeons++;
+    const weekend = weekendDay(state.daily.date);
+    const points = addWeekly(state, win ? 'cup' : 'cupTry', win ? WEEKLY.points.cupWin * (weekend ? WEEKLY.weekendCup : 1) : WEEKLY.points.cupTry);
+    if (win) state.weekly.cupWins++;
+    const cupText = `주간 점수 +${points}${win && weekend ? '(주말 2배)' : ''}`;
+    state.dungeonResult = { id, level, win, reason, text: cupText, serial: (state.dungeonResult?.serial || 0) + 1 };
+    record(state, `${CUP.name} ${win ? '우승!' : reason === 'timeout' ? '시간 초과' : '탈락'} · ${cupText}`);
+    finishRound(state, win ? 'win' : 'loss', state.map, state.wave, 1.5, emit, null, state.farm);
+    state.roundEnd.leaveDungeon = true;
+    return;
+  }
   let text = '열쇠는 그대로예요.';
   if (id === 'trial') {
     text = '레벨을 더 올리고 다시 도전해요.';
@@ -877,6 +1039,7 @@ function leaveDungeon(state, win, emit, reason = '') {
     state.daily.keys[id]--;
     state.daily.dungeons = (state.daily.dungeons || 0) + 1;
     state.dungeons[id] = Math.max(state.dungeons[id] || 0, level);
+    addWeekly(state, 'dungeon', WEEKLY.points.dungeon);
     text = rewardLine(grantDungeon(state, id, level));
   }
   const chaining = id !== 'trial' && (state.dungeonChain?.id === id || (win && state.dungeonAuto?.[id]));
@@ -1458,7 +1621,7 @@ function ruleBonus(state) {
   return Math.min(3, state.party.slice(0, partySlots(state)).filter(id => id && ruleFit(id, rule)).length) * RULE_BONUS;
 }
 function ruleHp(state, leader) { const rule = ruleId(state); return rule ? (leader ? RULES[rule].leader : RULES[rule].minion) || 1 : 1; }
-function buffMult(state) { return (state.buffs?.cheer > 0 ? cheerMult(state) : 1) * (1 + mateBuff(state, 'power')) * (1 + ruleBonus(state)) * (1 + teamSynergy(state).power); }
+function buffMult(state) { return (state.buffs?.cheer > 0 ? cheerMult(state) : 1) * (1 + mateBuff(state, 'power')) * (1 + ruleBonus(state)) * (1 + teamSynergy(state).power) * cupDamage(state); }
 
 // ── 팀 시너지: 출전 칸에 있는 동료의 무술 계열 조합 ──
 // 같은 계열 2·3·4명이면 그 계열 효과(steps[명수]), 서로 다른 계열이 3개 이상이면 '균형'(크리티컬 확률). 두 가지는 함께 붙는다.
@@ -1707,6 +1870,8 @@ function grantAny(state, reward) {
   if (reward.badges) { state.prestige.badges += reward.badges; state.prestige.earned += reward.badges; add('badges', reward.badges); }
   if (reward.keys && state.daily?.keys) { for (const id of Object.keys(state.daily.keys)) state.daily.keys[id] += reward.keys; add('keys', reward.keys); }
   if (reward.snacks) { for (const id of Object.keys(SNACKS)) state.snacks[id] = Math.min(snackMax(state), state.snacks[id] + SNACK_TIME); add('snacks', 1); }
+  if (reward.shardPicks) { state.shardPicks = (state.shardPicks || 0) + reward.shardPicks; add('shardPicks', reward.shardPicks); }
+  if (reward.title) { state.titles = [reward.title, ...(state.titles || []).filter(title => title !== reward.title)].slice(0, 20); add('title', 1); }
   if (reward.premiumPass) state.premium.pass = true;
   if (reward.adFree) state.premium.adFree = true;
   if (reward.monthly) {
@@ -1717,7 +1882,7 @@ function grantAny(state, reward) {
 }
 function snackMax(state) { return state.premium?.adFree ? 3 * SNACK_MAX : SNACK_MAX; }
 function giftLine(given) {
-  const names = { coins: '코인', gems: '보석', tickets: '뽑기권', recruits: '동료 모집권', patches: '천 조각', badges: '명예 배지', keys: '던전 열쇠', snacks: '간식 세트' };
+  const names = { coins: '코인', gems: '보석', tickets: '뽑기권', recruits: '동료 모집권', patches: '천 조각', badges: '명예 배지', keys: '던전 열쇠', snacks: '간식 세트', shardPicks: '동료 조각 선택권', title: '칭호' };
   return Object.entries(given).map(([key, value]) => `${names[key]} +${fmt(value)}`).join(' · ');
 }
 
@@ -1833,13 +1998,18 @@ function migrateFeatures(s) {
       s.daily.picks = [...new Set(['wins', ...s.daily.claimed.filter(id => id !== 'all'), 'trains', 'pulls'])].slice(0, DAILY_PICKS);
     }
     const keys = s.daily.keys && typeof s.daily.keys === 'object' ? s.daily.keys : {};
-    s.daily.keys = Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, count(keys[id]) ? Math.min(keys[id], DUNGEON_KEYS) : DUNGEON_KEYS]));
+    // 기록전·챔피언전 입장권도 그대로 둔다(예전엔 다시 불러오면 기록전 입장권이 2장으로 다시 찼다)
+    s.daily.keys = {
+      ...Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, count(keys[id]) ? Math.min(keys[id], DUNGEON_KEYS) : DUNGEON_KEYS])),
+      record: count(keys.record) ? Math.min(keys.record, DUNGEON_KEYS) : DUNGEON_KEYS,
+      cup: count(keys.cup) ? Math.min(keys.cup, cupKeysFor(s.daily.date)) : cupKeysFor(s.daily.date),
+    };
   }
   const dungeons = s.dungeons && typeof s.dungeons === 'object' ? s.dungeons : {};
   s.dungeons = Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, count(dungeons[id]) ? dungeons[id] : 0]));
   const active = s.dungeon;
-  if (!(active && (Object.hasOwn(DUNGEONS, active.id) || active.id === 'trial' || active.id === 'record') && count(active.level) && active.level >= 1 && Number.isFinite(active.time))) s.dungeon = null;
-  if (!s.dungeonResult || typeof s.dungeonResult !== 'object' || !(Object.hasOwn(DUNGEONS, s.dungeonResult.id) || s.dungeonResult.id === 'trial' || s.dungeonResult.id === 'record')) s.dungeonResult = null;
+  if (!(active && (Object.hasOwn(DUNGEONS, active.id) || ['trial', 'record', 'cup'].includes(active.id)) && count(active.level) && active.level >= 1 && Number.isFinite(active.time))) s.dungeon = null;
+  if (!s.dungeonResult || typeof s.dungeonResult !== 'object' || !(Object.hasOwn(DUNGEONS, s.dungeonResult.id) || ['trial', 'record', 'cup'].includes(s.dungeonResult.id))) s.dungeonResult = null;
   if (!count(s.cycle)) s.cycle = 0;
   const fresh = freshState();
   const isObject = value => value && typeof value === 'object' && !Array.isArray(value);
@@ -1883,6 +2053,15 @@ function migrateFeatures(s) {
   if (s.premium.monthly > 0) s.premium.monthlyDay = /^\d{4}-\d{2}-\d{2}$/.test(premium.monthlyDay) ? premium.monthlyDay : s.daily?.date || '';
   s.mail = hadMail ? s.mail.filter(mail => mail && count(mail.id) && typeof mail.title === 'string' && isObject(mail.reward)).slice(0, 60) : [];
   if (s.daily && !isObject(s.daily.shop)) s.daily.shop = {};
+  const weekly = s.weekly;
+  const dayKey = /^\d{4}-\d{2}-\d{2}$/;
+  s.weekly = isObject(weekly) && dayKey.test(weekly.week) && amount(weekly.points) && Array.isArray(weekly.claimed) && weekly.claimed.every(index => count(index) && index < WEEKLY.tiers.length)
+    ? { week: weekly.week, version: count(weekly.version) ? weekly.version : WEEKLY.version, points: weekly.points, claimed: [...new Set(weekly.claimed)],
+      sources: isObject(weekly.sources) ? Object.fromEntries(Object.entries(weekly.sources).filter(([, value]) => amount(value))) : {}, cupWins: count(weekly.cupWins) ? weekly.cupWins : 0 }
+    : null;
+  s.weeklyLog = Array.isArray(s.weeklyLog) ? s.weeklyLog.filter(entry => isObject(entry) && dayKey.test(entry.week) && amount(entry.points)).slice(0, 12) : [];
+  if (!count(s.shardPicks)) s.shardPicks = 0;
+  s.titles = Array.isArray(s.titles) ? s.titles.filter(title => typeof title === 'string').slice(0, 20) : [];
   if (!hadMail) sendMail(s, '새 기능 업데이트 선물', { gems: 500, recruits: 10 }, '승급·동료·스킬·상점이 생겼어요. 동료 모집권으로 동기를 불러 보세요!');
   if (!Number.isFinite(s.bossTime) || s.bossTime > BOSS_TIME) s.bossTime = BOSS_TIME;
   if (!count(s.totalClears)) s.totalClears = Array.isArray(s.cleared) ? s.cleared.filter(Boolean).length : 0;
@@ -1991,6 +2170,7 @@ function restore(snapshot) {
 
 if (typeof module !== 'undefined') {
   module.exports = {
+    WEEKLY, CUP, CUP_RULES, weekKey, weekendDay, weekLabel, cupRule, refreshWeek, addWeekly, weeklyTier, weeklyReward, claimWeekly, claimWeeklyAll, useShardPicks, cupKeys, cupKeysFor, cupUnlocked, cupReach, cupStep, cupInfo, enterCup, dungeonStats, weeklyFamilyCount,
     todayKey, gameDay, dayStart, daysBetween, settleMonthly, claimAttendance, claimDaily, claimToday, dailyReadyIds, dailyPicks, pickDaily, DAILY_PICKS, DAILY_MISSIONS, ATTENDANCE,
     MATE_FAMILIES, FAMILY_ORDER, BALANCE_SYNERGY, mateFamily, teamSynergy, synergyNext, mateCooldown,
     castMate, useMate, swapParty, RECORD, recordTier, recordTierHp, recordReward, recordKeys, enterRecord, sweepRecord, RUSH_SPEED, rushEnd, rushing, RULES, RULE_ORDER, RULE_BONUS, ruleId, ruleFit, ruleMates, ruleBonus, leaveDungeon, dungeonKeys, mateScale, mateBuff, mateSkillDps, PARTY_MAX, PARTY_UNLOCKS, PARTY_UNLOCK_TEXT, LEGACY_MATES, BOSS_SPRITES, REGION_ROUNDS, REGION_START, regionIndex, regionRound, lastRound, roundTag, stageLabel, skillPower, skillUnlocked, venueMap, stagePlace, stageNames, stageArt, regionConquered, REGIONS, ZONES, ACADEMY, autoTrain, critPower, regenRate, allyTrainLevel, allyTrainCap, allyTrainCost, trainAlly, skillLevel, skillCost, cheerMult, sprintMult, lunchHeal, trainSkill, ALLY_TRAIN, CRIT_BASE,
