@@ -173,6 +173,7 @@ function combatEvent(type, event) {
   }
   if (type === 'finish' && event.result === 'win' && (event.boss || event.reward)) playSound('win');
   if (type === 'finish' && event.result === 'win') flyCoins(event.boss ? 6 : 2);
+  if (type === 'finish') lastFinish = { result: event.result, boss: event.boss };
   if (type === 'kill') flyCoins(1);
   if (type === 'enter') renderedContest = '';
   if (type === 'ally') onAlly(event);
@@ -418,17 +419,94 @@ function renderKills() {
   setText('kill-text', state.dungeon ? `참가자 ${aliveBehind(state) + (state.front?.leader ? 0 : 1)}명` : boss ? '보스 도전!' : `승리 ${done}/${total}`);
   $('kill-bar').classList.toggle('boss', boss);
   $('kill-bar').hidden = Boolean(state.dungeon) || (boss && !state.roundEnd) || Boolean(state.farm || state.roundEnd?.nextFarm);
-  const pan = state.dungeon ? 50 : [8, 36, 64, 92][state.wave] ?? 50;
-  $('arena').style.setProperty('--pan', `${pan}%`);
+  renderTravel();
+}
+
+// ── 전진 연출: 승리하면 파티가 다음 교전 지점으로 뛰고 배경이 왼쪽으로 흐른다 ──
+// forward = 같은 장소에서 다음 무리로(배경을 앞으로 흘림), exit = 보스를 이기고 다음 장소로(옛 배경은 왼쪽으로 빠지고 새 배경이 오른쪽에서 들어옴),
+// cut = 패배 뒤 수련·지도 선택·던전·재입학처럼 다른 자리로 옮길 때(짧은 장면 전환, 뒤로 감지 않음).
+// 승리·패배 포즈가 끝날 때까지(roundEnd) 출발 장소를 그대로 둔다. 진행·보상은 엔진 그대로이고 화면만 맞춘다.
+const PAN = [8, 36, 64, 92];
+// 정문과 기숙사 복도는 한 장의 배경에서 왼쪽부터 차례로 진행한다.
+const ACADEMY_ENTRY_PAN = [
+  [1, 11, 22, 34],
+  [52, 66, 80, 97],
+];
+let travel = null;
+let lastFinish = null;
+function travelTarget() {
+  const dungeon = state.dungeon ? dungeonInfo(state.dungeon.id) : null;
+  const art = String(dungeon ? (dungeon.background || dungeon.map + 1) : venueMap(state) || state.map + 1);
+  const entryPan = !dungeon && !state.cycle ? ACADEMY_ENTRY_PAN[state.map]?.[state.wave] : undefined;
+  return {
+    art,
+    track: entryPan === undefined ? art : 'academy-entry',
+    pan: entryPan ?? (dungeon ? 50 : PAN[state.wave] ?? 50),
+    dungeon: Boolean(dungeon),
+  };
+}
+function renderTravel() {
+  if (travel && state.roundEnd) return;
+  const next = travelTarget();
+  const finish = lastFinish;
+  lastFinish = null;
+  const sameTrack = travel?.track === next.track;
+  if (sameTrack && travel.art === next.art && travel.pan === next.pan) return;
+  const won = travel && finish?.result === 'win' && !next.dungeon && !travel.dungeon;
+  const mode = !travel ? 'set' : reducedMotion.matches ? 'cut'
+    : won && sameTrack && next.pan > travel.pan ? 'forward'
+      : won && finish.boss && !sameTrack ? 'exit' : 'cut';
+  const arena = $('arena');
+  const art = arena.querySelector('.arena-art:not(.leaving)');
+  const rate = state.speed || 1;
+  if (mode === 'exit') {
+    const ghost = art.cloneNode();
+    ghost.classList.remove('entering', 'cut');
+    ghost.classList.add('leaving');
+    ghost.style.setProperty('--map-image', getComputedStyle(arena).getPropertyValue('--map-image'));
+    ghost.style.setProperty('--pan', `${travel.pan}%`);
+    ghost.style.transition = 'none';
+    ghost.style.animationDuration = `${720 / rate}ms`;
+    art.after(ghost);
+    setTimeout(() => ghost.remove(), 760 / rate);
+  }
+  art.classList.remove('entering', 'cut');
+  art.style.transition = mode === 'forward' ? `background-position ${820 / rate}ms cubic-bezier(.35, 0, .25, 1)` : 'none';
+  arena.dataset.map = next.art;
+  arena.dataset.track = next.track;
+  arena.style.setProperty('--pan', `${next.pan}%`);
+  arena.dataset.travel = mode;
+  if (mode === 'exit' || mode === 'cut') {
+    void art.offsetWidth;
+    art.style.animationDuration = `${(mode === 'exit' ? 720 : 320) / rate}ms`;
+    art.classList.add(mode === 'exit' ? 'entering' : 'cut');
+  }
+  if (mode === 'forward' || mode === 'exit') travelRun(mode === 'exit' ? 720 : 620);
+  travel = next;
+}
+// 이동하는 동안 주인공·동료는 달리고, 새 상대는 오른쪽에서 드러난다
+function travelRun(ms) {
+  const rate = state.speed || 1;
+  setPoses('player', [['run', ms]]);
+  const now = performance.now();
+  for (let slot = 0; slot < PARTY_MAX; slot++) allyPoses.set(String(slot), [{ pose: 'step', until: now + ms / rate }]);
+  for (const id of ['allies', 'rival', 'pack']) {
+    const box = $(id);
+    box.classList.remove('traveling');
+    void box.offsetWidth;
+    box.style.setProperty('--travel-ms', `${ms / rate}ms`);
+    box.classList.add('traveling');
+  }
+  clearTimeout(travelRun.timer);
+  travelRun.timer = setTimeout(() => ['allies', 'rival', 'pack'].forEach(id => $(id).classList.remove('traveling')), ms / rate + 40);
 }
 
 function renderBattle() {
   const map = MAPS[state.map];
   const gradeNumber = gradeIndex(state.map) + 1;
   const dungeon = state.dungeon ? dungeonInfo(state.dungeon.id) : null;
-  setText('stage-number', dungeon ? (state.dungeon.id === 'trial' ? `승급 심사 · ${tierName(state.dungeon.level)}` : `던전 · Lv.${state.dungeon.level}`) : stageLabel(state.cycle || 0, state.map));
-  setText('battle-title', dungeon ? dungeon.name : stagePlace(state.cycle || 0, state.map));
-  $('arena').dataset.map = dungeon ? (dungeon.background || dungeon.map + 1) : venueMap(state) || state.map + 1;
+  if (!(travel && state.roundEnd)) setText('stage-number', dungeon ? (state.dungeon.id === 'trial' ? `승급 심사 · ${tierName(state.dungeon.level)}` : `던전 · Lv.${state.dungeon.level}`) : stageLabel(state.cycle || 0, state.map));
+  if (!(travel && state.roundEnd)) setText('battle-title', dungeon ? dungeon.name : stagePlace(state.cycle || 0, state.map));
   $('arena').classList.toggle('dungeon-round', Boolean(dungeon));
   const status = $('battle-status');
   const resting = state.roundEnd?.result === 'loss';

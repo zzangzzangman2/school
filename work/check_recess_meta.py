@@ -124,6 +124,22 @@ with sync_playwright() as playwright:
     assert page.evaluate('state.autoMates') is True
     # 위 대결 진행으로 2승째 '첫 장비 획득' 안내가 퀘스트 줄을 가리지 않게 승수를 넘겨 둔다
     page.evaluate('Object.assign(state, window.partyBackup); state.wins = Math.max(state.wins, 3); commit()')
+    # 전진 연출: 무리를 이기면 앞으로(forward), 보스를 이기면 출구로 다음 장소(exit), 승리 포즈 동안 출발 장소 유지, 패배 뒤엔 짧은 전환(cut)
+    travel = page.evaluate('''() => {
+      const backup = structuredClone(state);
+      const arena = document.getElementById('arena');
+      const look = () => [arena.dataset.travel, arena.dataset.map, arena.style.getPropertyValue('--pan')];
+      const out = {};
+      state.dungeon = null; state.roundEnd = null; state.farm = null; state.cycle = 0; state.map = 0; state.wave = 0;
+      travel = null; renderTravel();
+      lastFinish = { result: 'win', boss: false }; state.wave = 1; renderTravel(); out.forward = look();
+      state.roundEnd = { result: 'win', nextMap: 1, nextWave: 0, wait: 1, nextFarm: null }; state.map = 1; state.wave = 0; renderTravel(); out.frozen = look();
+      lastFinish = { result: 'win', boss: true }; state.roundEnd = null; renderTravel(); out.exit = look(); out.ghost = document.querySelectorAll('.arena-art.leaving').length;
+      lastFinish = { result: 'loss', boss: false }; state.wave = 0; state.map = 1; state.wave = 2; renderTravel(); lastFinish = { result: 'loss', boss: false }; state.wave = 0; renderTravel(); out.cut = look();
+      Object.assign(state, backup); travel = null; commit();
+      return out;
+    }''')
+    assert travel == {'forward': ['forward', 'a01', '36%'], 'frozen': ['forward', 'a01', '36%'], 'exit': ['exit', 'a02', '8%'], 'ghost': 1, 'cut': ['cut', 'a02', '8%']}, travel
     page.evaluate("delete state.test; state.party = ['mate1', null, null, null]; state.allyTimers = [1.1, 1.5, 1.9, 2.3]; state.cooldowns = {}; commit()")
 
     # 퀘스트: 힘 훈련 Lv.3 → 받기 → 보석
