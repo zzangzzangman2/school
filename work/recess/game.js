@@ -127,9 +127,24 @@ const DAILY_MISSIONS = {
   trains: { name: '훈련 10번 하기', target: 10, value: state => state.daily.trains, reward: { coins: 12 } },
   pulls: { name: '스티커 5번 뽑기', target: 5, value: state => state.daily.pulls, reward: { patches: 2 } },
   snacks: { name: '간식 2번 먹기', target: 2, value: state => state.daily.snacks, reward: { tickets: 2 } },
-  dungeons: { name: '던전 3번 하기', target: 3, value: state => state.daily.dungeons || 0, reward: { tickets: 2 } },
-  all: { name: '일일 미션 모두 완료', target: 5, value: state => state.daily.claimed.filter(id => id !== 'all').length, reward: { tickets: 5, gems: 30 } },
+  dungeons: { name: '던전 3번 하기', target: 3, value: state => state.daily.dungeons || 0, reward: { tickets: 2 }, open: state => Object.keys(DUNGEONS).some(id => dungeonUnlocked(state, id)) },
+  all: { name: '오늘 목표 모두 완료', target: 3, value: state => state.daily.claimed.filter(id => id !== 'all' && dailyPicks(state).includes(id)).length, reward: { tickets: 5, gems: 30 } },
 };
+// 오늘 목표: 그날 열려 있는 미션 중 3개. '대결 이기기'는 방치로도 채워지므로 늘 넣고, 나머지 둘은 날짜로 골라 하루 동안 바뀌지 않는다.
+// 던전 미션은 던전이 열린 계정에만 나온다(열리기 전엔 달성할 수 없으므로)
+const DAILY_PICKS = 3;
+function dailyOpen(state, id) { return id !== 'all' && (!DAILY_MISSIONS[id].open || DAILY_MISSIONS[id].open(state)); }
+function pickDaily(state, day) {
+  const rest = Object.keys(DAILY_MISSIONS).filter(id => id !== 'wins' && dailyOpen(state, id));
+  let seed = [...day].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0, 7);
+  const picks = ['wins'];
+  while (picks.length < DAILY_PICKS && rest.length) {
+    seed = (Math.imul(seed, 1103515245) + 12345) >>> 0;
+    picks.push(rest.splice(seed % rest.length, 1)[0]);
+  }
+  return picks;
+}
+function dailyPicks(state) { return state.daily?.picks || ['wins', 'trains', 'pulls']; }
 
 // ── 무리 전투: 1~3번째 대결은 친구 둘 + 무리 대장, 4번째는 1:1 보스전 ──
 // 무리 전체 체력·보상 합은 예전 1:1 상대와 같다(share 합 1). 뒤에 선 상대 수만큼 앞 상대의 공격이 세진다(협공).
@@ -515,19 +530,78 @@ function winXp(state) {
   return Math.round((8 + grade * 5 + state.wave * 2) * (boss ? 2 : 1) * statBonus(state, 'xp') * (1 + snackBonus(state, 'xp')) * cycleScale(state, 'xp'));
 }
 
+// ── 운영 날짜: 한국 시간(KST) 자정에 바뀐다(국내 출시 기준) ──
+// 기기 시계를 되돌려도 이미 확정한 날짜(오늘 목표·출석·상점 한도·던전 열쇠의 날짜)보다 앞으로 가지 않는다.
+// 그래서 받은 보상이 다시 비거나 쓴 열쇠가 다시 채워지지 않는다. 서버가 붙으면 gameDay 자리에 서버 날짜를 넣으면 된다
+const DAY_OFFSET = 9 * 3600 * 1000;
+const DAY_MS = 24 * 3600 * 1000;
 function todayKey(date = new Date()) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  const kst = new Date(date.getTime() + DAY_OFFSET);
+  return `${kst.getUTCFullYear()}-${String(kst.getUTCMonth() + 1).padStart(2, '0')}-${String(kst.getUTCDate()).padStart(2, '0')}`;
 }
-function refreshDay(state, today) {
-  if (!state.daily || state.daily.date !== today) {
-    const first = !state.daily;
-    state.daily = { date: today, baseWins: state.wins, trains: 0, pulls: 0, snacks: 0, dungeons: 0, claimed: [], shop: {},
-      keys: { ...Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, DUNGEON_KEYS])), record: DUNGEON_KEYS } };
-    if (!first && state.premium?.monthly > 0) {
-      state.premium.monthly--;
-      sendMail(state, '식단 월정액 오늘의 보석', { gems: 100 }, `남은 기간 ${state.premium.monthly}일`);
-    }
+function dayStart(key) {
+  const [year, month, day] = key.split('-').map(Number);
+  return Date.UTC(year, month - 1, day) - DAY_OFFSET;
+}
+function daysBetween(from, to) { return Math.round((dayStart(to) - dayStart(from)) / DAY_MS); }
+function gameDay(state, now = new Date()) {
+  return [todayKey(now), state.daily?.date, state.attendance?.last].filter(Boolean).reduce((latest, key) => (key > latest ? key : latest));
+}
+// 새 날이면 오늘 기록을 새로 연다. carriedWins = 자정을 넘긴 방치에서 오늘 0시 이후에 이긴 수(오늘 목표에 넣는다)
+function refreshDay(state, today, carriedWins = 0) {
+  if (state.daily && state.daily.date >= today) return; // 같은 날이거나 기기 시계를 되돌림: 확정한 날짜의 기록을 그대로 둔다
+  state.daily = { date: today, baseWins: state.wins - Math.max(0, Math.min(carriedWins, state.wins)), trains: 0, pulls: 0, snacks: 0, dungeons: 0, claimed: [], shop: {},
+    keys: { ...Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, DUNGEON_KEYS])), record: DUNGEON_KEYS } };
+  state.daily.picks = pickDaily(state, today);
+  settleMonthly(state, today);
+}
+// 월정액: 지난번 지급일 다음 날부터 오늘까지 하루 보석 100씩(남은 일수까지). 오래 쉬었다 와도 지난 날짜만큼 한 번에 우편으로 온다.
+// 받은 날은 구매 보상(보석 300)으로 치고 다음 날부터 센다. monthlyDay = 마지막으로 정산한 날
+function settleMonthly(state, today) {
+  const premium = state.premium;
+  if (!premium || !(premium.monthly > 0)) return;
+  if (!premium.monthlyDay || premium.monthlyDay > today) {
+    premium.monthlyDay = premium.monthlyDay || today;
+    return;
   }
+  const days = Math.min(premium.monthly, daysBetween(premium.monthlyDay, today));
+  if (days <= 0) return;
+  premium.monthly -= days;
+  premium.monthlyDay = today;
+  sendMail(state, '식단 월정액 보석', { gems: 100 * days }, `${days > 1 ? `${days}일치 · ` : ''}남은 기간 ${premium.monthly}일`);
+}
+// 출석: 운영 날짜마다 한 번
+function claimAttendance(state, today = gameDay(state)) {
+  if (state.attendance.last >= today) return null;
+  const given = grant(state, ATTENDANCE[state.attendance.count % ATTENDANCE.length]);
+  state.attendance.count++;
+  state.attendance.last = today;
+  return given;
+}
+// 오늘 목표 하나 받기 / 받을 수 있는 목표 전부
+function dailyReadyIds(state) {
+  if (!state.daily) return [];
+  const ready = id => !state.daily.claimed.includes(id) && DAILY_MISSIONS[id].value(state) >= DAILY_MISSIONS[id].target;
+  return dailyPicks(state).filter(ready).concat(ready('all') ? ['all'] : []);
+}
+function claimDaily(state, id) {
+  const mission = DAILY_MISSIONS[id];
+  if (!state.daily || state.daily.claimed.includes(id) || (id !== 'all' && !dailyPicks(state).includes(id)) || mission.value(state) < mission.target) return null;
+  state.daily.claimed.push(id);
+  return grant(state, mission.reward);
+}
+// 한 번에 받기: 출석 + 다 채운 오늘 목표 + (그걸로 다 채워지면) 모두 완료 보상. 같은 날 두 번 눌러도 한 번만 받는다
+function claimToday(state, today = gameDay(state)) {
+  refreshDay(state, today);
+  const total = { coins: 0, tickets: 0, patches: 0, gems: 0 };
+  const add = given => { if (given) for (const key of Object.keys(total)) total[key] += given[key] || 0; };
+  let count = 0;
+  const attended = claimAttendance(state, today);
+  if (attended) { add(attended); count++; }
+  for (const id of dailyPicks(state)) { const given = claimDaily(state, id); if (given) { add(given); count++; } }
+  const bonus = claimDaily(state, 'all');
+  if (bonus) { add(bonus); count++; }
+  return count ? { count, given: total } : null;
 }
 function grant(state, reward) {
   const given = { coins: (reward.coins || 0) * coinUnit(state), tickets: reward.tickets || 0, patches: reward.patches || 0, gems: reward.gems || 0 };
@@ -1635,7 +1709,10 @@ function grantAny(state, reward) {
   if (reward.snacks) { for (const id of Object.keys(SNACKS)) state.snacks[id] = Math.min(snackMax(state), state.snacks[id] + SNACK_TIME); add('snacks', 1); }
   if (reward.premiumPass) state.premium.pass = true;
   if (reward.adFree) state.premium.adFree = true;
-  if (reward.monthly) state.premium.monthly += reward.monthly;
+  if (reward.monthly) {
+    if (!(state.premium.monthly > 0)) state.premium.monthlyDay = state.daily?.date || todayKey(); // 받은 날부터 센다
+    state.premium.monthly += reward.monthly;
+  }
   return given;
 }
 function snackMax(state) { return state.premium?.adFree ? 3 * SNACK_MAX : SNACK_MAX; }
@@ -1728,6 +1805,7 @@ function claimPass(state) {
 
 function migrateFeatures(s) {
   const count = value => Number.isSafeInteger(value) && value >= 0;
+  const amount = value => Number.isFinite(value) && value >= 0;
   if (s.training && typeof s.training === 'object') for (const id of Object.keys(TRAINING)) if (s.training[id] === undefined) s.training[id] = 0;
   for (const key of ['allyLv', 'skillLv']) {
     const raw = s[key] && typeof s[key] === 'object' && !Array.isArray(s[key]) ? s[key] : {};
@@ -1749,6 +1827,11 @@ function migrateFeatures(s) {
   if (!validDaily) s.daily = null;
   if (s.daily) {
     if (!count(s.daily.dungeons)) s.daily.dungeons = 0;
+    // 오늘 목표(3개) 이전 저장: 이미 받은 미션을 먼저 넣고 나머지를 채운다
+    const picks = s.daily.picks;
+    if (!(Array.isArray(picks) && picks.length && picks.every(id => id !== 'all' && Object.hasOwn(DAILY_MISSIONS, id)))) {
+      s.daily.picks = [...new Set(['wins', ...s.daily.claimed.filter(id => id !== 'all'), 'trains', 'pulls'])].slice(0, DAILY_PICKS);
+    }
     const keys = s.daily.keys && typeof s.daily.keys === 'object' ? s.daily.keys : {};
     s.daily.keys = Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, count(keys[id]) ? Math.min(keys[id], DUNGEON_KEYS) : DUNGEON_KEYS]));
   }
@@ -1796,6 +1879,8 @@ function migrateFeatures(s) {
   s.pass = isObject(s.pass) ? { free: count(s.pass.free) ? s.pass.free : 0, premium: count(s.pass.premium) ? s.pass.premium : 0 } : { free: 0, premium: 0 };
   const premium = isObject(s.premium) ? s.premium : {};
   s.premium = { pass: premium.pass === true, adFree: premium.adFree === true, monthly: count(premium.monthly) ? premium.monthly : 0, bought: isObject(premium.bought) ? premium.bought : {} };
+  // 월정액 정산일: 예전 저장은 마지막으로 하루치를 받은 날(= 저장된 오늘 기록의 날짜)
+  if (s.premium.monthly > 0) s.premium.monthlyDay = /^\d{4}-\d{2}-\d{2}$/.test(premium.monthlyDay) ? premium.monthlyDay : s.daily?.date || '';
   s.mail = hadMail ? s.mail.filter(mail => mail && count(mail.id) && typeof mail.title === 'string' && isObject(mail.reward)).slice(0, 60) : [];
   if (s.daily && !isObject(s.daily.shop)) s.daily.shop = {};
   if (!hadMail) sendMail(s, '새 기능 업데이트 선물', { gems: 500, recruits: 10 }, '승급·동료·스킬·상점이 생겼어요. 동료 모집권으로 동기를 불러 보세요!');
@@ -1805,8 +1890,9 @@ function migrateFeatures(s) {
   const perks = prestige.perks && typeof prestige.perks === 'object' ? prestige.perks : {};
   s.prestige = {
     count: count(prestige.count) ? prestige.count : 0,
-    badges: count(prestige.badges) ? prestige.badges : 0,
-    earned: count(prestige.earned) ? prestige.earned : 0,
+    // 명예 배지는 코인처럼 큰 수(안전 정수 범위를 넘으면 유효 숫자 약 16자리)로 저장한다. 큰 누계가 0으로 지워지지 않게
+    badges: amount(prestige.badges) ? prestige.badges : 0,
+    earned: amount(prestige.earned) ? prestige.earned : 0,
     best: count(prestige.best) ? prestige.best : 0,
     perks: Object.fromEntries(Object.keys(PERKS).map(id => [id, count(perks[id]) ? Math.min(perks[id], PERKS[id].cap) : 0])),
   };
@@ -1905,6 +1991,7 @@ function restore(snapshot) {
 
 if (typeof module !== 'undefined') {
   module.exports = {
+    todayKey, gameDay, dayStart, daysBetween, settleMonthly, claimAttendance, claimDaily, claimToday, dailyReadyIds, dailyPicks, pickDaily, DAILY_PICKS, DAILY_MISSIONS, ATTENDANCE,
     MATE_FAMILIES, FAMILY_ORDER, BALANCE_SYNERGY, mateFamily, teamSynergy, synergyNext, mateCooldown,
     castMate, useMate, swapParty, RECORD, recordTier, recordTierHp, recordReward, recordKeys, enterRecord, sweepRecord, RUSH_SPEED, rushEnd, rushing, RULES, RULE_ORDER, RULE_BONUS, ruleId, ruleFit, ruleMates, ruleBonus, leaveDungeon, dungeonKeys, mateScale, mateBuff, mateSkillDps, PARTY_MAX, PARTY_UNLOCKS, PARTY_UNLOCK_TEXT, LEGACY_MATES, BOSS_SPRITES, REGION_ROUNDS, REGION_START, regionIndex, regionRound, lastRound, roundTag, stageLabel, skillPower, skillUnlocked, venueMap, stagePlace, stageNames, stageArt, regionConquered, REGIONS, ZONES, ACADEMY, autoTrain, critPower, regenRate, allyTrainLevel, allyTrainCap, allyTrainCost, trainAlly, skillLevel, skillCost, cheerMult, sprintMult, lunchHeal, trainSkill, ALLY_TRAIN, CRIT_BASE,
     CONTESTS, schoolName, gradeLabel, placeLabel, contestId, contest,

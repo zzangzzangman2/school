@@ -283,9 +283,9 @@
       </section>
 
       <section class="view" id="view-activities" aria-labelledby="activities-title" hidden>
-        <div class="section-head"><div><h2 id="activities-title">출석 체크</h2><p id="attend-note">7일 동안 출석하면 마지막 날 큰 보상!</p></div><span class="pill" id="activity-patches"></span></div>
+        <div class="section-head"><div><h2 id="activities-title">출석 체크</h2><p id="attend-note">7일 동안 출석하면 마지막 날 큰 보상!</p></div><div class="head-pills"><button type="button" class="pill-button" id="today-open">오늘 한눈에</button><span class="pill" id="activity-patches"></span></div></div>
         <ol class="attendance" id="attendance"></ol>
-        <div class="section-head sub"><div><h3 class="subhead">일일 미션</h3><p>매일 자정에 새로 바뀌어요.</p></div></div>
+        <div class="section-head sub"><div><h3 class="subhead">오늘 목표</h3><p>한국 시간 0시마다 지금 할 수 있는 목표 3개가 새로 정해져요.</p></div><button type="button" class="pill-button" id="daily-claim-all">한 번에 받기</button></div>
         <div class="stack" id="daily-list"></div>
         <div class="section-head sub"><div><h3 class="subhead">성장 패스</h3><p id="pass-note">최고 기록 맵 3개마다 한 칸씩 보상이 열려요.</p></div><button type="button" class="pill-button" id="pass-claim">모두 받기</button></div>
         <ol class="pass-track" id="pass-track"></ol>
@@ -328,10 +328,22 @@
     <div class="school-art" aria-hidden="true"><span class="portrait-figure" id="school-sprite" data-portrait="boy"></span></div><h2 id="school-title">아카데미 졸업!</h2><p id="school-text"></p>
     <form method="dialog"><button class="confirm gold">좋아요</button></form>
   </dialog>
-  <dialog id="attend-dialog" aria-labelledby="attend-dialog-title">
-    <div class="dialog-icon" aria-hidden="true"><svg><use href="#i-calendar"/></svg></div><h2 id="attend-dialog-title">오늘의 출석 보상</h2><p>매일 들어와서 7일째 큰 보상을 받으세요.</p>
-    <ol class="attendance compact" id="attend-dialog-list"></ol>
-    <form method="dialog"><button class="confirm" id="attend-dialog-claim">출석하고 받기</button></form>
+  <dialog id="today-dialog" class="today-dialog" aria-labelledby="today-title">
+    <div class="today-head"><div class="dialog-icon" aria-hidden="true"><svg><use href="#i-calendar"/></svg></div><div><h2 id="today-title">오늘</h2><p id="today-date"></p></div></div>
+    <section class="today-block" aria-labelledby="today-attend-title">
+      <h3 id="today-attend-title">출석 <small id="today-attend-note"></small></h3>
+      <ol class="today-days" id="today-attend"></ol>
+      <p class="today-attend-reward" id="today-attend-reward"></p>
+    </section>
+    <section class="today-block" aria-labelledby="today-goals-title">
+      <h3 id="today-goals-title">오늘 목표 <small id="today-goals-note"></small></h3>
+      <ol class="today-goals" id="today-goals"></ol>
+    </section>
+    <div class="today-links" id="today-links" role="group" aria-label="바로 가기"></div>
+    <div class="today-actions">
+      <button type="button" class="confirm" id="today-claim">한 번에 받기</button>
+      <form method="dialog"><button class="today-close">닫기</button></form>
+    </div>
   </dialog>
   <dialog id="settings-dialog" aria-labelledby="settings-title">
     <div class="dialog-icon" aria-hidden="true"><svg><use href="#i-gear"/></svg></div><h2 id="settings-title">설정</h2>

@@ -235,7 +235,73 @@ with sync_playwright() as playwright:
     coins, gems = page.evaluate('[state.coins, state.gems]')
     page.locator('#offline-double').click()
     assert page.evaluate('state.gems') == gems - 50 and page.evaluate('state.coins') > coins
+
+    # ── 운영 날짜(KST)·오늘 화면 ──
+    # 한국 시간 2026-12-01 00:30. 전날 22:30에 닫고 2시간 방치 → 0시 이후 30분 몫(1/4)의 승리만 오늘 목표에 들어간다
+    today = chrome.new_page(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True)
+    today.on('pageerror', lambda issue: issues.append(str(issue)))
+    kst_0030 = datetime.fromisoformat('2026-11-30T15:30:00+00:00')
+    today.clock.install(time=kst_0030)
+    today.goto(target)
+    today.clock.pause_at(kst_0030 + timedelta(seconds=2))
+    today.get_by_role('radio', name='남학생').check()
+    today.get_by_role('textbox', name='닉네임').fill('오늘')
+    today.get_by_role('button', name='입학하기').click()
+    today.evaluate('''() => {
+      document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
+      state.daily.date = '2026-11-30'; state.daily.claimed = []; state.attendance = { count: 2, last: '2026-11-30' };
+      state.totalClears = 0; state.premium.monthly = 10; state.premium.monthlyDay = '2026-11-27';
+      save();
+    }''')
+    wins_before = today.evaluate('state.wins')
+    today.add_init_script('''(() => {
+      const key = 'haesol-recess-king-v1';
+      const save = JSON.parse(localStorage.getItem(key) || 'null');
+      if (save && !sessionStorage.getItem('midnight-done')) {
+        save.when = Date.now() - 2 * 3600 * 1000;
+        localStorage.setItem(key, JSON.stringify(save));
+        sessionStorage.setItem('midnight-done', '1');
+      }
+    })()''')
+    today.reload()
+    expect(today.get_by_role('heading', name='쉬는 시간 보상')).to_be_visible()
+    midnight = today.evaluate(f'''() => ({{ date: state.daily.date, total: state.wins - {wins_before}, counted: state.wins - state.daily.baseWins,
+      picks: state.daily.picks, monthly: [state.premium.monthly, state.premium.monthlyDay, state.mail.find(mail => mail.title === '식단 월정액 보석')?.reward.gems] }})''')
+    assert midnight['date'] == '2026-12-01' and midnight['total'] > 40, midnight
+    assert abs(midnight['counted'] - round(midnight['total'] * 0.25)) <= 1, midnight
+    assert len(midnight['picks']) == 3 and midnight['picks'][0] == 'wins' and 'dungeons' not in midnight['picks'], midnight
+    assert midnight['monthly'] == [6, '2026-12-01', 400], midnight  # 11-27 → 12-01: 4일치 한 번에
+    today.locator('#dialog').get_by_role('button', name='좋아요').click()
+    today.clock.run_for(400)  # 다음 창은 0.16초 뒤에 열린다(시계 멈춤 상태)
+    # 방치 보상 창 다음에 오늘 화면: 출석 3일째, 오늘 목표 3개 + 모두 완료, 한 번에 받기
+    expect(today.locator('#today-dialog')).to_be_visible()
+    expect(today.locator('#today-attend .today-day.today')).to_have_text('3')
+    expect(today.locator('#today-goals .today-goal')).to_have_count(4)
+    expect(today.locator('#today-goals .today-goal[data-goal="wins"]')).to_have_class(re.compile('ready'))
+    today.locator('#today-claim').click()
+    expect(today.locator('#today-claim')).to_be_disabled()
+    claimed = today.evaluate('[state.attendance.count, state.attendance.last, state.daily.claimed.slice()]')
+    assert claimed == [3, '2026-12-01', ['wins']], claimed
+    today.locator('#today-claim').click(force=True)
+    assert today.evaluate('state.attendance.count') == 3
+    today.locator('#today-dialog').get_by_role('button', name='닫기').click()
+    # 기기 시계를 하루 되돌려도 받은 보상·쓴 열쇠가 되살아나지 않는다(운영 날짜는 뒤로 가지 않음)
+    rollback = today.evaluate('''() => {
+      state.daily.keys.coin = 0;
+      const day = gameDay(state, new Date('2026-11-30T12:00:00+09:00'));
+      refreshDay(state, day);
+      return [day, state.daily.claimed.slice(), state.daily.keys.coin, claimAttendance(state, day)];
+    }''')
+    assert rollback == ['2026-12-01', ['wins'], 0, None], rollback
+    # 큰 명예 배지 누계(안전 정수 범위 밖)도 저장·복구 뒤 그대로
+    badges = today.evaluate('''() => {
+      state.prestige.earned = 3.44e16; state.prestige.badges = 2e17;
+      const back = restore(JSON.parse(JSON.stringify({ version: 5, when: Date.now(), state })));
+      return [back.prestige.earned, back.prestige.badges];
+    }''')
+    assert badges == [3.44e16, 2e17], badges
+    today.close()
     assert not issues, issues
     chrome.close()
 
-print('Mail, recruit/party/allies, party slot unlocks, team synergy, 16 companion skills, quest reward, daily shop, promotion trial, pass + premium grant, and offline double verified.')
+print('Mail, recruit/party/allies, party slot unlocks, team synergy, 16 companion skills, quest reward, daily shop, promotion trial, pass + premium grant, offline double, KST day rollover (midnight offline split, rollback, monthly catch-up, big badges) and today screen verified.')

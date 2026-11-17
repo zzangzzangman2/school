@@ -1200,3 +1200,44 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .motion-lab .mv-thumb.mv-hit { border-color: #ff8a5c; }
 .mv-thumb.mv-hit small { color: #ffb08a; font-weight: 800; }
 .motion-lab .mv-thumb.current { background: rgba(255, 207, 74, .3); border-color: #ffcf4a; }
+
+/* ── 오늘 화면(새 날 첫 접속) ── */
+.head-pills { display: flex; gap: 6px; align-items: center; }
+.today-dialog { width: min(94vw, 400px); max-height: min(92vh, 760px); overflow-y: auto; }
+.today-head { display: flex; gap: 10px; align-items: center; text-align: left; }
+.today-head .dialog-icon { flex: 0 0 auto; width: 46px; height: 46px; margin: 0; }
+.today-head h2 { margin: 0; }
+.today-head p { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+.today-block { margin-top: 12px; text-align: left; }
+.today-block h3 { display: flex; gap: 6px; align-items: baseline; margin: 0 0 6px; font-size: 14px; }
+.today-block h3 small { color: var(--muted); font-size: 11px; font-weight: 700; }
+.today-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; margin: 0; padding: 0; list-style: none; }
+.today-day { display: grid; place-items: center; height: 30px; border-radius: 9px; border: 1px solid var(--line); background: var(--card); color: var(--muted); font-size: 12px; font-weight: 900; }
+.today-day.claimed { border-color: #b8e6c8; background: #e9f9ef; color: #2fae66; }
+.today-day.today { border: 2px solid var(--gold); background: #fffaf0; color: #c26a00; box-shadow: 0 0 0 3px rgba(255, 200, 61, .3); }
+.today-day.big { border-color: #f0c75a; background: linear-gradient(#fff6d6, #ffe39a); color: #9a6200; }
+.today-day.big.claimed { background: #e9f9ef; }
+.today-attend-reward { display: flex; gap: 8px; align-items: center; justify-content: space-between; margin: 6px 0 0; padding: 5px 9px; border-radius: 10px; background: #fffaf0; }
+.today-attend-reward small { color: #c26a00; font-size: 11px; font-weight: 800; }
+.today-attend-reward.done { background: #f2f0f6; }
+.today-attend-reward.done small { color: var(--muted); }
+.today-goals { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
+.today-goal { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'name reward' 'meter count'; gap: 4px 8px; align-items: center; padding: 6px 9px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); }
+.today-goal b { grid-area: name; min-width: 0; overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.today-goal .today-reward { grid-area: reward; justify-self: end; }
+.today-goal .today-count { grid-area: count; justify-self: end; min-width: 44px; color: var(--muted); font-size: 11px; font-weight: 800; text-align: right; }
+.today-goal .today-meter { grid-area: meter; height: 6px; overflow: hidden; border-radius: 3px; background: rgba(60, 40, 100, .1); }
+.today-goal .today-meter i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #8b6cf0, #b48cff); }
+.today-goal.ready { border: 2px solid var(--gold); background: #fffaf0; }
+.today-goal.ready .today-count { color: #c26a00; }
+.today-goal.ready .today-meter i { background: linear-gradient(90deg, #ffb02e, #ffd36b); }
+.today-goal.claimed { opacity: .55; }
+.today-goal.bonus { background: linear-gradient(#fff6d6, #fffaf0); border-color: #f0c75a; }
+.today-links { display: grid; gap: 5px; margin-top: 10px; }
+.today-links button { min-height: 36px; padding: 0 12px; border: 1px solid #c9b6ff; border-radius: 11px; background: #f3edff; color: #4a2f8f; font-weight: 800; text-align: left; }
+.today-links button::after { content: ' ›'; float: right; }
+.today-links:empty { display: none; }
+.today-actions { position: sticky; bottom: -1px; z-index: 1; margin: 10px -4px -4px; padding: 8px 4px 4px; background: linear-gradient(rgba(255, 253, 248, 0), var(--card, #fffdf8) 22%); }
+.today-dialog #today-claim { width: 100%; margin-top: 0; }
+.today-dialog #today-claim:disabled { filter: grayscale(.7); opacity: .7; }
+.today-close { width: 100%; min-height: 32px; margin-top: 2px; border: 0; border-radius: 11px; background: transparent; color: var(--muted); font-weight: 800; }

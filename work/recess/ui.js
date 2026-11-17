@@ -293,10 +293,18 @@ function catchUp(seconds) {
   const adjusted = Math.min(seconds, offlineLimit(state));
   const before = { wins: state.wins, coins: state.coins, level: state.level, bag: state.bag.length, tickets: state.tickets };
   const speed = state.speed;
+  const dayBefore = state.daily?.date;
   state.speed = 1;
   simulate(state, adjusted, null);
   state.speed = speed;
   const wins = state.wins - before.wins;
+  // 방치 구간이 운영 날짜를 넘겼으면 오늘 0시 이후에 해당하는 몫만 오늘 목표(대결 이기기)에 넣는다.
+  // 계산한 방치 시간은 지금까지의 마지막 구간으로 본다(최대 시간을 넘긴 앞부분은 계산하지 않음)
+  const today = gameDay(state);
+  if (dayBefore && dayBefore < today) {
+    const share = clamp((Date.now() - dayStart(today)) / 1000 / Math.max(1, adjusted), 0, 1);
+    refreshDay(state, today, Math.round(wins * share));
+  }
   if (wins === 0 || adjusted < 15) return;
   const details = [`${displayOffline(adjusted)} 동안 ${fmt(wins)}번 이겼어요.`, `코인 +${fmt(state.coins - before.coins)}`];
   if (state.level > before.level) details.push(`레벨 ${before.level} → ${state.level}`);
@@ -936,7 +944,7 @@ function rewardChips(reward, unitCoins = true) {
 }
 
 function attendanceState() {
-  const claimedToday = state.attendance.last === todayKey();
+  const claimedToday = state.attendance.last >= gameDay(state);
   const done = claimedToday ? ((state.attendance.count - 1) % 7) + 1 : state.attendance.count % 7;
   return { claimedToday, done };
 }
@@ -960,25 +968,40 @@ function renderAttendance(list) {
   }));
 }
 
-function claimAttendance() {
-  if (state.attendance.last === todayKey()) return;
-  const given = grant(state, ATTENDANCE[state.attendance.count % ATTENDANCE.length]);
-  state.attendance.count++;
-  state.attendance.last = todayKey();
+function onClaimAttendance() {
+  const given = claimAttendance(state);
+  if (!given) return;
   message(`출석 보상 · ${rewardText(given)}`);
   commit();
 }
 
+// 출석 + 다 채운 오늘 목표 + 모두 완료 보너스를 한 번에
+function onClaimToday() {
+  const result = claimToday(state);
+  if (!result) return;
+  message(`오늘 보상 ${result.count}개 · ${rewardText(result.given)}`);
+  commit();
+}
+
+function todayReadyCount() {
+  return (attendanceState().claimedToday ? 0 : 1) + dailyReadyIds(state).length;
+}
+
 function renderDaily() {
-  refreshDay(state, todayKey());
-  $('daily-list').replaceChildren(...Object.entries(DAILY_MISSIONS).map(([id, mission]) => {
+  refreshDay(state, gameDay(state));
+  const ready = todayReadyCount();
+  const claimAll = $('daily-claim-all');
+  claimAll.disabled = !ready;
+  claimAll.textContent = ready ? `한 번에 받기 ${ready}` : '받을 보상 없음';
+  $('daily-list').replaceChildren(...[...dailyPicks(state), 'all'].map(id => {
+    const mission = DAILY_MISSIONS[id];
     const value = Math.max(0, mission.value(state));
     const claimed = state.daily.claimed.includes(id);
     const ready = value >= mission.target && !claimed;
     const article = row(ICONS.daily[id], mission.name, '', claimed ? '완료' : ready ? '받기' : '진행 중', () => {
-      if (state.daily.claimed.includes(id) || mission.value(state) < mission.target) return;
-      state.daily.claimed.push(id);
-      message(`일일 미션 보상 · ${rewardText(grant(state, mission.reward))}`);
+      const given = claimDaily(state, id);
+      if (!given) return;
+      message(`오늘 목표 보상 · ${rewardText(given)}`);
       commit();
     }, {
       selected: ready, disabled: !ready, kind: ready ? 'claim' : claimed ? 'worn' : '', tone: DAILY_TONES[id],
@@ -990,8 +1013,91 @@ function renderDaily() {
 }
 
 function dailyReady() {
-  if (!state.daily || state.daily.date !== todayKey()) return false;
-  return Object.entries(DAILY_MISSIONS).some(([id, mission]) => !state.daily.claimed.includes(id) && mission.value(state) >= mission.target);
+  if (!state.daily || state.daily.date !== gameDay(state)) return false;
+  return dailyReadyIds(state).length > 0;
+}
+
+// ── 오늘 화면: 새 날 첫 접속에 출석·오늘 목표 3개·바로 가기를 한 화면에. 목표 탭의 '오늘 한눈에'로도 연다 ──
+const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+function todayLinks() {
+  const links = [];
+  if (state.farm && !state.roundEnd && !state.dungeon) {
+    links.push(['retry', `막힌 보스 재도전 · ${mapCode(state.map)}`]);
+  }
+  const keys = Object.keys(DUNGEONS).filter(id => dungeonUnlocked(state, id)).reduce((sum, id) => sum + (state.daily.keys[id] || 0), 0);
+  if (keys > 0) links.push(['dungeon', `오늘 열린 특별 대회 · 열쇠 ${keys}개`]);
+  if (recordUnlocked(state) && recordKeys(state) > 0) links.push(['record', `30초 기록전 · ${recordKeys(state)}번 남음`]);
+  return links;
+}
+
+function renderToday() {
+  const today = gameDay(state);
+  refreshDay(state, today);
+  const date = new Date(dayStart(today) + 12 * 3600 * 1000);
+  setText('today-date', `${date.getUTCMonth() + 1}월 ${date.getUTCDate()}일 ${WEEKDAYS[date.getUTCDay()]}요일 · 한국 시간 0시에 바뀌어요`);
+  const { claimedToday, done } = attendanceState();
+  setText('today-attend-note', claimedToday ? `${done}/7일 받음` : `오늘 ${done + 1}일째`);
+  // 7칸 점 줄(받음 ✓ · 오늘 · 남은 날, 7일째는 큰 보상)과 오늘 받을(받은) 보상
+  $('today-attend').replaceChildren(...ATTENDANCE.map((_, day) => {
+    const cell = document.createElement('li');
+    const status = day < done ? 'claimed' : day === done && !claimedToday ? 'today' : 'later';
+    cell.className = `today-day ${status}${day === ATTENDANCE.length - 1 ? ' big' : ''}`;
+    cell.textContent = status === 'claimed' ? '✓' : String(day + 1);
+    cell.ariaLabel = `${day + 1}일째${status === 'claimed' ? ' 받음' : status === 'today' ? ' 오늘' : ''}`;
+    return cell;
+  }));
+  const todayReward = ATTENDANCE[(claimedToday ? state.attendance.count - 1 : state.attendance.count) % ATTENDANCE.length];
+  const rewardLine = $('today-attend-reward');
+  rewardLine.replaceChildren(Object.assign(document.createElement('small'), { textContent: claimedToday ? '오늘 받은 출석 보상' : '오늘 출석 보상' }), rewardChips(todayReward));
+  rewardLine.classList.toggle('done', claimedToday);
+  const picks = dailyPicks(state);
+  setText('today-goals-note', `${picks.filter(id => state.daily.claimed.includes(id)).length}/${picks.length} 완료`);
+  $('today-goals').replaceChildren(...[...picks, 'all'].map(id => {
+    const mission = DAILY_MISSIONS[id];
+    const value = Math.max(0, Math.min(mission.value(state), mission.target));
+    const claimed = state.daily.claimed.includes(id);
+    const ready = !claimed && value >= mission.target;
+    const item = document.createElement('li');
+    item.className = `today-goal${claimed ? ' claimed' : ready ? ' ready' : ''}${id === 'all' ? ' bonus' : ''}`;
+    item.dataset.goal = id;
+    const name = document.createElement('b');
+    name.textContent = mission.name;
+    const meter = document.createElement('span');
+    meter.className = 'today-meter';
+    const fill = document.createElement('i');
+    fill.style.width = `${(claimed ? 1 : value / mission.target) * 100}%`;
+    meter.append(fill);
+    const count = document.createElement('small');
+    count.className = 'today-count';
+    count.textContent = claimed ? '받음' : ready ? '받기 가능' : `${value}/${mission.target}`;
+    const reward = rewardChips(mission.reward);
+    reward.classList.add('today-reward');
+    item.append(name, reward, meter, count);
+    return item;
+  }));
+  $('today-links').replaceChildren(...todayLinks().map(([kind, label]) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.link = kind;
+    button.textContent = label;
+    return button;
+  }));
+  const ready = todayReadyCount();
+  const claim = $('today-claim');
+  claim.disabled = !ready;
+  claim.textContent = ready ? `한 번에 받기 (${ready}개)` : '오늘 받을 보상을 다 받았어요';
+}
+
+function openToday() {
+  renderToday();
+  if (!$('today-dialog').open) $('today-dialog').showModal();
+}
+
+function onTodayLink(kind) {
+  $('today-dialog').close();
+  selectView('battle');
+  if (kind === 'retry') $('retry-map').click();
+  else document.querySelector(kind === 'record' ? '#dungeon-list .dungeon-card.record' : '#dungeon-list')?.scrollIntoView({ block: 'center', behavior: reducedMotion.matches ? 'auto' : 'smooth' });
 }
 
 function renderMissions() {
@@ -1005,7 +1111,7 @@ function renderMissions() {
   button.className = claimedToday ? 'done' : 'claim';
   button.textContent = claimedToday ? '오늘 출석 완료! 내일 또 만나요' : '오늘 출석 보상 받기';
   button.disabled = claimedToday;
-  button.addEventListener('click', claimAttendance);
+  button.addEventListener('click', onClaimAttendance);
   claim.append(button);
   $('attendance').append(claim);
   renderDaily();
@@ -1237,7 +1343,7 @@ function pull(count, currency) {
   const ratio = state.hp / maxHp(state);
   const results = pullStickers(state, count);
   if (state.roundEnd?.result !== 'loss') state.hp = clamp(Math.round(ratio * maxHp(state)), 1, maxHp(state));
-  refreshDay(state, todayKey());
+  refreshDay(state, gameDay(state));
   state.daily.pulls += count;
   state.stats.pulls += count;
   lastPull = { count, currency };
@@ -1311,7 +1417,7 @@ function eatSnack(id) {
   const ratio = state.hp / maxHp(state);
   state.snacks[id] = Math.min(SNACK_MAX, state.snacks[id] + SNACK_TIME);
   if (state.roundEnd?.result !== 'loss') state.hp = clamp(Math.round(ratio * maxHp(state)), 1, maxHp(state));
-  refreshDay(state, todayKey());
+  refreshDay(state, gameDay(state));
   state.daily.snacks++;
   message(`${SNACKS[id].name} 냠! ${SNACKS[id].label} · 15분`);
   commit();
@@ -1388,7 +1494,7 @@ function renderDungeons() {
     enter.ariaLabel = `${dungeon.name} Lv.${best + 1} 도전`;
     enter.disabled = !open || keys <= 0 || Boolean(state.dungeon);
     enter.addEventListener('click', () => {
-      refreshDay(state, todayKey());
+      refreshDay(state, gameDay(state));
       if (!enterDungeon(state, id)) return;
       combatEvent('enter', {});
       message(`${dungeon.name} Lv.${state.dungeon.level} 시작! 30초 안에 이기세요.`);
@@ -1401,7 +1507,7 @@ function renderDungeons() {
     sweep.ariaLabel = `${dungeon.name} Lv.${best} 소탕`;
     sweep.disabled = !open || !best || keys <= 0 || Boolean(state.dungeon);
     sweep.addEventListener('click', () => {
-      refreshDay(state, todayKey());
+      refreshDay(state, gameDay(state));
       if (!sweepDungeon(state, id)) return;
       flyCoins(id === 'coin' ? 6 : 2);
       commit();
@@ -1469,7 +1575,7 @@ function recordCard() {
   enter.ariaLabel = `${RECORD.name} 도전`;
   enter.disabled = !open || keys <= 0 || Boolean(state.dungeon);
   enter.addEventListener('click', () => {
-    refreshDay(state, todayKey());
+    refreshDay(state, gameDay(state));
     if (!enterRecord(state)) return;
     combatEvent('enter', {});
     message(`${RECORD.name} 시작! 30초 동안 최대한 많이 때리세요.`);
@@ -1482,7 +1588,7 @@ function recordCard() {
   sweep.ariaLabel = `${RECORD.name} 최고 기록 구간으로 소탕`;
   sweep.disabled = !open || !reach.tier || keys <= 0 || Boolean(state.dungeon);
   sweep.addEventListener('click', () => {
-    refreshDay(state, todayKey());
+    refreshDay(state, gameDay(state));
     if (!sweepRecord(state)) return;
     flyCoins(6);
     commit();
@@ -1591,10 +1697,10 @@ function render() {
   const gearScore = id => { const stats = gearStats(state, id); return stats.attack * 5 + stats.hp / 2; };
   $('bag-dot').hidden = !state.bag.some(id => gearScore(id) > gearScore(state.equipped[GEAR[id].slot]));
   const missionReady = Object.entries(MISSIONS).some(([id, mission]) => mission.value(state) >= nextMission(state, id).target);
-  $('mission-dot').hidden = !(missionReady || state.attendance.last !== todayKey() || dailyReady());
+  $('mission-dot').hidden = !(missionReady || !attendanceState().claimedToday || dailyReady());
   $('training-dot').hidden = currentView === 'training' || !(trainingReady() || tierReady(state) || academyReady());
   $('gacha-dot').hidden = state.tickets < 1;
-  refreshDay(state, todayKey());
+  refreshDay(state, gameDay(state));
   $('battle-dot').hidden = currentView === 'battle' || !Object.keys(DUNGEONS).some(id => dungeonUnlocked(state, id) && dungeonKeys(state, id) > 0);
   // 처음 그릴 때 이미 있던 결과(지난번 것)는 다시 띄우지 않고, 그 뒤에 생긴 결과부터 보여 준다
   if (shownDungeonResult === null) shownDungeonResult = state.dungeonResult?.serial ?? 0;
@@ -1632,7 +1738,7 @@ function render() {
     bag: [state.bag, state.equipped, state.ranks, state.patches, gearFilter, state.profile.gender],
     gacha: [gachaTab, state.tickets, state.coins >= gachaCoinCost(1), state.coins >= gachaCoinCost(10), state.stickers, state.cleared, state.recruits, state.gems],
     grades: [state.map, state.cleared, state.cycle, state.prestige, state.level],
-    activities: [state.missions, state.wins, state.cleared, state.bag, state.patches, state.attendance, state.daily, todayKey(), state.pass, passTiers(state), state.premium.pass],
+    activities: [state.missions, state.wins, state.cleared, state.bag, state.patches, state.attendance, state.daily, gameDay(state), state.pass, passTiers(state), state.premium.pass],
   };
   const fingerprint = JSON.stringify([currentView, viewModels[currentView]]);
   if (fingerprint === previousModel) return;
@@ -1693,7 +1799,7 @@ function runAutoTrain(force = false) {
   lastAutoTrain = now;
   const bought = autoTrain(state);
   if (!bought) return;
-  refreshDay(state, todayKey());
+  refreshDay(state, gameDay(state));
   state.daily.trains += bought;
 }
 
@@ -1704,7 +1810,7 @@ function train(id, repeat = false) {
   state.training[id] += count;
   state.coins -= total;
   if (id === 'health' && state.hp > 0) state.hp += maxHp(state) - before;
-  refreshDay(state, todayKey());
+  refreshDay(state, gameDay(state));
   state.daily.trains += count;
   if (!repeat || count > 1) message(`${TRAINING[id].name} Lv. ${state.training[id]}`);
   commit();
@@ -1798,13 +1904,9 @@ function enterGame() {
     catchUp(initialOffline);
     initialOffline = 0;
   }
-  refreshDay(state, todayKey());
-  if (state.attendance.count > 0 && state.attendance.last !== todayKey()) {
-    queuePopup(() => {
-      renderAttendance($('attend-dialog-list'));
-      $('attend-dialog').showModal();
-    });
-  }
+  refreshDay(state, gameDay(state));
+  // 새 날 첫 접속: 방치 보상 창 다음에 오늘 화면(출석·오늘 목표·바로 가기)
+  if (state.attendance.count > 0 && !attendanceState().claimedToday) queuePopup(openToday);
   commit();
 }
 
@@ -1869,7 +1971,16 @@ function start() {
     message(state.speed === 2 ? '2배속으로 대결해요.' : '보통 속도로 대결해요.');
     commit();
   });
-  $('attend-dialog-claim').addEventListener('click', claimAttendance);
+  $('today-claim').addEventListener('click', () => {
+    onClaimToday();
+    renderToday();
+  });
+  $('today-links').addEventListener('click', event => {
+    const link = event.target.closest('[data-link]');
+    if (link) onTodayLink(link.dataset.link);
+  });
+  $('today-open').addEventListener('click', openToday);
+  $('daily-claim-all').addEventListener('click', onClaimToday);
   $('prestige-button').addEventListener('click', openTransfer);
   $('transfer-confirm').addEventListener('click', doTransfer);
   $('gacha-again').addEventListener('click', () => { if (lastPull) pull(lastPull.count, lastPull.currency); });
