@@ -336,3 +336,394 @@
 .arena[data-motion='spar'] [data-spar='sport-green'][data-pose='strike'], .arena[data-motion='spar'] [data-spar='sport-green'][data-pose='launch'], .arena[data-motion='spar'] [data-spar='sport-green'][data-pose='follow'] { --pose-image: url('assets/motion-sport-green-strike.webp'); }
 .arena[data-motion='spar'] [data-spar='sport-green'][data-pose='hit'] { --pose-image: url('assets/motion-sport-green-hit.webp'); }
 .arena[data-motion='spar'] [data-spar='sport-green'][data-pose='down'] { --pose-image: url('assets/motion-sport-green-down.webp'); }
+
+/* ════ Codex 6차: 동료 16명 대결 9장 + 스킬 2장(준비 skill-a → 터지는 순간 skill-b) ════ */
+[data-sprite='mate1'][data-pose='ready'] { --pose-image: url('assets/motion-mate1-ready.webp'); }
+[data-sprite='mate1'][data-pose='step'] { --pose-image: url('assets/motion-mate1-step.webp'); }
+[data-sprite='mate1'][data-pose='windup'] { --pose-image: url('assets/motion-mate1-windup.webp'); }
+[data-sprite='mate1'][data-pose='strike'], [data-sprite='mate1'][data-pose='launch'] { --pose-image: url('assets/motion-mate1-strike.webp'); }
+[data-sprite='mate1'][data-pose='follow'] { --pose-image: url('assets/motion-mate1-follow.webp'); }
+[data-sprite='mate1'][data-pose='hit'] { --pose-image: url('assets/motion-mate1-hit.webp'); }
+[data-sprite='mate1'][data-pose='down'] { --pose-image: url('assets/motion-mate1-down.webp'); }
+[data-sprite='mate1'][data-pose='guard'] { --pose-image: url('assets/motion-mate1-guard.webp'); }
+[data-sprite='mate1'][data-pose='open'] { --pose-image: url('assets/motion-mate1-open.webp'); }
+[data-sprite='mate1'][data-pose='skill-a'] { --pose-image: url('assets/motion-mate1-skill-a.webp'); }
+[data-sprite='mate1'][data-pose='skill-b'] { --pose-image: url('assets/motion-mate1-skill-b.webp'); }
+[data-sprite='mate2'][data-pose='ready'] { --pose-image: url('assets/motion-mate2-ready.webp'); }
+[data-sprite='mate2'][data-pose='step'] { --pose-image: url('assets/motion-mate2-step.webp'); }
+[data-sprite='mate2'][data-pose='windup'] { --pose-image: url('assets/motion-mate2-windup.webp'); }
+[data-sprite='mate2'][data-pose='strike'], [data-sprite='mate2'][data-pose='launch'] { --pose-image: url('assets/motion-mate2-strike.webp'); }
+[data-sprite='mate2'][data-pose='follow'] { --pose-image: url('assets/motion-mate2-follow.webp'); }
+[data-sprite='mate2'][data-pose='hit'] { --pose-image: url('assets/motion-mate2-hit.webp'); }
+[data-sprite='mate2'][data-pose='down'] { --pose-image: url('assets/motion-mate2-down.webp'); }
+[data-sprite='mate2'][data-pose='guard'] { --pose-image: url('assets/motion-mate2-guard.webp'); }
+[data-sprite='mate2'][data-pose='open'] { --pose-image: url('assets/motion-mate2-open.webp'); }
+[data-sprite='mate2'][data-pose='skill-a'] { --pose-image: url('assets/motion-mate2-skill-a.webp'); }
+[data-sprite='mate2'][data-pose='skill-b'] { --pose-image: url('assets/motion-mate2-skill-b.webp'); }
+[data-sprite='mate3'][data-pose='ready'] { --pose-image: url('assets/motion-mate3-ready.webp'); }
+[data-sprite='mate3'][data-pose='step'] { --pose-image: url('assets/motion-mate3-step.webp'); }
+[data-sprite='mate3'][data-pose='windup'] { --pose-image: url('assets/motion-mate3-windup.webp'); }
+[data-sprite='mate3'][data-pose='strike'], [data-sprite='mate3'][data-pose='launch'] { --pose-image: url('assets/motion-mate3-strike.webp'); }
+[data-sprite='mate3'][data-pose='follow'] { --pose-image: url('assets/motion-mate3-follow.webp'); }
+[data-sprite='mate3'][data-pose='hit'] { --pose-image: url('assets/motion-mate3-hit.webp'); }
+[data-sprite='mate3'][data-pose='down'] { --pose-image: url('assets/motion-mate3-down.webp'); }
+[data-sprite='mate3'][data-pose='guard'] { --pose-image: url('assets/motion-mate3-guard.webp'); }
+[data-sprite='mate3'][data-pose='open'] { --pose-image: url('assets/motion-mate3-open.webp'); }
+[data-sprite='mate3'][data-pose='skill-a'] { --pose-image: url('assets/motion-mate3-skill-a.webp'); }
+[data-sprite='mate3'][data-pose='skill-b'] { --pose-image: url('assets/motion-mate3-skill-b.webp'); }
+[data-sprite='mate4'][data-pose='ready'] { --pose-image: url('assets/motion-mate4-ready.webp'); }
+[data-sprite='mate4'][data-pose='step'] { --pose-image: url('assets/motion-mate4-step.webp'); }
+[data-sprite='mate4'][data-pose='windup'] { --pose-image: url('assets/motion-mate4-windup.webp'); }
+[data-sprite='mate4'][data-pose='strike'], [data-sprite='mate4'][data-pose='launch'] { --pose-image: url('assets/motion-mate4-strike.webp'); }
+[data-sprite='mate4'][data-pose='follow'] { --pose-image: url('assets/motion-mate4-follow.webp'); }
+[data-sprite='mate4'][data-pose='hit'] { --pose-image: url('assets/motion-mate4-hit.webp'); }
+[data-sprite='mate4'][data-pose='down'] { --pose-image: url('assets/motion-mate4-down.webp'); }
+[data-sprite='mate4'][data-pose='guard'] { --pose-image: url('assets/motion-mate4-guard.webp'); }
+[data-sprite='mate4'][data-pose='open'] { --pose-image: url('assets/motion-mate4-open.webp'); }
+[data-sprite='mate4'][data-pose='skill-a'] { --pose-image: url('assets/motion-mate4-skill-a.webp'); }
+[data-sprite='mate4'][data-pose='skill-b'] { --pose-image: url('assets/motion-mate4-skill-b.webp'); }
+[data-sprite='mate5'][data-pose='ready'] { --pose-image: url('assets/motion-mate5-ready.webp'); }
+[data-sprite='mate5'][data-pose='step'] { --pose-image: url('assets/motion-mate5-step.webp'); }
+[data-sprite='mate5'][data-pose='windup'] { --pose-image: url('assets/motion-mate5-windup.webp'); }
+[data-sprite='mate5'][data-pose='strike'], [data-sprite='mate5'][data-pose='launch'] { --pose-image: url('assets/motion-mate5-strike.webp'); }
+[data-sprite='mate5'][data-pose='follow'] { --pose-image: url('assets/motion-mate5-follow.webp'); }
+[data-sprite='mate5'][data-pose='hit'] { --pose-image: url('assets/motion-mate5-hit.webp'); }
+[data-sprite='mate5'][data-pose='down'] { --pose-image: url('assets/motion-mate5-down.webp'); }
+[data-sprite='mate5'][data-pose='guard'] { --pose-image: url('assets/motion-mate5-guard.webp'); }
+[data-sprite='mate5'][data-pose='open'] { --pose-image: url('assets/motion-mate5-open.webp'); }
+[data-sprite='mate5'][data-pose='skill-a'] { --pose-image: url('assets/motion-mate5-skill-a.webp'); }
+[data-sprite='mate5'][data-pose='skill-b'] { --pose-image: url('assets/motion-mate5-skill-b.webp'); }
+[data-sprite='mate6'][data-pose='ready'] { --pose-image: url('assets/motion-mate6-ready.webp'); }
+[data-sprite='mate6'][data-pose='step'] { --pose-image: url('assets/motion-mate6-step.webp'); }
+[data-sprite='mate6'][data-pose='windup'] { --pose-image: url('assets/motion-mate6-windup.webp'); }
+[data-sprite='mate6'][data-pose='strike'], [data-sprite='mate6'][data-pose='launch'] { --pose-image: url('assets/motion-mate6-strike.webp'); }
+[data-sprite='mate6'][data-pose='follow'] { --pose-image: url('assets/motion-mate6-follow.webp'); }
+[data-sprite='mate6'][data-pose='hit'] { --pose-image: url('assets/motion-mate6-hit.webp'); }
+[data-sprite='mate6'][data-pose='down'] { --pose-image: url('assets/motion-mate6-down.webp'); }
+[data-sprite='mate6'][data-pose='guard'] { --pose-image: url('assets/motion-mate6-guard.webp'); }
+[data-sprite='mate6'][data-pose='open'] { --pose-image: url('assets/motion-mate6-open.webp'); }
+[data-sprite='mate6'][data-pose='skill-a'] { --pose-image: url('assets/motion-mate6-skill-a.webp'); }
+[data-sprite='mate6'][data-pose='skill-b'] { --pose-image: url('assets/motion-mate6-skill-b.webp'); }
+[data-sprite='mate7'][data-pose='ready'] { --pose-image: url('assets/motion-mate7-ready.webp'); }
+[data-sprite='mate7'][data-pose='step'] { --pose-image: url('assets/motion-mate7-step.webp'); }
+[data-sprite='mate7'][data-pose='windup'] { --pose-image: url('assets/motion-mate7-windup.webp'); }
+[data-sprite='mate7'][data-pose='strike'], [data-sprite='mate7'][data-pose='launch'] { --pose-image: url('assets/motion-mate7-strike.webp'); }
+[data-sprite='mate7'][data-pose='follow'] { --pose-image: url('assets/motion-mate7-follow.webp'); }
+[data-sprite='mate7'][data-pose='hit'] { --pose-image: url('assets/motion-mate7-hit.webp'); }
+[data-sprite='mate7'][data-pose='down'] { --pose-image: url('assets/motion-mate7-down.webp'); }
+[data-sprite='mate7'][data-pose='guard'] { --pose-image: url('assets/motion-mate7-guard.webp'); }
+[data-sprite='mate7'][data-pose='open'] { --pose-image: url('assets/motion-mate7-open.webp'); }
+[data-sprite='mate7'][data-pose='skill-a'] { --pose-image: url('assets/motion-mate7-skill-a.webp'); }
+[data-sprite='mate7'][data-pose='skill-b'] { --pose-image: url('assets/motion-mate7-skill-b.webp'); }
+[data-sprite='mate8'][data-pose='ready'] { --pose-image: url('assets/motion-mate8-ready.webp'); }
+[data-sprite='mate8'][data-pose='step'] { --pose-image: url('assets/motion-mate8-step.webp'); }
+[data-sprite='mate8'][data-pose='windup'] { --pose-image: url('assets/motion-mate8-windup.webp'); }
+[data-sprite='mate8'][data-pose='strike'], [data-sprite='mate8'][data-pose='launch'] { --pose-image: url('assets/motion-mate8-strike.webp'); }
+[data-sprite='mate8'][data-pose='follow'] { --pose-image: url('assets/motion-mate8-follow.webp'); }
+[data-sprite='mate8'][data-pose='hit'] { --pose-image: url('assets/motion-mate8-hit.webp'); }
+[data-sprite='mate8'][data-pose='down'] { --pose-image: url('assets/motion-mate8-down.webp'); }
+[data-sprite='mate8'][data-pose='guard'] { --pose-image: url('assets/motion-mate8-guard.webp'); }
+[data-sprite='mate8'][data-pose='open'] { --pose-image: url('assets/motion-mate8-open.webp'); }
+[data-sprite='mate8'][data-pose='skill-a'] { --pose-image: url('assets/motion-mate8-skill-a.webp'); }
+[data-sprite='mate8'][data-pose='skill-b'] { --pose-image: url('assets/motion-mate8-skill-b.webp'); }
+[data-sprite='mate9'][data-pose='ready'] { --pose-image: url('assets/motion-mate9-ready.webp'); }
+[data-sprite='mate9'][data-pose='step'] { --pose-image: url('assets/motion-mate9-step.webp'); }
+[data-sprite='mate9'][data-pose='windup'] { --pose-image: url('assets/motion-mate9-windup.webp'); }
+[data-sprite='mate9'][data-pose='strike'], [data-sprite='mate9'][data-pose='launch'] { --pose-image: url('assets/motion-mate9-strike.webp'); }
+[data-sprite='mate9'][data-pose='follow'] { --pose-image: url('assets/motion-mate9-follow.webp'); }
+[data-sprite='mate9'][data-pose='hit'] { --pose-image: url('assets/motion-mate9-hit.webp'); }
+[data-sprite='mate9'][data-pose='down'] { --pose-image: url('assets/motion-mate9-down.webp'); }
+[data-sprite='mate9'][data-pose='guard'] { --pose-image: url('assets/motion-mate9-guard.webp'); }
+[data-sprite='mate9'][data-pose='open'] { --pose-image: url('assets/motion-mate9-open.webp'); }
+[data-sprite='mate9'][data-pose='skill-a'] { --pose-image: url('assets/motion-mate9-skill-a.webp'); }
+[data-sprite='mate9'][data-pose='skill-b'] { --pose-image: url('assets/motion-mate9-skill-b.webp'); }
+[data-sprite='mate10'][data-pose='ready'] { --pose-image: url('assets/motion-mate10-ready.webp'); }
+[data-sprite='mate10'][data-pose='step'] { --pose-image: url('assets/motion-mate10-step.webp'); }
+[data-sprite='mate10'][data-pose='windup'] { --pose-image: url('assets/motion-mate10-windup.webp'); }
+[data-sprite='mate10'][data-pose='strike'], [data-sprite='mate10'][data-pose='launch'] { --pose-image: url('assets/motion-mate10-strike.webp'); }
+[data-sprite='mate10'][data-pose='follow'] { --pose-image: url('assets/motion-mate10-follow.webp'); }
+[data-sprite='mate10'][data-pose='hit'] { --pose-image: url('assets/motion-mate10-hit.webp'); }
+[data-sprite='mate10'][data-pose='down'] { --pose-image: url('assets/motion-mate10-down.webp'); }
+[data-sprite='mate10'][data-pose='guard'] { --pose-image: url('assets/motion-mate10-guard.webp'); }
+[data-sprite='mate10'][data-pose='open'] { --pose-image: url('assets/motion-mate10-open.webp'); }
+[data-sprite='mate10'][data-pose='skill-a'] { --pose-image: url('assets/motion-mate10-skill-a.webp'); }
+[data-sprite='mate10'][data-pose='skill-b'] { --pose-image: url('assets/motion-mate10-skill-b.webp'); }
+[data-sprite='mate11'][data-pose='ready'] { --pose-image: url('assets/motion-mate11-ready.webp'); }
+[data-sprite='mate11'][data-pose='step'] { --pose-image: url('assets/motion-mate11-step.webp'); }
+[data-sprite='mate11'][data-pose='windup'] { --pose-image: url('assets/motion-mate11-windup.webp'); }
+[data-sprite='mate11'][data-pose='strike'], [data-sprite='mate11'][data-pose='launch'] { --pose-image: url('assets/motion-mate11-strike.webp'); }
+[data-sprite='mate11'][data-pose='follow'] { --pose-image: url('assets/motion-mate11-follow.webp'); }
+[data-sprite='mate11'][data-pose='hit'] { --pose-image: url('assets/motion-mate11-hit.webp'); }
+[data-sprite='mate11'][data-pose='down'] { --pose-image: url('assets/motion-mate11-down.webp'); }
+[data-sprite='mate11'][data-pose='guard'] { --pose-image: url('assets/motion-mate11-guard.webp'); }
+[data-sprite='mate11'][data-pose='open'] { --pose-image: url('assets/motion-mate11-open.webp'); }
+[data-sprite='mate11'][data-pose='skill-a'] { --pose-image: url('assets/motion-mate11-skill-a.webp'); }
+[data-sprite='mate11'][data-pose='skill-b'] { --pose-image: url('assets/motion-mate11-skill-b.webp'); }
+[data-sprite='mate12'][data-pose='ready'] { --pose-image: url('assets/motion-mate12-ready.webp'); }
+[data-sprite='mate12'][data-pose='step'] { --pose-image: url('assets/motion-mate12-step.webp'); }
+[data-sprite='mate12'][data-pose='windup'] { --pose-image: url('assets/motion-mate12-windup.webp'); }
+[data-sprite='mate12'][data-pose='strike'], [data-sprite='mate12'][data-pose='launch'] { --pose-image: url('assets/motion-mate12-strike.webp'); }
+[data-sprite='mate12'][data-pose='follow'] { --pose-image: url('assets/motion-mate12-follow.webp'); }
+[data-sprite='mate12'][data-pose='hit'] { --pose-image: url('assets/motion-mate12-hit.webp'); }
+[data-sprite='mate12'][data-pose='down'] { --pose-image: url('assets/motion-mate12-down.webp'); }
+[data-sprite='mate12'][data-pose='guard'] { --pose-image: url('assets/motion-mate12-guard.webp'); }
+[data-sprite='mate12'][data-pose='open'] { --pose-image: url('assets/motion-mate12-open.webp'); }
+[data-sprite='mate12'][data-pose='skill-a'] { --pose-image: url('assets/motion-mate12-skill-a.webp'); }
+[data-sprite='mate12'][data-pose='skill-b'] { --pose-image: url('assets/motion-mate12-skill-b.webp'); }
+[data-sprite='mate13'][data-pose='ready'] { --pose-image: url('assets/motion-mate13-ready.webp'); }
+[data-sprite='mate13'][data-pose='step'] { --pose-image: url('assets/motion-mate13-step.webp'); }
+[data-sprite='mate13'][data-pose='windup'] { --pose-image: url('assets/motion-mate13-windup.webp'); }
+[data-sprite='mate13'][data-pose='strike'], [data-sprite='mate13'][data-pose='launch'] { --pose-image: url('assets/motion-mate13-strike.webp'); }
+[data-sprite='mate13'][data-pose='follow'] { --pose-image: url('assets/motion-mate13-follow.webp'); }
+[data-sprite='mate13'][data-pose='hit'] { --pose-image: url('assets/motion-mate13-hit.webp'); }
+[data-sprite='mate13'][data-pose='down'] { --pose-image: url('assets/motion-mate13-down.webp'); }
+[data-sprite='mate13'][data-pose='guard'] { --pose-image: url('assets/motion-mate13-guard.webp'); }
+[data-sprite='mate13'][data-pose='open'] { --pose-image: url('assets/motion-mate13-open.webp'); }
+[data-sprite='mate13'][data-pose='skill-a'] { --pose-image: url('assets/motion-mate13-skill-a.webp'); }
+[data-sprite='mate13'][data-pose='skill-b'] { --pose-image: url('assets/motion-mate13-skill-b.webp'); }
+[data-sprite='mate14'][data-pose='ready'] { --pose-image: url('assets/motion-mate14-ready.webp'); }
+[data-sprite='mate14'][data-pose='step'] { --pose-image: url('assets/motion-mate14-step.webp'); }
+[data-sprite='mate14'][data-pose='windup'] { --pose-image: url('assets/motion-mate14-windup.webp'); }
+[data-sprite='mate14'][data-pose='strike'], [data-sprite='mate14'][data-pose='launch'] { --pose-image: url('assets/motion-mate14-strike.webp'); }
+[data-sprite='mate14'][data-pose='follow'] { --pose-image: url('assets/motion-mate14-follow.webp'); }
+[data-sprite='mate14'][data-pose='hit'] { --pose-image: url('assets/motion-mate14-hit.webp'); }
+[data-sprite='mate14'][data-pose='down'] { --pose-image: url('assets/motion-mate14-down.webp'); }
+[data-sprite='mate14'][data-pose='guard'] { --pose-image: url('assets/motion-mate14-guard.webp'); }
+[data-sprite='mate14'][data-pose='open'] { --pose-image: url('assets/motion-mate14-open.webp'); }
+[data-sprite='mate14'][data-pose='skill-a'] { --pose-image: url('assets/motion-mate14-skill-a.webp'); }
+[data-sprite='mate14'][data-pose='skill-b'] { --pose-image: url('assets/motion-mate14-skill-b.webp'); }
+[data-sprite='mate15'][data-pose='ready'] { --pose-image: url('assets/motion-mate15-ready.webp'); }
+[data-sprite='mate15'][data-pose='step'] { --pose-image: url('assets/motion-mate15-step.webp'); }
+[data-sprite='mate15'][data-pose='windup'] { --pose-image: url('assets/motion-mate15-windup.webp'); }
+[data-sprite='mate15'][data-pose='strike'], [data-sprite='mate15'][data-pose='launch'] { --pose-image: url('assets/motion-mate15-strike.webp'); }
+[data-sprite='mate15'][data-pose='follow'] { --pose-image: url('assets/motion-mate15-follow.webp'); }
+[data-sprite='mate15'][data-pose='hit'] { --pose-image: url('assets/motion-mate15-hit.webp'); }
+[data-sprite='mate15'][data-pose='down'] { --pose-image: url('assets/motion-mate15-down.webp'); }
+[data-sprite='mate15'][data-pose='guard'] { --pose-image: url('assets/motion-mate15-guard.webp'); }
+[data-sprite='mate15'][data-pose='open'] { --pose-image: url('assets/motion-mate15-open.webp'); }
+[data-sprite='mate15'][data-pose='skill-a'] { --pose-image: url('assets/motion-mate15-skill-a.webp'); }
+[data-sprite='mate15'][data-pose='skill-b'] { --pose-image: url('assets/motion-mate15-skill-b.webp'); }
+[data-sprite='mate16'][data-pose='ready'] { --pose-image: url('assets/motion-mate16-ready.webp'); }
+[data-sprite='mate16'][data-pose='step'] { --pose-image: url('assets/motion-mate16-step.webp'); }
+[data-sprite='mate16'][data-pose='windup'] { --pose-image: url('assets/motion-mate16-windup.webp'); }
+[data-sprite='mate16'][data-pose='strike'], [data-sprite='mate16'][data-pose='launch'] { --pose-image: url('assets/motion-mate16-strike.webp'); }
+[data-sprite='mate16'][data-pose='follow'] { --pose-image: url('assets/motion-mate16-follow.webp'); }
+[data-sprite='mate16'][data-pose='hit'] { --pose-image: url('assets/motion-mate16-hit.webp'); }
+[data-sprite='mate16'][data-pose='down'] { --pose-image: url('assets/motion-mate16-down.webp'); }
+[data-sprite='mate16'][data-pose='guard'] { --pose-image: url('assets/motion-mate16-guard.webp'); }
+[data-sprite='mate16'][data-pose='open'] { --pose-image: url('assets/motion-mate16-open.webp'); }
+[data-sprite='mate16'][data-pose='skill-a'] { --pose-image: url('assets/motion-mate16-skill-a.webp'); }
+[data-sprite='mate16'][data-pose='skill-b'] { --pose-image: url('assets/motion-mate16-skill-b.webp'); }
+/* 건달 졸개 8종·두목 4명 */
+[data-sprite='thug1'][data-pose='ready'] { --pose-image: url('assets/motion-thug1-ready.webp'); }
+[data-sprite='thug1'][data-pose='step'] { --pose-image: url('assets/motion-thug1-step.webp'); }
+[data-sprite='thug1'][data-pose='windup'] { --pose-image: url('assets/motion-thug1-windup.webp'); }
+[data-sprite='thug1'][data-pose='strike'], [data-sprite='thug1'][data-pose='launch'] { --pose-image: url('assets/motion-thug1-strike.webp'); }
+[data-sprite='thug1'][data-pose='follow'] { --pose-image: url('assets/motion-thug1-follow.webp'); }
+[data-sprite='thug1'][data-pose='hit'] { --pose-image: url('assets/motion-thug1-hit.webp'); }
+[data-sprite='thug1'][data-pose='down'] { --pose-image: url('assets/motion-thug1-down.webp'); }
+[data-sprite='thug1'][data-pose='guard'] { --pose-image: url('assets/motion-thug1-guard.webp'); }
+[data-sprite='thug1'][data-pose='open'] { --pose-image: url('assets/motion-thug1-open.webp'); }
+[data-sprite='thug2'][data-pose='ready'] { --pose-image: url('assets/motion-thug2-ready.webp'); }
+[data-sprite='thug2'][data-pose='step'] { --pose-image: url('assets/motion-thug2-step.webp'); }
+[data-sprite='thug2'][data-pose='windup'] { --pose-image: url('assets/motion-thug2-windup.webp'); }
+[data-sprite='thug2'][data-pose='strike'], [data-sprite='thug2'][data-pose='launch'] { --pose-image: url('assets/motion-thug2-strike.webp'); }
+[data-sprite='thug2'][data-pose='follow'] { --pose-image: url('assets/motion-thug2-follow.webp'); }
+[data-sprite='thug2'][data-pose='hit'] { --pose-image: url('assets/motion-thug2-hit.webp'); }
+[data-sprite='thug2'][data-pose='down'] { --pose-image: url('assets/motion-thug2-down.webp'); }
+[data-sprite='thug2'][data-pose='guard'] { --pose-image: url('assets/motion-thug2-guard.webp'); }
+[data-sprite='thug2'][data-pose='open'] { --pose-image: url('assets/motion-thug2-open.webp'); }
+[data-sprite='thug3'][data-pose='ready'] { --pose-image: url('assets/motion-thug3-ready.webp'); }
+[data-sprite='thug3'][data-pose='step'] { --pose-image: url('assets/motion-thug3-step.webp'); }
+[data-sprite='thug3'][data-pose='windup'] { --pose-image: url('assets/motion-thug3-windup.webp'); }
+[data-sprite='thug3'][data-pose='strike'], [data-sprite='thug3'][data-pose='launch'] { --pose-image: url('assets/motion-thug3-strike.webp'); }
+[data-sprite='thug3'][data-pose='follow'] { --pose-image: url('assets/motion-thug3-follow.webp'); }
+[data-sprite='thug3'][data-pose='hit'] { --pose-image: url('assets/motion-thug3-hit.webp'); }
+[data-sprite='thug3'][data-pose='down'] { --pose-image: url('assets/motion-thug3-down.webp'); }
+[data-sprite='thug3'][data-pose='guard'] { --pose-image: url('assets/motion-thug3-guard.webp'); }
+[data-sprite='thug3'][data-pose='open'] { --pose-image: url('assets/motion-thug3-open.webp'); }
+[data-sprite='thug4'][data-pose='ready'] { --pose-image: url('assets/motion-thug4-ready.webp'); }
+[data-sprite='thug4'][data-pose='step'] { --pose-image: url('assets/motion-thug4-step.webp'); }
+[data-sprite='thug4'][data-pose='windup'] { --pose-image: url('assets/motion-thug4-windup.webp'); }
+[data-sprite='thug4'][data-pose='strike'], [data-sprite='thug4'][data-pose='launch'] { --pose-image: url('assets/motion-thug4-strike.webp'); }
+[data-sprite='thug4'][data-pose='follow'] { --pose-image: url('assets/motion-thug4-follow.webp'); }
+[data-sprite='thug4'][data-pose='hit'] { --pose-image: url('assets/motion-thug4-hit.webp'); }
+[data-sprite='thug4'][data-pose='down'] { --pose-image: url('assets/motion-thug4-down.webp'); }
+[data-sprite='thug4'][data-pose='guard'] { --pose-image: url('assets/motion-thug4-guard.webp'); }
+[data-sprite='thug4'][data-pose='open'] { --pose-image: url('assets/motion-thug4-open.webp'); }
+[data-sprite='thug5'][data-pose='ready'] { --pose-image: url('assets/motion-thug5-ready.webp'); }
+[data-sprite='thug5'][data-pose='step'] { --pose-image: url('assets/motion-thug5-step.webp'); }
+[data-sprite='thug5'][data-pose='windup'] { --pose-image: url('assets/motion-thug5-windup.webp'); }
+[data-sprite='thug5'][data-pose='strike'], [data-sprite='thug5'][data-pose='launch'] { --pose-image: url('assets/motion-thug5-strike.webp'); }
+[data-sprite='thug5'][data-pose='follow'] { --pose-image: url('assets/motion-thug5-follow.webp'); }
+[data-sprite='thug5'][data-pose='hit'] { --pose-image: url('assets/motion-thug5-hit.webp'); }
+[data-sprite='thug5'][data-pose='down'] { --pose-image: url('assets/motion-thug5-down.webp'); }
+[data-sprite='thug5'][data-pose='guard'] { --pose-image: url('assets/motion-thug5-guard.webp'); }
+[data-sprite='thug5'][data-pose='open'] { --pose-image: url('assets/motion-thug5-open.webp'); }
+[data-sprite='thug6'][data-pose='ready'] { --pose-image: url('assets/motion-thug6-ready.webp'); }
+[data-sprite='thug6'][data-pose='step'] { --pose-image: url('assets/motion-thug6-step.webp'); }
+[data-sprite='thug6'][data-pose='windup'] { --pose-image: url('assets/motion-thug6-windup.webp'); }
+[data-sprite='thug6'][data-pose='strike'], [data-sprite='thug6'][data-pose='launch'] { --pose-image: url('assets/motion-thug6-strike.webp'); }
+[data-sprite='thug6'][data-pose='follow'] { --pose-image: url('assets/motion-thug6-follow.webp'); }
+[data-sprite='thug6'][data-pose='hit'] { --pose-image: url('assets/motion-thug6-hit.webp'); }
+[data-sprite='thug6'][data-pose='down'] { --pose-image: url('assets/motion-thug6-down.webp'); }
+[data-sprite='thug6'][data-pose='guard'] { --pose-image: url('assets/motion-thug6-guard.webp'); }
+[data-sprite='thug6'][data-pose='open'] { --pose-image: url('assets/motion-thug6-open.webp'); }
+[data-sprite='thug7'][data-pose='ready'] { --pose-image: url('assets/motion-thug7-ready.webp'); }
+[data-sprite='thug7'][data-pose='step'] { --pose-image: url('assets/motion-thug7-step.webp'); }
+[data-sprite='thug7'][data-pose='windup'] { --pose-image: url('assets/motion-thug7-windup.webp'); }
+[data-sprite='thug7'][data-pose='strike'], [data-sprite='thug7'][data-pose='launch'] { --pose-image: url('assets/motion-thug7-strike.webp'); }
+[data-sprite='thug7'][data-pose='follow'] { --pose-image: url('assets/motion-thug7-follow.webp'); }
+[data-sprite='thug7'][data-pose='hit'] { --pose-image: url('assets/motion-thug7-hit.webp'); }
+[data-sprite='thug7'][data-pose='down'] { --pose-image: url('assets/motion-thug7-down.webp'); }
+[data-sprite='thug7'][data-pose='guard'] { --pose-image: url('assets/motion-thug7-guard.webp'); }
+[data-sprite='thug7'][data-pose='open'] { --pose-image: url('assets/motion-thug7-open.webp'); }
+[data-sprite='thug8'][data-pose='ready'] { --pose-image: url('assets/motion-thug8-ready.webp'); }
+[data-sprite='thug8'][data-pose='step'] { --pose-image: url('assets/motion-thug8-step.webp'); }
+[data-sprite='thug8'][data-pose='windup'] { --pose-image: url('assets/motion-thug8-windup.webp'); }
+[data-sprite='thug8'][data-pose='strike'], [data-sprite='thug8'][data-pose='launch'] { --pose-image: url('assets/motion-thug8-strike.webp'); }
+[data-sprite='thug8'][data-pose='follow'] { --pose-image: url('assets/motion-thug8-follow.webp'); }
+[data-sprite='thug8'][data-pose='hit'] { --pose-image: url('assets/motion-thug8-hit.webp'); }
+[data-sprite='thug8'][data-pose='down'] { --pose-image: url('assets/motion-thug8-down.webp'); }
+[data-sprite='thug8'][data-pose='guard'] { --pose-image: url('assets/motion-thug8-guard.webp'); }
+[data-sprite='thug8'][data-pose='open'] { --pose-image: url('assets/motion-thug8-open.webp'); }
+[data-sprite='thug-boss1'][data-pose='ready'] { --pose-image: url('assets/motion-thug-boss1-ready.webp'); }
+[data-sprite='thug-boss1'][data-pose='step'] { --pose-image: url('assets/motion-thug-boss1-step.webp'); }
+[data-sprite='thug-boss1'][data-pose='windup'] { --pose-image: url('assets/motion-thug-boss1-windup.webp'); }
+[data-sprite='thug-boss1'][data-pose='strike'], [data-sprite='thug-boss1'][data-pose='launch'] { --pose-image: url('assets/motion-thug-boss1-strike.webp'); }
+[data-sprite='thug-boss1'][data-pose='follow'] { --pose-image: url('assets/motion-thug-boss1-follow.webp'); }
+[data-sprite='thug-boss1'][data-pose='hit'] { --pose-image: url('assets/motion-thug-boss1-hit.webp'); }
+[data-sprite='thug-boss1'][data-pose='down'] { --pose-image: url('assets/motion-thug-boss1-down.webp'); }
+[data-sprite='thug-boss1'][data-pose='guard'] { --pose-image: url('assets/motion-thug-boss1-guard.webp'); }
+[data-sprite='thug-boss1'][data-pose='open'] { --pose-image: url('assets/motion-thug-boss1-open.webp'); }
+[data-sprite='thug-boss2'][data-pose='ready'] { --pose-image: url('assets/motion-thug-boss2-ready.webp'); }
+[data-sprite='thug-boss2'][data-pose='step'] { --pose-image: url('assets/motion-thug-boss2-step.webp'); }
+[data-sprite='thug-boss2'][data-pose='windup'] { --pose-image: url('assets/motion-thug-boss2-windup.webp'); }
+[data-sprite='thug-boss2'][data-pose='strike'], [data-sprite='thug-boss2'][data-pose='launch'] { --pose-image: url('assets/motion-thug-boss2-strike.webp'); }
+[data-sprite='thug-boss2'][data-pose='follow'] { --pose-image: url('assets/motion-thug-boss2-follow.webp'); }
+[data-sprite='thug-boss2'][data-pose='hit'] { --pose-image: url('assets/motion-thug-boss2-hit.webp'); }
+[data-sprite='thug-boss2'][data-pose='down'] { --pose-image: url('assets/motion-thug-boss2-down.webp'); }
+[data-sprite='thug-boss2'][data-pose='guard'] { --pose-image: url('assets/motion-thug-boss2-guard.webp'); }
+[data-sprite='thug-boss2'][data-pose='open'] { --pose-image: url('assets/motion-thug-boss2-open.webp'); }
+[data-sprite='thug-boss3'][data-pose='ready'] { --pose-image: url('assets/motion-thug-boss3-ready.webp'); }
+[data-sprite='thug-boss3'][data-pose='step'] { --pose-image: url('assets/motion-thug-boss3-step.webp'); }
+[data-sprite='thug-boss3'][data-pose='windup'] { --pose-image: url('assets/motion-thug-boss3-windup.webp'); }
+[data-sprite='thug-boss3'][data-pose='strike'], [data-sprite='thug-boss3'][data-pose='launch'] { --pose-image: url('assets/motion-thug-boss3-strike.webp'); }
+[data-sprite='thug-boss3'][data-pose='follow'] { --pose-image: url('assets/motion-thug-boss3-follow.webp'); }
+[data-sprite='thug-boss3'][data-pose='hit'] { --pose-image: url('assets/motion-thug-boss3-hit.webp'); }
+[data-sprite='thug-boss3'][data-pose='down'] { --pose-image: url('assets/motion-thug-boss3-down.webp'); }
+[data-sprite='thug-boss3'][data-pose='guard'] { --pose-image: url('assets/motion-thug-boss3-guard.webp'); }
+[data-sprite='thug-boss3'][data-pose='open'] { --pose-image: url('assets/motion-thug-boss3-open.webp'); }
+[data-sprite='thug-boss4'][data-pose='ready'] { --pose-image: url('assets/motion-thug-boss4-ready.webp'); }
+[data-sprite='thug-boss4'][data-pose='step'] { --pose-image: url('assets/motion-thug-boss4-step.webp'); }
+[data-sprite='thug-boss4'][data-pose='windup'] { --pose-image: url('assets/motion-thug-boss4-windup.webp'); }
+[data-sprite='thug-boss4'][data-pose='strike'], [data-sprite='thug-boss4'][data-pose='launch'] { --pose-image: url('assets/motion-thug-boss4-strike.webp'); }
+[data-sprite='thug-boss4'][data-pose='follow'] { --pose-image: url('assets/motion-thug-boss4-follow.webp'); }
+[data-sprite='thug-boss4'][data-pose='hit'] { --pose-image: url('assets/motion-thug-boss4-hit.webp'); }
+[data-sprite='thug-boss4'][data-pose='down'] { --pose-image: url('assets/motion-thug-boss4-down.webp'); }
+[data-sprite='thug-boss4'][data-pose='guard'] { --pose-image: url('assets/motion-thug-boss4-guard.webp'); }
+[data-sprite='thug-boss4'][data-pose='open'] { --pose-image: url('assets/motion-thug-boss4-open.webp'); }
+/* ════ Codex 5차: 주인공 종목별 공격(kick·knee·throw·hold), 필살기·액티브 스킬, 방어·숨 고르기·패배 ════ */
+.arena[data-motion='kick'] [data-sprite='boy'][data-pose='windup'], .arena[data-motion='knee'] [data-sprite='boy'][data-pose='windup'] { --pose-image: url('assets/motion-boy-kick-windup.webp'); }
+.arena[data-motion='kick'] [data-sprite='boy'][data-pose='strike'] { --pose-image: url('assets/motion-boy-kick-strike.webp'); }
+.arena[data-motion='kick'] [data-sprite='boy'][data-pose='follow'], .arena[data-motion='knee'] [data-sprite='boy'][data-pose='follow'] { --pose-image: url('assets/motion-boy-kick-follow.webp'); }
+.arena[data-motion='knee'] [data-sprite='boy'][data-pose='strike'] { --pose-image: url('assets/motion-boy-knee-strike.webp'); }
+.arena[data-motion='throw'] [data-sprite='boy'][data-pose='windup'], .arena[data-motion='hold'] [data-sprite='boy'][data-pose='windup'] { --pose-image: url('assets/motion-boy-throw-windup.webp'); }
+.arena[data-motion='throw'] [data-sprite='boy'][data-pose='strike'] { --pose-image: url('assets/motion-boy-throw-strike.webp'); }
+.arena[data-motion='throw'] [data-sprite='boy'][data-pose='follow'] { --pose-image: url('assets/motion-boy-throw-follow.webp'); }
+.arena[data-motion='hold'] [data-sprite='boy'][data-pose='strike'], .arena[data-motion='hold'] [data-sprite='boy'][data-pose='follow'] { --pose-image: url('assets/motion-boy-hold-strike.webp'); }
+[data-sprite='boy'][data-pose='guard'] { --pose-image: url('assets/motion-boy-guard.webp'); }
+[data-sprite='boy'][data-pose='ready-b'] { --pose-image: url('assets/motion-boy-ready-b.webp'); }
+[data-sprite='boy'][data-pose='lose'] { --pose-image: url('assets/motion-boy-lose.webp'); }
+[data-sprite='boy'][data-pose='skill-rush-windup'] { --pose-image: url('assets/motion-boy-skill-rush-windup.webp'); }
+[data-sprite='boy'][data-pose='skill-rush-strike'] { --pose-image: url('assets/motion-boy-skill-rush-strike.webp'); }
+[data-sprite='boy'][data-pose='skill-counter-guard'] { --pose-image: url('assets/motion-boy-skill-counter-guard.webp'); }
+[data-sprite='boy'][data-pose='skill-counter-strike'] { --pose-image: url('assets/motion-boy-skill-counter-strike.webp'); }
+[data-sprite='boy'][data-pose='skill-combo-windup'] { --pose-image: url('assets/motion-boy-skill-combo-windup.webp'); }
+[data-sprite='boy'][data-pose='skill-combo-strike'] { --pose-image: url('assets/motion-boy-skill-combo-strike.webp'); }
+[data-sprite='boy'][data-pose='skill-cheer'] { --pose-image: url('assets/motion-boy-skill-cheer.webp'); }
+[data-sprite='boy'][data-pose='skill-drink'] { --pose-image: url('assets/motion-boy-skill-drink.webp'); }
+[data-sprite='boy'][data-pose='skill-step-windup'] { --pose-image: url('assets/motion-boy-skill-step-windup.webp'); }
+[data-sprite='boy'][data-pose='skill-step-follow'] { --pose-image: url('assets/motion-boy-skill-step-follow.webp'); }
+.arena[data-motion='spar'] [data-sprite='boy'][data-pose='lose'] { --pose-image: url('assets/motion-boy-spar-down.webp'); }
+.arena[data-motion='kick'] [data-sprite='girl'][data-pose='windup'], .arena[data-motion='knee'] [data-sprite='girl'][data-pose='windup'] { --pose-image: url('assets/motion-girl-kick-windup.webp'); }
+.arena[data-motion='kick'] [data-sprite='girl'][data-pose='strike'] { --pose-image: url('assets/motion-girl-kick-strike.webp'); }
+.arena[data-motion='kick'] [data-sprite='girl'][data-pose='follow'], .arena[data-motion='knee'] [data-sprite='girl'][data-pose='follow'] { --pose-image: url('assets/motion-girl-kick-follow.webp'); }
+.arena[data-motion='knee'] [data-sprite='girl'][data-pose='strike'] { --pose-image: url('assets/motion-girl-knee-strike.webp'); }
+.arena[data-motion='throw'] [data-sprite='girl'][data-pose='windup'], .arena[data-motion='hold'] [data-sprite='girl'][data-pose='windup'] { --pose-image: url('assets/motion-girl-throw-windup.webp'); }
+.arena[data-motion='throw'] [data-sprite='girl'][data-pose='strike'] { --pose-image: url('assets/motion-girl-throw-strike.webp'); }
+.arena[data-motion='throw'] [data-sprite='girl'][data-pose='follow'] { --pose-image: url('assets/motion-girl-throw-follow.webp'); }
+.arena[data-motion='hold'] [data-sprite='girl'][data-pose='strike'], .arena[data-motion='hold'] [data-sprite='girl'][data-pose='follow'] { --pose-image: url('assets/motion-girl-hold-strike.webp'); }
+[data-sprite='girl'][data-pose='guard'] { --pose-image: url('assets/motion-girl-guard.webp'); }
+[data-sprite='girl'][data-pose='ready-b'] { --pose-image: url('assets/motion-girl-ready-b.webp'); }
+[data-sprite='girl'][data-pose='lose'] { --pose-image: url('assets/motion-girl-lose.webp'); }
+[data-sprite='girl'][data-pose='skill-rush-windup'] { --pose-image: url('assets/motion-girl-skill-rush-windup.webp'); }
+[data-sprite='girl'][data-pose='skill-rush-strike'] { --pose-image: url('assets/motion-girl-skill-rush-strike.webp'); }
+[data-sprite='girl'][data-pose='skill-counter-guard'] { --pose-image: url('assets/motion-girl-skill-counter-guard.webp'); }
+[data-sprite='girl'][data-pose='skill-counter-strike'] { --pose-image: url('assets/motion-girl-skill-counter-strike.webp'); }
+[data-sprite='girl'][data-pose='skill-combo-windup'] { --pose-image: url('assets/motion-girl-skill-combo-windup.webp'); }
+[data-sprite='girl'][data-pose='skill-combo-strike'] { --pose-image: url('assets/motion-girl-skill-combo-strike.webp'); }
+[data-sprite='girl'][data-pose='skill-cheer'] { --pose-image: url('assets/motion-girl-skill-cheer.webp'); }
+[data-sprite='girl'][data-pose='skill-drink'] { --pose-image: url('assets/motion-girl-skill-drink.webp'); }
+[data-sprite='girl'][data-pose='skill-step-windup'] { --pose-image: url('assets/motion-girl-skill-step-windup.webp'); }
+[data-sprite='girl'][data-pose='skill-step-follow'] { --pose-image: url('assets/motion-girl-skill-step-follow.webp'); }
+.arena[data-motion='spar'] [data-sprite='girl'][data-pose='lose'] { --pose-image: url('assets/motion-girl-spar-down.webp'); }
+/* 잡기 종목에서 맞는 쪽: throw = 메쳐져 뜸 → 매트에 눌림, hold = 눌림. 그림이 있는 상대만(건달은 기본 hit·down) */
+.arena[data-motion='throw'] [data-sprite='rival1'][data-pose='hit'] { --pose-image: url('assets/motion-rival1-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='rival1'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='rival1'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='rival1'][data-pose='down'] { --pose-image: url('assets/motion-rival1-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='rival2'][data-pose='hit'] { --pose-image: url('assets/motion-rival2-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='rival2'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='rival2'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='rival2'][data-pose='down'] { --pose-image: url('assets/motion-rival2-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='rival3'][data-pose='hit'] { --pose-image: url('assets/motion-rival3-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='rival3'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='rival3'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='rival3'][data-pose='down'] { --pose-image: url('assets/motion-rival3-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='rival4'][data-pose='hit'] { --pose-image: url('assets/motion-rival4-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='rival4'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='rival4'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='rival4'][data-pose='down'] { --pose-image: url('assets/motion-rival4-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='mob1'][data-pose='hit'] { --pose-image: url('assets/motion-mob1-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='mob1'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='mob1'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='mob1'][data-pose='down'] { --pose-image: url('assets/motion-mob1-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='mob2'][data-pose='hit'] { --pose-image: url('assets/motion-mob2-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='mob2'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='mob2'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='mob2'][data-pose='down'] { --pose-image: url('assets/motion-mob2-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='mob3'][data-pose='hit'] { --pose-image: url('assets/motion-mob3-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='mob3'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='mob3'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='mob3'][data-pose='down'] { --pose-image: url('assets/motion-mob3-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='mob4'][data-pose='hit'] { --pose-image: url('assets/motion-mob4-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='mob4'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='mob4'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='mob4'][data-pose='down'] { --pose-image: url('assets/motion-mob4-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='mob5'][data-pose='hit'] { --pose-image: url('assets/motion-mob5-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='mob5'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='mob5'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='mob5'][data-pose='down'] { --pose-image: url('assets/motion-mob5-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='mob6'][data-pose='hit'] { --pose-image: url('assets/motion-mob6-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='mob6'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='mob6'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='mob6'][data-pose='down'] { --pose-image: url('assets/motion-mob6-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='mob7'][data-pose='hit'] { --pose-image: url('assets/motion-mob7-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='mob7'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='mob7'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='mob7'][data-pose='down'] { --pose-image: url('assets/motion-mob7-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='mob8'][data-pose='hit'] { --pose-image: url('assets/motion-mob8-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='mob8'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='mob8'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='mob8'][data-pose='down'] { --pose-image: url('assets/motion-mob8-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='boss1'][data-pose='hit'] { --pose-image: url('assets/motion-boss1-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='boss1'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='boss1'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='boss1'][data-pose='down'] { --pose-image: url('assets/motion-boss1-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='boss2'][data-pose='hit'] { --pose-image: url('assets/motion-boss2-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='boss2'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='boss2'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='boss2'][data-pose='down'] { --pose-image: url('assets/motion-boss2-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='boss3'][data-pose='hit'] { --pose-image: url('assets/motion-boss3-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='boss3'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='boss3'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='boss3'][data-pose='down'] { --pose-image: url('assets/motion-boss3-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='boss4'][data-pose='hit'] { --pose-image: url('assets/motion-boss4-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='boss4'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='boss4'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='boss4'][data-pose='down'] { --pose-image: url('assets/motion-boss4-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='boss5'][data-pose='hit'] { --pose-image: url('assets/motion-boss5-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='boss5'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='boss5'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='boss5'][data-pose='down'] { --pose-image: url('assets/motion-boss5-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='boss6'][data-pose='hit'] { --pose-image: url('assets/motion-boss6-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='boss6'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='boss6'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='boss6'][data-pose='down'] { --pose-image: url('assets/motion-boss6-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='dboss-store'][data-pose='hit'] { --pose-image: url('assets/motion-dboss-store-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='dboss-store'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='dboss-store'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='dboss-store'][data-pose='down'] { --pose-image: url('assets/motion-dboss-store-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='dboss-quiz'][data-pose='hit'] { --pose-image: url('assets/motion-dboss-quiz-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='dboss-quiz'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='dboss-quiz'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='dboss-quiz'][data-pose='down'] { --pose-image: url('assets/motion-dboss-quiz-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='dboss-sports'][data-pose='hit'] { --pose-image: url('assets/motion-dboss-sports-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='dboss-sports'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='dboss-sports'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='dboss-sports'][data-pose='down'] { --pose-image: url('assets/motion-dboss-sports-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='sport-blue'][data-pose='hit'] { --pose-image: url('assets/motion-sport-blue-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='sport-blue'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='sport-blue'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='sport-blue'][data-pose='down'] { --pose-image: url('assets/motion-sport-blue-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='sport-red'][data-pose='hit'] { --pose-image: url('assets/motion-sport-red-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='sport-red'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='sport-red'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='sport-red'][data-pose='down'] { --pose-image: url('assets/motion-sport-red-pinned.webp'); }
+.arena[data-motion='throw'] [data-sprite='sport-green'][data-pose='hit'] { --pose-image: url('assets/motion-sport-green-thrown.webp'); }
+.arena[data-motion='throw'] [data-sprite='sport-green'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='sport-green'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='sport-green'][data-pose='down'] { --pose-image: url('assets/motion-sport-green-pinned.webp'); }
+/* 주인공이 졌을 때 보스가 이긴 모습 */
+[data-sprite='boss1'][data-pose='victory'] { --pose-image: url('assets/motion-boss1-victory.webp'); }
+[data-sprite='boss2'][data-pose='victory'] { --pose-image: url('assets/motion-boss2-victory.webp'); }
+[data-sprite='boss3'][data-pose='victory'] { --pose-image: url('assets/motion-boss3-victory.webp'); }
+[data-sprite='boss4'][data-pose='victory'] { --pose-image: url('assets/motion-boss4-victory.webp'); }
+[data-sprite='boss5'][data-pose='victory'] { --pose-image: url('assets/motion-boss5-victory.webp'); }
+[data-sprite='boss6'][data-pose='victory'] { --pose-image: url('assets/motion-boss6-victory.webp'); }
+[data-sprite='dboss-store'][data-pose='victory'] { --pose-image: url('assets/motion-dboss-store-victory.webp'); }
+[data-sprite='dboss-quiz'][data-pose='victory'] { --pose-image: url('assets/motion-dboss-quiz-victory.webp'); }
+[data-sprite='dboss-sports'][data-pose='victory'] { --pose-image: url('assets/motion-dboss-sports-victory.webp'); }

@@ -327,7 +327,35 @@
       <button class="setting-row" id="profile-button" type="button" aria-label="캐릭터 설정"><svg aria-hidden="true"><use href="#i-user"/></svg><span>캐릭터·닉네임 바꾸기</span><b>›</b></button>
       <button class="setting-row" type="button" data-open-portrait="lobby"><svg aria-hidden="true"><use href="#i-user"/></svg><span>선수 로비</span><b aria-hidden="true">›</b></button>
       <button class="setting-row" id="help" type="button" aria-label="게임 도움말"><svg aria-hidden="true"><use href="#i-help"/></svg><span>게임 도움말</span><b>›</b></button>
+      <button class="setting-row" id="test-open" type="button" hidden><svg aria-hidden="true"><use href="#i-gear"/></svg><span>테스트 도구</span><b aria-hidden="true">›</b></button>
+      <button class="setting-row" id="test-mode" type="button"><svg aria-hidden="true"><use href="#i-gear"/></svg><span id="test-mode-label">테스트 모드(진짜 저장과 따로)</span><b aria-hidden="true">›</b></button>
     </div>
+    <form method="dialog"><button class="confirm">닫기</button></form>
+  </dialog>
+  <button class="test-badge" id="test-badge" type="button" hidden>TEST</button>
+  <dialog id="test-dialog" class="test-dialog" aria-labelledby="test-title">
+    <h2 id="test-title">테스트 도구</h2>
+    <p class="test-hint">테스트 모드 저장은 진짜 저장과 따로예요. 마음껏 눌러 보세요.</p>
+    <h3>동료</h3>
+    <div class="test-grid">
+      <button type="button" data-test="mates">16명 모두 받기</button><button type="button" data-test="shards">조각 +100씩</button>
+      <button type="button" data-test="stars">모두 최대 별</button><button type="button" data-test="slots">출전 4칸 열기/닫기</button>
+      <button type="button" data-test="party">출전 자동 채우기</button><button type="button" data-test="cast">스킬 쿨타임 초기화</button>
+    </div>
+    <h3>재화·성장</h3>
+    <div class="test-grid">
+      <button type="button" data-test="coins">코인 ×10</button><button type="button" data-test="gems">보석·모집권·뽑기권</button>
+      <button type="button" data-test="level">레벨 +10</button><button type="button" data-test="tier">승급 +1</button>
+    </div>
+    <h3>장소·종목</h3>
+    <div class="test-move"><select id="test-place" aria-label="지역"></select><select id="test-map" aria-label="경기장"></select><button type="button" data-test="move">이동</button></div>
+    <label class="test-move">종목 고정 <select id="test-contest"></select></label>
+    <h3>대결</h3>
+    <div class="test-grid">
+      <button type="button" data-test="heal">체력 회복</button><button type="button" data-test="finish">앞 상대 체력 1</button>
+      <button type="button" data-test="boss">이 경기장 보스로</button>
+    </div>
+    <p class="test-note" id="test-note" role="status"></p>
     <form method="dialog"><button class="confirm">닫기</button></form>
   </dialog>
   <dialog id="portrait-dialog" class="portrait-dialog" aria-labelledby="portrait-title">

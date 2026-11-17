@@ -124,6 +124,8 @@ function spendGems() {
   g.claimPass(state);
   while (state.gems >= 900) { state.gems -= 900; state.recruits += 10; }
   while (state.recruits >= 10) { state.recruits -= 10; g.recruit(state, 10, rng); }
+  // 조각으로 영입·성급업(S·A 별 5개까지)
+  for (const id of Object.keys(g.COMPANIONS)) while (g.starUp(state, id));
   const owned = Object.keys(state.companions).sort((a, b) => g.allyPower(state, b) - g.allyPower(state, a));
   state.party = [0, 1, 2, 3].map(slot => (slot < g.partySlots(state) ? owned[slot] || null : null));
 }

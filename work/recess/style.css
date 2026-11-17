@@ -997,3 +997,53 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .snack small { font-size: 8px; line-height: 12px; }
 .fighter.player .sprite { max-width: 128px; }
 .allies { width: 150px; }
+
+/* ════ 동료 등급(S~F)·별·조각, 테스트 도구 ════ */
+.grade-badge { position: absolute; right: 4px; top: 4px; z-index: 2; display: grid; place-items: center; min-width: 22px; height: 22px; padding: 0 4px; border-radius: 7px; color: #fff; font-size: 13px; font-weight: 900; font-style: italic; text-shadow: 0 1px 0 rgba(0, 0, 0, .35); box-shadow: 0 2px 4px rgba(0, 0, 0, .25); }
+.grade-S .grade-badge { background: linear-gradient(135deg, #ff5f8f, #ffb347 45%, #ffe66d 70%, #7cf0c0); }
+.grade-A .grade-badge { background: linear-gradient(135deg, #8a3cdf, #c99bff); }
+.grade-B .grade-badge { background: linear-gradient(135deg, #2f7ae5, #79b8ff); }
+.grade-C .grade-badge { background: linear-gradient(135deg, #2fae66, #7fdca5); }
+.grade-D .grade-badge { background: linear-gradient(135deg, #7b8794, #b6c0ca); }
+.grade-F .grade-badge { background: linear-gradient(135deg, #8a6a4a, #c2a07c); }
+.mate-card.grade-S { border-color: #ffd36b; box-shadow: 0 2px 0 var(--card-shadow), 0 0 0 1px rgba(255, 190, 70, .35) inset; }
+.mate-stars { color: #f5a400; font-size: 12px; letter-spacing: 1px; line-height: 1; text-shadow: 0 1px 0 rgba(120, 70, 0, .25); }
+.gacha-results .mate-stars { font-size: 8px; }
+.shard-meter { position: relative; height: 14px; border-radius: 7px; }
+.shard-meter i { background: linear-gradient(90deg, #ff9f43, #ffd36b); }
+.shard-count { position: absolute; inset: 0; display: grid; place-items: center; color: #5a3b00; font-size: 9px; font-weight: 800; line-height: 1; }
+.mate-card button.star-up { background: linear-gradient(#ffcf5a, #f29a00); box-shadow: inset 0 -2px #b86a00; text-shadow: 0 1px 0 rgba(120, 60, 0, .5); }
+.mate-card button.star-up[hidden] { display: none; }
+.new-tag.shard-tag { background: #f29a00; }
+.gacha-results .mate-card.fill { opacity: .82; }
+.mate-cutin.grade-S { background: linear-gradient(90deg, rgba(70, 20, 60, .94), rgba(150, 60, 40, .86)); }
+.impact.float-shard .damage { color: #ffd36b; font-size: 13px; }
+.float-shard::before { display: none; }
+.allies .impact.float-shard { left: 10px; top: 0; }
+.arena[data-motion='throw'] .fighter .sprite[data-pose='strike'], .arena[data-motion='hold'] .fighter .sprite[data-pose='strike'] { --shift: clamp(18px, 9vw, 41px); }
+.test-badge { position: fixed; z-index: 50; left: 6px; bottom: calc(78px + env(safe-area-inset-bottom)); padding: 4px 9px; border: 0; border-radius: 8px; background: #e0245e; color: #fff; font-size: 11px; font-weight: 900; letter-spacing: 1px; box-shadow: 0 2px 6px rgba(0, 0, 0, .35); }
+.test-badge[hidden] { display: none; }
+.test-dialog { width: min(92vw, 420px); max-height: 88vh; overflow-y: auto; }
+.test-dialog h2 { margin: 0 0 4px; font-size: 18px; }
+.test-dialog h3 { margin: 12px 0 6px; color: var(--muted); font-size: 12px; }
+.test-hint, .test-note { margin: 0; color: var(--muted); font-size: 11px; }
+.test-note { min-height: 16px; margin-top: 10px; color: #e0245e; font-weight: 700; }
+.test-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.test-grid button, .test-move button { min-height: 36px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: inherit; font-size: 12px; font-weight: 700; }
+.test-grid button:active, .test-move button:active { transform: translateY(1px); }
+.test-move { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 12px; font-weight: 700; }
+.test-move select { flex: 1; min-width: 0; min-height: 34px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: inherit; font-size: 12px; }
+.test-move button { flex: 0 0 64px; }
+.mate-cutin { top: 64px; z-index: 12; }
+/* ════ 주인공·동료 같은 크기(--unit), 앞줄 3명 + 뒷줄 2명, 몸이 겹치지 않게 ════ */
+/* --unit = 대결 그림 한 칸의 폭(인물 키는 그 약 0.78배). 대결 칸 높이에 맞춰 줄어들고, 뒷줄까지 1.46칸 높이에 들어간다 */
+.fight { container-type: size; }
+.fight > * { --unit: min(112px, 29.5cqw, 64cqh); }
+/* 팀 전체를 0.2칸 오른쪽으로(왼쪽 끝 동료가 화면 밖으로 잘리지 않게) */
+.fighter.player .sprite { flex: 0 0 auto; max-width: var(--unit); margin-right: calc(var(--unit) * -.2); }
+.allies { left: 0; bottom: 4px; width: calc(50% - 6px + var(--unit) * .2); height: 100%; }
+.ally { left: auto; right: calc(var(--unit) * var(--d)); bottom: calc(var(--unit) * var(--y)); width: var(--unit); transform: scale(var(--s)); transform-origin: center bottom; }
+.ally .sprite { width: var(--unit); height: calc(var(--unit) * .91); }
+/* 간식 버튼은 주인공 머리 위쪽에서 오른쪽으로(뒷줄 동료는 그 왼쪽, 상대 머리는 그 오른쪽) */
+.snacks { left: calc(50% - 6px - var(--unit) * .35); top: 2px; translate: none; gap: 3px; }
+.snacks .snack { width: 30px; }

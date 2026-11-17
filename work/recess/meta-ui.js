@@ -9,6 +9,7 @@ let renderedAllies = '';
 const allyPoses = new Map();
 const ACTIVE_ICONS = { pencil: '#st-goldpen', cheer: '#i-megaphone', lunch: '#i-tray', sprint: '#i-run' };
 const ACTIVE_TONES = { pencil: 'yellow', cheer: 'pink', lunch: 'green', sprint: 'blue' };
+const ACTIVE_POSES = { pencil: [['skill-combo-windup', 120], ['skill-combo-strike', 300]], cheer: [['skill-cheer', 700]], lunch: [['skill-drink', 700]], sprint: [['skill-step-windup', 160], ['skill-step-follow', 300]] };
 const QUEST_TEXT = {
   best: n => `${placeLabel(n - 1)} 클리어`,
   power: n => `힘 훈련 Lv.${n}`,
@@ -128,6 +129,8 @@ function onActive(event) {
   pop.textContent = `${ACTIVE[event.id].name}!${event.amount && event.id !== 'lunch' ? ` ${fmt(event.amount)}` : event.id === 'lunch' ? ` +${fmt(event.amount)}` : ''}`;
   $('arena').append(pop);
   setTimeout(() => pop.remove(), 1000);
+  const frames = ACTIVE_POSES[event.id];
+  if (frames && $('arena').dataset.motion !== 'spar') setPoses('player', frames);
   if (event.id === 'pencil' && !reducedMotion.matches) {
     flashHit('rival', { move: 'rush', amount: event.amount, lucky: false });
     packAct('hit', 0, 260);
@@ -135,9 +138,10 @@ function onActive(event) {
   playSound(event.id === 'lunch' ? 'win' : 'bell');
 }
 
-// ── 동료 표시: 주인공 옆·뒤로 최대 4명이 함께 싸운다 ──
-// 앞줄 2명(크게) + 뒷줄 2명(작게, 위쪽). 주인공은 그 오른쪽 앞에 선다
-const ALLY_SLOTS = [{ x: 14, y: 0, s: 0.86 }, { x: 64, y: 8, s: 0.8 }, { x: 0, y: 50, s: 0.68 }, { x: 46, y: 56, s: 0.64 }];
+// ── 동료 표시: 주인공과 같은 크기(--unit)로 2줄 대형, 몸이 서로 겹치지 않게 ──
+// d = 주인공 몸 중심에서 왼쪽으로 떨어진 거리, y = 바닥에서 띄운 높이(둘 다 --unit 배수), s = 크기
+// 앞줄: 주인공 · 0번 · 1번(몸 폭 0.4~0.5 + 틈). 뒷줄: 2번·3번이 앞줄 머리 높이(0.8)에서 앞줄 사이사이에 선다
+const ALLY_SLOTS = [{ d: 0.52, y: 0, s: 1 }, { d: 1.04, y: 0, s: 1 }, { d: 0.26, y: 0.8, s: 0.85 }, { d: 0.78, y: 0.8, s: 0.85 }];
 
 function renderAllies() {
   const ids = state.party.slice(0, partySlots(state)).map((id, slot) => (id ? `${slot}:${id}` : '')).filter(Boolean);
@@ -151,8 +155,8 @@ function renderAllies() {
       const ally = document.createElement('span');
       ally.className = 'ally';
       ally.dataset.slot = slot;
-      ally.style.setProperty('--x', `${place.x}px`);
-      ally.style.setProperty('--y', `${place.y}px`);
+      ally.style.setProperty('--d', place.d);
+      ally.style.setProperty('--y', place.y);
       ally.style.setProperty('--s', place.s);
       ally.style.zIndex = 4 - index;
       const sprite = document.createElement('span');
@@ -225,11 +229,11 @@ function onMate(event) {
   const mate = COMPANIONS[event.id];
   const now = performance.now();
   const rate = state?.speed || 1;
-  allyPoses.set(String(event.slot), [{ pose: 'windup', until: now + 110 / rate }, { pose: 'strike', until: now + 520 / rate }]);
+  allyPoses.set(String(event.slot), [{ pose: 'skill-a', until: now + 180 / rate }, { pose: 'skill-b', until: now + 680 / rate }]);
   const arena = $('arena');
   arena.querySelectorAll('.mate-cutin').forEach((old, index, all) => { if (all.length - index > 1) old.remove(); });
   const cut = document.createElement('div');
-  cut.className = `mate-cutin ${mate.rarity}`;
+  cut.className = `mate-cutin ${GRADES[mate.grade].tone} grade-${mate.grade}`;
   cut.setAttribute('role', 'status');
   const text = document.createElement('div');
   const style = document.createElement('small');
@@ -243,6 +247,8 @@ function onMate(event) {
   if (event.amount) floatText('rival', `${event.crit ? '크리티컬 ' : ''}${event.hits > 1 ? `${event.hits}연타 ` : ''}${fmt(event.amount)}`, 'skill');
   if (event.heal) floatText('player', `+${fmt(event.heal)}`, 'heal');
 }
+
+function onShard(event) { floatText('allies', `${COMPANIONS[event.id].name} 조각 +${event.amount}`, 'shard'); }
 
 // ── 성장 탭 ──
 function renderGrowth() {
@@ -340,7 +346,7 @@ function mateCard(id) {
   const mate = COMPANIONS[id];
   const level = companionLevel(state, id);
   const card = document.createElement('article');
-  card.className = `mate-card ${mate.rarity}${level ? '' : ' unknown'}`;
+  card.className = `mate-card ${GRADES[mate.grade].tone} grade-${mate.grade}${level ? '' : ' unknown'}`;
   const figure = document.createElement('span');
   figure.className = 'mate-figure';
   figure.append(mateFace(id));
@@ -348,13 +354,27 @@ function mateCard(id) {
   style.className = 'mate-style';
   style.textContent = mate.style;
   figure.append(style);
-  const rarity = document.createElement('small');
-  rarity.className = 'rarity';
-  rarity.textContent = RARITIES[mate.rarity].name;
+  const grade = document.createElement('small');
+  grade.className = 'grade-badge';
+  grade.textContent = mate.grade;
+  grade.ariaLabel = GRADES[mate.grade].name;
+  figure.append(grade);
   const name = document.createElement('b');
   name.textContent = level ? mate.name : '???';
-  card.append(figure, rarity, name);
+  card.append(figure, name);
+  if (level) card.append(starLine(id));
   return card;
+}
+
+// ★★★☆☆: S·A는 5칸, B 이하는 별 1개 고정
+function starLine(id) {
+  const max = GRADES[COMPANIONS[id].grade].maxStar;
+  const level = companionLevel(state, id);
+  const line = document.createElement('span');
+  line.className = 'mate-stars';
+  line.ariaLabel = `별 ${level}개`;
+  line.textContent = '★'.repeat(level) + '☆'.repeat(max - level);
+  return line;
 }
 
 function renderParty() {
@@ -378,7 +398,7 @@ function renderParty() {
     const power = document.createElement('em');
     const trained = allyTrainLevel(state, id);
     const cap = allyTrainCap(state, id);
-    power.textContent = `★${companionLevel(state, id)} · Lv.${trained}/${cap} · 내 파워의 ${fmt(Math.round(allyPower(state, id) * 100))}%`;
+    power.textContent = `Lv.${trained}/${cap} · 내 파워의 ${fmt(Math.round(allyPower(state, id) * 100))}%`;
     const up = document.createElement('button');
     up.type = 'button';
     up.className = 'buy lvup';
@@ -416,16 +436,31 @@ function renderParty() {
     const mate = COMPANIONS[id];
     const level = companionLevel(state, id);
     const card = mateCard(id);
-    const copies = state.companions[id] || 0;
-    const prev = level ? level * (level + 1) / 2 : 0;
-    const nextNeed = (level + 1) * (level + 2) / 2;
+    const shards = mateShards(state, id);
+    const need = starCost(state, id);
     const meter = document.createElement('span');
-    meter.className = 'sticker-meter';
+    meter.className = 'sticker-meter shard-meter';
     const fill = document.createElement('i');
-    fill.style.width = `${level ? clamp((copies - prev) / (nextNeed - prev), 0, 1) * 100 : 0}%`;
+    fill.style.width = `${need ? clamp(shards / need, 0, 1) * 100 : 100}%`;
     meter.append(fill);
+    const count = document.createElement('small');
+    count.className = 'shard-count';
+    count.textContent = need ? `조각 ${fmt(shards)}/${fmt(need)}` : '최대 별';
+    meter.append(count);
     const info = document.createElement('em');
-    info.textContent = level ? `★${level} · Lv.${allyTrainLevel(state, id)} · 보유 파워 +${(ALLY_OWNED[mate.rarity] * level * 100).toFixed(1)}%` : '미보유';
+    info.textContent = level ? `Lv.${allyTrainLevel(state, id)} · 보유 파워 +${(GRADES[mate.grade].owned * level * 100).toFixed(1)}%` : `조각 ${fmt(need)}개 모으면 영입`;
+    const star = document.createElement('button');
+    star.type = 'button';
+    star.className = 'star-up';
+    star.textContent = level ? '성급업' : '영입';
+    star.hidden = !need || shards < need;
+    star.ariaLabel = `${mate.name} ${level ? '성급업' : '영입'}, 조각 ${need}개`;
+    star.addEventListener('click', () => {
+      if (!starUp(state, id)) return;
+      if (!state.party.some(Boolean)) state.party[0] = id;
+      message(level ? `${mate.name} ★${companionLevel(state, id)}!` : `${mate.name} 영입!`);
+      commit();
+    });
     const button = document.createElement('button');
     button.type = 'button';
     const inParty = state.party.includes(id);
@@ -441,7 +476,7 @@ function renderParty() {
     const skillLine = document.createElement('p');
     skillLine.className = 'mate-skill';
     skillLine.textContent = level ? `${mate.skill.name} · ${mate.skill.desc}` : `${mate.style} · ${mate.skill.name}`;
-    card.append(meter, info, skillLine, button);
+    card.append(meter, info, skillLine, star, button);
     return card;
   }));
 }
@@ -473,7 +508,9 @@ function renderRecruitPanel() {
     button.addEventListener('click', () => doRecruit(count, currency));
     return button;
   }));
-  setText('recruit-rates', `확률 · ${Object.values(RARITIES).map(rarity => `${rarity.name} ${rarity.weight}%`).join(' · ')}`);
+  const empty = GRADE_ORDER.filter(grade => !Object.values(COMPANIONS).some(mate => mate.grade === grade));
+  setText('recruit-rates', `확률 · ${GRADE_ORDER.map(grade => `${grade} ${GRADES[grade].weight}%`).join(' · ')} · 첫 모집 S급 확정 · 10회 모집 A급 이상 1번`
+    + (empty.length ? ` · 아직 ${empty.join('·')}급 동료가 없어서 그 자리는 S 동료 조각으로 나와요` : ''));
 }
 
 function doRecruit(count, currency) {
@@ -492,22 +529,23 @@ function doRecruit(count, currency) {
 
 function showRecruitResults(results, count, currency) {
   const dialog = $('gacha-dialog');
-  const best = Math.max(...results.map(result => RARITY_ORDER.indexOf(result.rarity)));
-  dialog.dataset.best = RARITY_ORDER[best];
+  const best = Math.min(...results.map(result => GRADE_ORDER.indexOf(result.fill ? 'C' : result.grade)));
+  dialog.dataset.best = GRADES[GRADE_ORDER[best]].tone;
   setText('gacha-result-title', '동료 모집 결과');
   const fresh = results.filter(result => result.isNew).length;
-  setText('gacha-result-note', [fresh && `새 동료 ${fresh}명`, results.some(result => result.leveled) && '레벨 업!'].filter(Boolean).join(' · ') || '동기들과 더 친해졌어요.');
+  const shards = results.reduce((sum, result) => sum + (result.shards || 0), 0);
+  const gems = results.reduce((sum, result) => sum + (result.gems || 0), 0);
+  setText('gacha-result-note', [fresh && `새 동료 ${fresh}명`, shards && `조각 +${shards}`, gems && `보석 +${gems}`].filter(Boolean).join(' · '));
   $('gacha-results').classList.toggle('single', results.length === 1);
   $('gacha-results').replaceChildren(...results.map((result, index) => {
     const card = mateCard(result.id);
     card.classList.add('sticker-card');
     card.style.animationDelay = `${index * 70}ms`;
-    if (result.isNew || result.leveled) {
-      const tag = document.createElement('span');
-      tag.className = 'new-tag';
-      tag.textContent = result.isNew ? 'NEW' : `Lv.${result.level}`;
-      card.append(tag);
-    }
+    const tag = document.createElement('span');
+    tag.className = `new-tag${result.isNew ? '' : ' shard-tag'}`;
+    tag.textContent = result.isNew ? 'NEW' : result.shards ? `조각 +${result.shards}` : `보석 +${result.gems}`;
+    card.append(tag);
+    if (result.fill) card.classList.add('fill');
     return card;
   }));
   const again = $('gacha-again');
@@ -686,4 +724,90 @@ function bindMetaUI() {
   $('go-recruit').addEventListener('click', () => openView('gacha:recruit'));
   $('offline-double').addEventListener('click', takeOfflineDouble);
   for (const id of ['profile-button', 'help']) $(id).addEventListener('click', () => $('settings-dialog').close());
+  bindTestTools();
+}
+
+// ── 테스트 도구: 주소에 ?test를 붙여 열면(설정 → 테스트 모드) 진짜 저장과 따로 놀면서 기능을 바로 확인한다 ──
+function testPlaces() {
+  const places = [['아카데미', 0]];
+  REGIONS.forEach((name, index) => places.push([name, REGION_START[index]]));
+  return places;
+}
+
+function testAct(action) {
+  const ids = Object.keys(COMPANIONS);
+  const acts = {
+    mates: () => { for (const id of ids) state.companions[id] = Math.max(1, companionLevel(state, id)); return '동료 16명을 모두 받았어요'; },
+    shards: () => { for (const id of ids) addShards(state, id, 100); return '모든 동료 조각 +100'; },
+    stars: () => { for (const id of ids) state.companions[id] = GRADES[COMPANIONS[id].grade].maxStar; return '모든 동료 최대 별'; },
+    slots: () => { state.test = { ...state.test, slots: !state.test?.slots }; return state.test.slots ? '출전 4칸 열림' : '출전 칸을 진행도 기준으로 되돌렸어요'; },
+    party: () => {
+      const owned = ids.filter(id => companionLevel(state, id)).sort((a, b) => allyPower(state, b) - allyPower(state, a));
+      state.party = Array.from({ length: PARTY_MAX }, (_, slot) => (slot < partySlots(state) ? owned[slot] || null : null));
+      return '센 동료부터 출전 칸을 채웠어요';
+    },
+    cast: () => { for (let slot = 0; slot < PARTY_MAX; slot++) state.cooldowns[`mate${slot}`] = 0; for (const id of Object.keys(ACTIVE)) state.cooldowns[id] = 0; return '동료·액티브 스킬 쿨타임 초기화'; },
+    coins: () => { state.coins = Math.max(1e6, state.coins * 10); return `코인 ${fmt(state.coins)}`; },
+    gems: () => { state.gems += 10000; state.recruits += 100; state.tickets += 100; state.keys = (state.keys || 0) + 10; return '보석 +10,000 · 모집권 +100 · 뽑기권 +100'; },
+    level: () => { state.level += 10; state.hp = maxHp(state); return `레벨 ${state.level}`; },
+    tier: () => { state.tier = Math.min(TIERS.length - 1, state.tier + 1); state.hp = maxHp(state); return `승급 · ${TIERS[state.tier]}`; },
+    heal: () => { state.hp = maxHp(state); return '체력 회복'; },
+    finish: () => { if (state.roundEnd || state.enemyHp <= 1) return '지금은 쓰러뜨릴 상대가 없어요'; state.enemyHp = 1; return '앞 상대 체력 1'; },
+    boss: () => { state.roundEnd = null; state.farm = null; openFight(state, state.map, BOSS_WAVE, 0.4); return '이 경기장 보스로'; },
+  };
+  return acts[action]?.();
+}
+
+function testMove() {
+  const cycle = Number($('test-place').value);
+  const map = Number($('test-map').value);
+  state.dungeon = null;
+  state.roundEnd = null;
+  state.farm = null;
+  state.cycle = cycle;
+  state.cleared = MAPS.map((_, index) => index < map);
+  state.prestige.best = Math.max(state.prestige.best, cycle * MAPS.length + map);
+  state.hp = maxHp(state);
+  openFight(state, map, 0, 0.4);
+  lastCycle = cycle; // 이동은 제패 축하 창 없이
+  return `${stageLabel(cycle, map)}로 이동`;
+}
+
+function bindTestTools() {
+  $('test-mode').addEventListener('click', () => {
+    const url = new URL(location.href);
+    if (TEST_MODE) url.searchParams.delete('test');
+    else url.searchParams.set('test', '1');
+    location.href = url.href;
+  });
+  setText('test-mode-label', TEST_MODE ? '테스트 모드 끝내기(진짜 저장으로)' : '테스트 모드(진짜 저장과 따로)');
+  $('test-open').hidden = !TEST_MODE;
+  $('test-badge').hidden = !TEST_MODE;
+  if (!TEST_MODE) return;
+  $('test-place').replaceChildren(...testPlaces().map(([name, cycle]) => new Option(name, cycle)));
+  $('test-map').replaceChildren(...MAPS.map((_, map) => new Option(mapCode(map), map)));
+  $('test-contest').replaceChildren(new Option('경기장대로', ''), ...Object.entries(CONTESTS).map(([id, game]) => new Option(game.name, id)));
+  const open = () => {
+    $('test-place').value = String(testPlaces().filter(([, cycle]) => cycle <= (state.cycle || 0)).at(-1)[1]);
+    $('test-map').value = String(state.map);
+    $('test-contest').value = state.test?.contest || '';
+    $('settings-dialog').close();
+    $('test-dialog').showModal();
+  };
+  $('test-open').addEventListener('click', open);
+  $('test-badge').addEventListener('click', open);
+  $('test-dialog').addEventListener('click', event => {
+    const button = event.target.closest('[data-test]');
+    if (!button) return;
+    const note = button.dataset.test === 'move' ? testMove() : testAct(button.dataset.test);
+    if (note) message(`테스트 · ${note}`);
+    setText('test-note', note || '');
+    commit();
+  });
+  $('test-contest').addEventListener('change', () => {
+    state.test = { ...state.test, contest: $('test-contest').value || undefined };
+    renderedContest = '';
+    message(state.test.contest ? `테스트 · 종목 고정: ${CONTESTS[state.test.contest].name}` : '테스트 · 종목을 경기장대로');
+    commit();
+  });
 }

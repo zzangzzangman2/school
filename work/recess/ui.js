@@ -157,12 +157,14 @@ function combatEvent(type, event) {
   }
   if (type === 'windup') {
     const launch = event.side === 'player' ? 'run' : 'launch';
-    setPoses(event.side, [['windup', 75], [launch, event.windup * 1000 - 55]]);
+    const special = event.side === 'player' && heroSkillPose(event.move);
+    setPoses(event.side, special ? [[special[0], event.windup * 1000 + 20]] : [['windup', 75], [launch, event.windup * 1000 - 55]]);
   }
   if (type === 'boss' && event.phase === 'counter') setPoses('rival', [['windup', 505], ['launch', 180]]);
   if (type === 'impact') {
     const target = event.side === 'player' ? 'rival' : 'player';
-    setPoses(event.side, [['strike', 110], ['follow', 100]]);
+    const special = event.side === 'player' && heroSkillPose(event.move);
+    setPoses(event.side, special ? [[special[1], 180], ['follow', 100]] : [['strike', 110], ['follow', 100]]);
     setPoses(target, [[event.blocked ? 'guard' : 'hit', event.breaks ? 240 : 160]]);
     if (!reducedMotion.matches) flashHit(target, event);
     if (event.side === 'rival' && aliveBehind(state)) packAct('strike', 1 + Math.floor(Math.random() * 2), 260);
@@ -175,6 +177,7 @@ function combatEvent(type, event) {
   if (type === 'enter') renderedContest = '';
   if (type === 'ally') onAlly(event);
   if (type === 'mate') onMate(event);
+  if (type === 'shard') onShard(event);
   if (type === 'active') onActive(event);
   if (type === 'splash' && !reducedMotion.matches) {
     $('pack').classList.remove('hit');
@@ -223,17 +226,22 @@ function renderMotion() {
     let resting = 'ready';
     if (state.roundEnd) {
       const won = state.roundEnd.result === 'win';
-      resting = side === 'player' ? (won ? 'victory' : 'down') : (won ? 'down' : 'victory');
+      resting = side === 'player' ? (won ? 'victory' : 'lose') : (won ? 'down' : 'victory');
     } else if (state.pause > 0) resting = 'step';
     else if (side === 'rival' && phase === 'guard') resting = 'guard';
     else if (side === 'rival' && phase === 'counter') resting = 'windup';
     else if (side === 'rival' && (phase === 'open' || phase === 'broken')) resting = 'open';
     else if (side === 'player' ? state.playerMove : state.enemyMove) resting = 'windup';
     const sprite = $(`${side}-sprite`);
-    const next = action || resting;
+    let next = action || resting;
+    if (next === 'ready' && side === 'player' && $('arena').dataset.motion !== 'spar' && Math.floor(now / 700) % 2) next = 'ready-b';
     if (sprite.dataset.pose !== next) sprite.dataset.pose = next;
   }
 }
+
+// 필살기(돌진 스트레이트·공 울림 카운터)는 전용 포즈. 태권도(보호구)에서는 기본 동작
+const HERO_SKILL_POSES = { rush: ['skill-rush-windup', 'skill-rush-strike'], bell: ['skill-counter-guard', 'skill-counter-strike'], counter: ['skill-counter-guard', 'skill-counter-strike'] };
+function heroSkillPose(move) { return $('arena').dataset.motion !== 'spar' && HERO_SKILL_POSES[move]; }
 
 function bar(fill, parent, amount, total) {
   const progress = clamp(amount / total * 100, 0, 100);
@@ -308,6 +316,7 @@ const PACK_SLOTS = [
 const packPoses = new Map();
 
 function protectiveSprite(id) {
+  if (/^(mate|thug)/.test(id)) return '';
   const seed = Array.from(id).reduce((sum, char) => sum + char.charCodeAt(0), 0);
   return ['sport-blue', 'sport-red', 'sport-green'][seed % 3];
 }
@@ -1199,7 +1208,7 @@ let lastCycle = null;
 function showSchool() {
   const dialog = $('school-dialog');
   if (!dialog || dialog.open) return;
-  $('school-sprite').dataset.portrait = state.profile.gender;
+  $('school-sprite').dataset.portrait = state.profile.gender === 'boy' ? 'boy-win' : state.profile.gender;
   const cycle = state.cycle;
   setText('school-title', cycle === 1 ? '아카데미 졸업!' : `${schoolName(cycle - 1)} 제패!`);
   const conquered = Math.min(regionIndex(cycle), REGIONS.length);

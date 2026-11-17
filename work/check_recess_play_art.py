@@ -31,6 +31,19 @@ for name in ('dust', 'cloud'):
 for name in ('ddakji', 'eraser', 'dodgeball', 'basketball', 'satba', 'headgear', 'glove'):
     icon = Image.open(assets / f'prop-{name}.webp')
     assert icon.size == ((48, 28) if name == 'eraser' else (48, 48)) and icon.mode == 'RGBA'
+# 5차: 주인공 종목별 공격·스킬 포즈, 6차: 동료 16명(대결 9장 + 스킬 2장 + 스탠딩)·건달 12명(9장)
+for gender in ('boy', 'girl'):
+    for pose in ('kick-windup', 'kick-strike', 'kick-follow', 'knee-strike', 'throw-windup', 'throw-strike', 'throw-follow', 'hold-strike', 'guard', 'lose', 'ready-b',
+                 'skill-rush-windup', 'skill-rush-strike', 'skill-counter-guard', 'skill-counter-strike'):
+        assert Image.open(assets / f'motion-{gender}-{pose}.webp').size == (280, 255)
+        assert Image.open(assets / f'wardrobe-{gender}-{pose}.webp').size == (280, 255)
+for n in range(1, 17):
+    for pose in ('ready', 'step', 'windup', 'strike', 'follow', 'hit', 'down', 'guard', 'open', 'skill-a', 'skill-b'):
+        assert Image.open(assets / f'motion-mate{n}-{pose}.webp').size == (280, 255)
+    assert Image.open(assets / f'stand-mate{n}.webp').size == (720, 1280)
+for id in [f'thug{n}' for n in range(1, 9)] + [f'thug-boss{n}' for n in range(1, 5)]:
+    for pose in ('ready', 'step', 'windup', 'strike', 'follow', 'hit', 'down', 'guard', 'open'):
+        assert Image.open(assets / f'motion-{id}-{pose}.webp').size == (280, 255)
 # 아카데미 경기장 12곳과 지역 구역 배경(시골·도시 4구역씩)
 for id in [f'a{n:02d}' for n in range(1, 13)] + [f'z0{n}{kind}' for n in range(1, 5) for kind in 'rc']:
     assert Image.open(assets / f'map-{id}.webp').size == (535, 302)
@@ -49,8 +62,8 @@ with sync_playwright() as playwright:
     page.get_by_role('textbox', name='닉네임').fill('하루')
     page.get_by_role('button', name='입학하기').click()
 
-    for cycle, map, contest, motion in [(0, 0, 'boxing', 'strike'), (0, 6, 'wrestling', 'push'), (0, 7, 'jiujitsu', 'push'),
-                                      (1, 0, 'ssireum', 'push'), (2, 0, 'taekwondo', 'spar'), (3, 9, 'mma', 'strike')]:
+    for cycle, map, contest, motion in [(0, 0, 'boxing', 'strike'), (0, 3, 'kickboxing', 'kick'), (0, 4, 'muaythai', 'knee'), (0, 6, 'wrestling', 'throw'),
+                                      (0, 7, 'jiujitsu', 'hold'), (1, 0, 'ssireum', 'throw'), (2, 0, 'taekwondo', 'spar'), (3, 9, 'mma', 'strike')]:
         page.evaluate('''([cycle, map]) => {
           state.cycle = cycle;
           state.equipped.top = 'mintHood';
@@ -66,11 +79,19 @@ with sync_playwright() as playwright:
         assert from_asset(path, 'motion-boy-strike' if motion == 'strike' else f'motion-boy-{motion}-strike')
         if motion == 'spar':
             assert 'wardrobe-rendered' not in (page.locator('#player-sprite').get_attribute('class') or '')
-            color = page.locator('#rival-sprite').get_attribute('data-spar')
+            # 지역의 건달은 보호구로 바꾸지 않고 자기 그림 그대로
+            rival = page.locator('#rival-sprite').get_attribute('data-sprite')
+            color = page.locator('#rival-sprite').get_attribute('data-spar') or rival
             path = page.locator('#rival-sprite').evaluate("e => getComputedStyle(e).getPropertyValue('--pose-image')")
             assert from_asset(path, f'motion-{color}-hit'), color
+            assert rival.startswith('thug') == (not page.locator('#rival-sprite').get_attribute('data-spar')), rival
         else:
             expect(page.locator('#player-sprite canvas')).to_have_attribute('data-frame', re.compile(f':{motion}$'))
+            # 잡기 종목: 맞는 쪽은 메쳐져 뜨거나(throw) 눌린다(hold). 그 그림이 있는 상대(아카데미 선수)만
+            rival = page.locator('#rival-sprite').get_attribute('data-sprite')
+            if motion in ('throw', 'hold') and (assets / f'motion-{rival}-thrown.webp').exists():
+                path = page.locator('#rival-sprite').evaluate("e => getComputedStyle(e).getPropertyValue('--pose-image')")
+                assert from_asset(path, f"motion-{rival}-{'thrown' if motion == 'throw' else 'pinned'}"), rival
 
         page.evaluate("flashHit('rival', { amount: 4, move: 'attack' })")
         effect = page.evaluate('contest(state).fx')

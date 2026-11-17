@@ -60,6 +60,25 @@ with sync_playwright() as playwright:
     }''')
     assert casts == 4, casts
 
+    # 등급: 16명 모두 S급. 조각으로 별 5개까지 성급업, 없는 동료는 조각으로 영입, 학년·구역 마지막 보스는 조각 2개
+    expect(page.locator('#party-slots .grade-badge').first).to_have_text('S')
+    grade = page.evaluate('''() => {
+      const backup = structuredClone(state);
+      const out = { allS: Object.values(COMPANIONS).every(mate => mate.grade === 'S') };
+      state.companions = { mate1: 1 };
+      state.mateShards = { mate1: 150, mate9: 40 };
+      while (starUp(state, 'mate1'));
+      out.max = [companionLevel(state, 'mate1'), mateShards(state, 'mate1'), starCost(state, 'mate1')];
+      out.unlock = [starUp(state, 'mate9'), companionLevel(state, 'mate9')];
+      state.party = ['mate9', null, null, null];
+      out.drop = dropShard(state, true, null)?.amount;
+      out.rates = GRADE_ORDER.map(id => GRADES[id].weight).reduce((sum, weight) => sum + weight, 0);
+      Object.assign(state, backup);
+      commit();
+      return out;
+    }''')
+    assert grade == {'allS': True, 'max': [5, 0, 0], 'unlock': [True, 1], 'drop': 2, 'rates': 100}, grade
+
     # 퀘스트: 힘 훈련 Lv.3 → 받기 → 보석
     expect(page.locator('#objective-title')).to_contain_text('힘 훈련 Lv.3')
     page.evaluate('state.coins = 5000; state.training.power = 3; commit()')

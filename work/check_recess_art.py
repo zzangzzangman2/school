@@ -54,7 +54,7 @@ with sync_playwright() as playwright:
     phone.get_by_role('textbox', name='닉네임').fill('하루')
     phone.get_by_role('button', name='입학하기').click()
     expect(phone.locator('#rival-sprite')).to_have_attribute('data-sprite', 'rival1')
-    expect(phone.locator('#pack .sprite').first).to_have_attribute('data-sprite', 'mob1')
+    expect(phone.locator('#pack .sprite').first).to_have_attribute('data-sprite', re.compile(r'^thug[1-8]$'))
     assert phone.locator('#rival-sprite').evaluate("e => !getComputedStyle(e).filter.includes('hue-rotate')")
 
     phone.evaluate('''() => {

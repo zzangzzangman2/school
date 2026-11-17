@@ -28,3 +28,54 @@
 .arena[data-motion='push'] [data-sprite='girl'][data-pose='windup'] { --wardrobe-base: url('assets/motion-girl-push-windup.webp'); --wardrobe-mask: url('assets/wardrobe-girl-push-windup.webp'); }
 .arena[data-motion='push'] [data-sprite='girl'][data-pose='strike'] { --wardrobe-base: url('assets/motion-girl-push-strike.webp'); --wardrobe-mask: url('assets/wardrobe-girl-push-strike.webp'); }
 .arena[data-motion='push'] [data-sprite='girl'][data-pose='follow'] { --wardrobe-base: url('assets/motion-girl-push-follow.webp'); --wardrobe-mask: url('assets/wardrobe-girl-push-follow.webp'); }
+/* Codex 5차 포즈의 장비 마스크 */
+.arena[data-motion='kick'] [data-sprite='boy'][data-pose='windup'] { --wardrobe-base: url('assets/motion-boy-kick-windup.webp'); --wardrobe-mask: url('assets/wardrobe-boy-kick-windup.webp'); }
+.arena[data-motion='kick'] [data-sprite='boy'][data-pose='strike'] { --wardrobe-base: url('assets/motion-boy-kick-strike.webp'); --wardrobe-mask: url('assets/wardrobe-boy-kick-strike.webp'); }
+.arena[data-motion='kick'] [data-sprite='boy'][data-pose='follow'] { --wardrobe-base: url('assets/motion-boy-kick-follow.webp'); --wardrobe-mask: url('assets/wardrobe-boy-kick-follow.webp'); }
+.arena[data-motion='knee'] [data-sprite='boy'][data-pose='windup'] { --wardrobe-base: url('assets/motion-boy-kick-windup.webp'); --wardrobe-mask: url('assets/wardrobe-boy-kick-windup.webp'); }
+.arena[data-motion='knee'] [data-sprite='boy'][data-pose='strike'] { --wardrobe-base: url('assets/motion-boy-knee-strike.webp'); --wardrobe-mask: url('assets/wardrobe-boy-knee-strike.webp'); }
+.arena[data-motion='knee'] [data-sprite='boy'][data-pose='follow'] { --wardrobe-base: url('assets/motion-boy-kick-follow.webp'); --wardrobe-mask: url('assets/wardrobe-boy-kick-follow.webp'); }
+.arena[data-motion='throw'] [data-sprite='boy'][data-pose='windup'] { --wardrobe-base: url('assets/motion-boy-throw-windup.webp'); --wardrobe-mask: url('assets/wardrobe-boy-throw-windup.webp'); }
+.arena[data-motion='throw'] [data-sprite='boy'][data-pose='strike'] { --wardrobe-base: url('assets/motion-boy-throw-strike.webp'); --wardrobe-mask: url('assets/wardrobe-boy-throw-strike.webp'); }
+.arena[data-motion='throw'] [data-sprite='boy'][data-pose='follow'] { --wardrobe-base: url('assets/motion-boy-throw-follow.webp'); --wardrobe-mask: url('assets/wardrobe-boy-throw-follow.webp'); }
+.arena[data-motion='hold'] [data-sprite='boy'][data-pose='windup'] { --wardrobe-base: url('assets/motion-boy-throw-windup.webp'); --wardrobe-mask: url('assets/wardrobe-boy-throw-windup.webp'); }
+.arena[data-motion='hold'] [data-sprite='boy'][data-pose='strike'] { --wardrobe-base: url('assets/motion-boy-hold-strike.webp'); --wardrobe-mask: url('assets/wardrobe-boy-hold-strike.webp'); }
+.arena[data-motion='hold'] [data-sprite='boy'][data-pose='follow'] { --wardrobe-base: url('assets/motion-boy-hold-strike.webp'); --wardrobe-mask: url('assets/wardrobe-boy-hold-strike.webp'); }
+[data-sprite='boy'][data-pose='guard'] { --wardrobe-base: url('assets/motion-boy-guard.webp'); --wardrobe-mask: url('assets/wardrobe-boy-guard.webp'); }
+[data-sprite='boy'][data-pose='ready-b'] { --wardrobe-base: url('assets/motion-boy-ready-b.webp'); --wardrobe-mask: url('assets/wardrobe-boy-ready-b.webp'); }
+[data-sprite='boy'][data-pose='lose'] { --wardrobe-base: url('assets/motion-boy-lose.webp'); --wardrobe-mask: url('assets/wardrobe-boy-lose.webp'); }
+[data-sprite='boy'][data-pose='skill-rush-windup'] { --wardrobe-base: url('assets/motion-boy-skill-rush-windup.webp'); --wardrobe-mask: url('assets/wardrobe-boy-skill-rush-windup.webp'); }
+[data-sprite='boy'][data-pose='skill-rush-strike'] { --wardrobe-base: url('assets/motion-boy-skill-rush-strike.webp'); --wardrobe-mask: url('assets/wardrobe-boy-skill-rush-strike.webp'); }
+[data-sprite='boy'][data-pose='skill-counter-guard'] { --wardrobe-base: url('assets/motion-boy-skill-counter-guard.webp'); --wardrobe-mask: url('assets/wardrobe-boy-skill-counter-guard.webp'); }
+[data-sprite='boy'][data-pose='skill-counter-strike'] { --wardrobe-base: url('assets/motion-boy-skill-counter-strike.webp'); --wardrobe-mask: url('assets/wardrobe-boy-skill-counter-strike.webp'); }
+[data-sprite='boy'][data-pose='skill-combo-windup'] { --wardrobe-base: url('assets/motion-boy-skill-combo-windup.webp'); --wardrobe-mask: url('assets/wardrobe-boy-skill-combo-windup.webp'); }
+[data-sprite='boy'][data-pose='skill-combo-strike'] { --wardrobe-base: url('assets/motion-boy-skill-combo-strike.webp'); --wardrobe-mask: url('assets/wardrobe-boy-skill-combo-strike.webp'); }
+[data-sprite='boy'][data-pose='skill-cheer'] { --wardrobe-base: url('assets/motion-boy-skill-cheer.webp'); --wardrobe-mask: url('assets/wardrobe-boy-skill-cheer.webp'); }
+[data-sprite='boy'][data-pose='skill-drink'] { --wardrobe-base: url('assets/motion-boy-skill-drink.webp'); --wardrobe-mask: url('assets/wardrobe-boy-skill-drink.webp'); }
+[data-sprite='boy'][data-pose='skill-step-windup'] { --wardrobe-base: url('assets/motion-boy-skill-step-windup.webp'); --wardrobe-mask: url('assets/wardrobe-boy-skill-step-windup.webp'); }
+[data-sprite='boy'][data-pose='skill-step-follow'] { --wardrobe-base: url('assets/motion-boy-skill-step-follow.webp'); --wardrobe-mask: url('assets/wardrobe-boy-skill-step-follow.webp'); }
+.arena[data-motion='kick'] [data-sprite='girl'][data-pose='windup'] { --wardrobe-base: url('assets/motion-girl-kick-windup.webp'); --wardrobe-mask: url('assets/wardrobe-girl-kick-windup.webp'); }
+.arena[data-motion='kick'] [data-sprite='girl'][data-pose='strike'] { --wardrobe-base: url('assets/motion-girl-kick-strike.webp'); --wardrobe-mask: url('assets/wardrobe-girl-kick-strike.webp'); }
+.arena[data-motion='kick'] [data-sprite='girl'][data-pose='follow'] { --wardrobe-base: url('assets/motion-girl-kick-follow.webp'); --wardrobe-mask: url('assets/wardrobe-girl-kick-follow.webp'); }
+.arena[data-motion='knee'] [data-sprite='girl'][data-pose='windup'] { --wardrobe-base: url('assets/motion-girl-kick-windup.webp'); --wardrobe-mask: url('assets/wardrobe-girl-kick-windup.webp'); }
+.arena[data-motion='knee'] [data-sprite='girl'][data-pose='strike'] { --wardrobe-base: url('assets/motion-girl-knee-strike.webp'); --wardrobe-mask: url('assets/wardrobe-girl-knee-strike.webp'); }
+.arena[data-motion='knee'] [data-sprite='girl'][data-pose='follow'] { --wardrobe-base: url('assets/motion-girl-kick-follow.webp'); --wardrobe-mask: url('assets/wardrobe-girl-kick-follow.webp'); }
+.arena[data-motion='throw'] [data-sprite='girl'][data-pose='windup'] { --wardrobe-base: url('assets/motion-girl-throw-windup.webp'); --wardrobe-mask: url('assets/wardrobe-girl-throw-windup.webp'); }
+.arena[data-motion='throw'] [data-sprite='girl'][data-pose='strike'] { --wardrobe-base: url('assets/motion-girl-throw-strike.webp'); --wardrobe-mask: url('assets/wardrobe-girl-throw-strike.webp'); }
+.arena[data-motion='throw'] [data-sprite='girl'][data-pose='follow'] { --wardrobe-base: url('assets/motion-girl-throw-follow.webp'); --wardrobe-mask: url('assets/wardrobe-girl-throw-follow.webp'); }
+.arena[data-motion='hold'] [data-sprite='girl'][data-pose='windup'] { --wardrobe-base: url('assets/motion-girl-throw-windup.webp'); --wardrobe-mask: url('assets/wardrobe-girl-throw-windup.webp'); }
+.arena[data-motion='hold'] [data-sprite='girl'][data-pose='strike'] { --wardrobe-base: url('assets/motion-girl-hold-strike.webp'); --wardrobe-mask: url('assets/wardrobe-girl-hold-strike.webp'); }
+.arena[data-motion='hold'] [data-sprite='girl'][data-pose='follow'] { --wardrobe-base: url('assets/motion-girl-hold-strike.webp'); --wardrobe-mask: url('assets/wardrobe-girl-hold-strike.webp'); }
+[data-sprite='girl'][data-pose='guard'] { --wardrobe-base: url('assets/motion-girl-guard.webp'); --wardrobe-mask: url('assets/wardrobe-girl-guard.webp'); }
+[data-sprite='girl'][data-pose='ready-b'] { --wardrobe-base: url('assets/motion-girl-ready-b.webp'); --wardrobe-mask: url('assets/wardrobe-girl-ready-b.webp'); }
+[data-sprite='girl'][data-pose='lose'] { --wardrobe-base: url('assets/motion-girl-lose.webp'); --wardrobe-mask: url('assets/wardrobe-girl-lose.webp'); }
+[data-sprite='girl'][data-pose='skill-rush-windup'] { --wardrobe-base: url('assets/motion-girl-skill-rush-windup.webp'); --wardrobe-mask: url('assets/wardrobe-girl-skill-rush-windup.webp'); }
+[data-sprite='girl'][data-pose='skill-rush-strike'] { --wardrobe-base: url('assets/motion-girl-skill-rush-strike.webp'); --wardrobe-mask: url('assets/wardrobe-girl-skill-rush-strike.webp'); }
+[data-sprite='girl'][data-pose='skill-counter-guard'] { --wardrobe-base: url('assets/motion-girl-skill-counter-guard.webp'); --wardrobe-mask: url('assets/wardrobe-girl-skill-counter-guard.webp'); }
+[data-sprite='girl'][data-pose='skill-counter-strike'] { --wardrobe-base: url('assets/motion-girl-skill-counter-strike.webp'); --wardrobe-mask: url('assets/wardrobe-girl-skill-counter-strike.webp'); }
+[data-sprite='girl'][data-pose='skill-combo-windup'] { --wardrobe-base: url('assets/motion-girl-skill-combo-windup.webp'); --wardrobe-mask: url('assets/wardrobe-girl-skill-combo-windup.webp'); }
+[data-sprite='girl'][data-pose='skill-combo-strike'] { --wardrobe-base: url('assets/motion-girl-skill-combo-strike.webp'); --wardrobe-mask: url('assets/wardrobe-girl-skill-combo-strike.webp'); }
+[data-sprite='girl'][data-pose='skill-cheer'] { --wardrobe-base: url('assets/motion-girl-skill-cheer.webp'); --wardrobe-mask: url('assets/wardrobe-girl-skill-cheer.webp'); }
+[data-sprite='girl'][data-pose='skill-drink'] { --wardrobe-base: url('assets/motion-girl-skill-drink.webp'); --wardrobe-mask: url('assets/wardrobe-girl-skill-drink.webp'); }
+[data-sprite='girl'][data-pose='skill-step-windup'] { --wardrobe-base: url('assets/motion-girl-skill-step-windup.webp'); --wardrobe-mask: url('assets/wardrobe-girl-skill-step-windup.webp'); }
+[data-sprite='girl'][data-pose='skill-step-follow'] { --wardrobe-base: url('assets/motion-girl-skill-step-follow.webp'); --wardrobe-mask: url('assets/wardrobe-girl-skill-step-follow.webp'); }
