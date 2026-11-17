@@ -40,6 +40,26 @@ with sync_playwright() as playwright:
     page.get_by_role('button', name='동료', exact=True).click()
     expect(page.locator('#party-slots .party-slot.filled')).to_have_count(1)
 
+    # 동료 칸: 처음 1칸 → 아카데미 졸업 2칸 → 시골 4곳 제패 3칸 → 8곳 제패 4칸(최고 기록 기준)
+    assert page.evaluate('partySlots(state)') == 1
+    assert page.evaluate("state.prestige.best = MAPS.length; partySlots(state)") == 2
+    assert page.evaluate("state.prestige.best = REGION_START[4] * MAPS.length; partySlots(state)") == 3
+    assert page.evaluate("state.prestige.best = REGION_START[8] * MAPS.length; partySlots(state)") == 4
+    # 여성 동료 16명, 무술이 모두 다르고, 출전하면 각자 스킬을 알아서 쓴다
+    assert page.evaluate("new Set(Object.values(COMPANIONS).map(mate => mate.style)).size") == 16
+    casts = page.evaluate('''() => {
+      const backup = structuredClone(state);
+      for (const id of Object.keys(COMPANIONS)) state.companions[id] = 1;
+      state.party = ['mate2', 'mate6', 'mate8', 'mate16'];
+      state.cooldowns = {};
+      const names = new Set();
+      simulate(state, 6, (type, event) => { if (type === 'mate' && event.id) names.add(event.id); });
+      Object.assign(state, backup);
+      commit();
+      return names.size;
+    }''')
+    assert casts == 4, casts
+
     # 퀘스트: 힘 훈련 Lv.3 → 받기 → 보석
     expect(page.locator('#objective-title')).to_contain_text('힘 훈련 Lv.3')
     page.evaluate('state.coins = 5000; state.training.power = 3; commit()')
@@ -101,4 +121,4 @@ with sync_playwright() as playwright:
     assert not issues, issues
     chrome.close()
 
-print('Mail, recruit/party/allies, quest reward, daily shop, promotion trial, pass + premium grant, and offline double verified.')
+print('Mail, recruit/party/allies, party slot unlocks, 16 companion skills, quest reward, daily shop, promotion trial, pass + premium grant, and offline double verified.')

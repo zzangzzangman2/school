@@ -30,14 +30,14 @@ with sync_playwright() as playwright:
     assert phone.locator('.character-preview').first.evaluate("e => getComputedStyle(e).backgroundImage.includes('data:image/webp')")
     phone.clock.run_for(25000)
     assert phone.evaluate("localStorage.getItem('haesol-recess-king-v1') === null")
-    choose(phone, '여학생', '   ')
+    choose(phone, '남학생', '   ')
     expect(phone.get_by_role('alert')).to_have_text('닉네임을 1~12자로 입력해 주세요.')
     phone.get_by_role('textbox', name='닉네임').fill('별하늘')
     phone.screenshot(path=str(root / 'work' / 'recess-v2-enrollment.png'))
     phone.get_by_role('button', name='입학하기').click()
     expect(phone.get_by_role('heading', name='아카데미 정문')).to_be_visible()
     expect(phone.locator('#player-name')).to_have_text('별하늘')
-    expect(phone.locator('#player-sprite')).to_have_attribute('data-sprite', 'girl')
+    expect(phone.locator('#player-sprite')).to_have_attribute('data-sprite', 'boy')
     expect(phone.locator('#level')).to_have_text('1')
     expect(phone.locator('#coins')).to_have_text('12')
     assert phone.locator('.bottom-nav').bounding_box()['y'] < 844
@@ -71,7 +71,7 @@ with sync_playwright() as playwright:
 
     phone.get_by_role('button', name='설정', exact=True).click()
     phone.get_by_role('button', name='캐릭터 설정').click()
-    expect(phone.get_by_role('radio', name='여학생')).to_be_checked()
+    expect(phone.get_by_role('radio', name='남학생')).to_be_checked()
     phone.get_by_role('radio', name='남학생').check()
     phone.get_by_role('textbox', name='닉네임').fill('봄달')
     phone.get_by_role('button', name='저장하고 돌아가기').click()
@@ -115,7 +115,7 @@ with sync_playwright() as playwright:
           sessionStorage.setItem('qa-snapshot', JSON.stringify(game));
         }''', [seed, number])
         seeded.reload()
-        expect(seeded.locator('#rival-sprite')).to_have_attribute('data-sprite', f'boss{number}')
+        expect(seeded.locator('#rival-sprite')).to_have_attribute('data-sprite', ['boss2', 'boss4', 'boss5', 'boss6'][number - 1])
         assert seeded.locator('#rival-sprite').evaluate("e => getComputedStyle(e).backgroundImage.includes('data:image/webp')")
     seeded.evaluate('''seed => {
       const legacy = JSON.parse(seed);
@@ -125,7 +125,7 @@ with sync_playwright() as playwright:
       sessionStorage.setItem('qa-snapshot', JSON.stringify(legacy));
     }''', seed)
     seeded.reload()
-    choose(seeded, '여학생', '복학생')
+    choose(seeded, '남학생', '복학생')
     expect(seeded.get_by_role('heading', name='레슬링 매트장')).to_be_visible()
     expect(seeded.locator('#level')).to_have_text('15')
     expect(seeded.locator('#coins')).to_have_text('311')
@@ -133,7 +133,7 @@ with sync_playwright() as playwright:
     small = chrome.new_page(viewport={'width': 320, 'height': 568}, is_mobile=True, has_touch=True)
     small.goto(target)
     assert small.evaluate('document.documentElement.scrollWidth === innerWidth')
-    choose(small, '여학생', '봄달봄달봄달봄달봄달봄달')
+    choose(small, '남학생', '봄달봄달봄달봄달봄달봄달')
     small.get_by_role('button', name='대결 지도', exact=True).click()
     assert small.evaluate('document.documentElement.scrollWidth === innerWidth')
     expect(small.locator('.grade-group')).to_have_count(4)

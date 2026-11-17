@@ -64,7 +64,15 @@ function dps(crowd = false) {
   let allies = 0;
   for (let slot = 0; slot < g.partySlots(state); slot++) if (state.party[slot]) allies += attackNow * g.allyPower(state, state.party[slot]) / g.ALLY_INTERVAL;
   const pencil = tier >= 1 ? attackNow * g.skillPower(state) / 8 * (crowd ? 3 : 1) : 0;
-  return (player + allies + pencil) * cheer;
+  // 동료 스킬: 피해 스킬은 초당 배수로, 파워·크리티컬 버프는 켜져 있는 시간 비율로 어림
+  const mates = attackNow * g.mateSkillDps(state, crowd);
+  let uptime = 1;
+  for (let slot = 0; slot < g.partySlots(state); slot++) {
+    const skill = state.party[slot] && g.COMPANIONS[state.party[slot]].skill;
+    if (skill?.power) uptime *= 1 + skill.power * skill.dur / skill.cd;
+    if (skill?.crit) uptime *= 1 + skill.crit * (g.CRIT_BASE - 1) * skill.dur / skill.cd;
+  }
+  return (player + allies + pencil + mates) * cheer * uptime;
 }
 function effectiveHp(ttk = 0) { return g.maxHp(state) * ((state.tier >= 3 ? 1.35 : 1) + g.regenRate(state) * ttk); }
 
@@ -117,7 +125,7 @@ function spendGems() {
   while (state.gems >= 900) { state.gems -= 900; state.recruits += 10; }
   while (state.recruits >= 10) { state.recruits -= 10; g.recruit(state, 10, rng); }
   const owned = Object.keys(state.companions).sort((a, b) => g.allyPower(state, b) - g.allyPower(state, a));
-  state.party = [0, 1, 2].map(slot => (slot < g.partySlots(state) ? owned[slot] || null : null));
+  state.party = [0, 1, 2, 3].map(slot => (slot < g.partySlots(state) ? owned[slot] || null : null));
 }
 
 function runDungeons() {

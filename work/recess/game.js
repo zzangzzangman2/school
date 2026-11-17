@@ -4,18 +4,18 @@ const MAPS_PER_GRADE = 3;
 const GRADE_COUNT = 4;
 const LEGACY_GRADES = 6; // 저장 버전 1(학년 6칸) 이전용
 const MAPS = [
-  { place: '아카데미 정문', names: ['민준', '소민', '지우', '정문 지킴이 솔'], hp: [24, 30, 38, 61], hit: [3, 3, 4, 6] },
-  { place: '기숙사 복도', names: ['가온', '여름', '시우', '복도 조교 민서'], hp: [40, 48, 58, 87], hit: [4, 5, 6, 8] },
-  { place: '신입생 체육관', names: ['해준', '로아', '우빈', '1학년 대표 다온'], hp: [54, 64, 80, 245], hit: [5, 6, 8, 13] },
-  { place: '웨이트 트레이닝장', names: ['유나', '준서', '승아', '웨이트장 터줏대감 준영'], hp: [80, 99, 118, 167], hit: [8, 10, 12, 15] },
-  { place: '학생식당 앞', names: ['은재', '예나', '도율', '식당 앞 단골 이솔'], hp: [115, 134, 158, 215], hit: [11, 12, 15, 19] },
-  { place: '복싱장', names: ['수호', '우주', '윤슬', '2학년 대표 유찬'], hp: [145, 172, 200, 275], hit: [13, 15, 18, 23] },
-  { place: '레슬링 매트장', names: ['지한', '하린', '이준', '매트장 주장 별이'], hp: [190, 226, 261, 342], hit: [17, 19, 21, 26] },
-  { place: '야외 코트', names: ['태인', '유리', '한결', '코트 에이스 온유'], hp: [246, 284, 330, 425], hit: [20, 22, 25, 31] },
-  { place: '모래판 씨름장', names: ['유민', '주리', '민재', '3학년 대표 채원'], hp: [300, 349, 399, 515], hit: [23, 26, 29, 39] },
-  { place: '운동장 트랙', names: ['주원', '세아', '지호', '트랙 에이스 리우'], hp: [380, 432, 490, 630], hit: [28, 31, 35, 43] },
-  { place: '졸업 시험장', names: ['서준', '나윤', '현준', '시험 감독 조교 리나'], hp: [467, 530, 595, 755], hit: [33, 36, 40, 49] },
-  { place: '아카데미 결승 링', names: ['희수', '민지', '시온', '수석 졸업 후보 은우'], hp: [560, 630, 710, 895], hit: [38, 41, 47, 57] },
+  { place: '아카데미 정문', names: ['민준', '태호', '건우', '정문 깡패 선배 강솔'], hp: [24, 30, 38, 61], hit: [3, 3, 4, 6] },
+  { place: '기숙사 복도', names: ['가온', '시우', '도현', '복도 행동대장 민서'], hp: [40, 48, 58, 87], hit: [4, 5, 6, 8] },
+  { place: '신입생 체육관', names: ['해준', '우빈', '로운', '1학년 대표 다온'], hp: [54, 64, 80, 245], hit: [5, 6, 8, 13] },
+  { place: '웨이트 트레이닝장', names: ['준서', '승현', '재민', '웨이트장 터줏대감 준영'], hp: [80, 99, 118, 167], hit: [8, 10, 12, 15] },
+  { place: '학생식당 앞', names: ['은재', '도율', '현수', '식당 앞 단골 이솔'], hp: [115, 134, 158, 215], hit: [11, 12, 15, 19] },
+  { place: '복싱장', names: ['수호', '우주', '윤성', '2학년 대표 유찬'], hp: [145, 172, 200, 275], hit: [13, 15, 18, 23] },
+  { place: '레슬링 매트장', names: ['지한', '이준', '태민', '매트장 주장 강별'], hp: [190, 226, 261, 342], hit: [17, 19, 21, 26] },
+  { place: '야외 코트', names: ['태인', '한결', '동하', '코트 에이스 온유'], hp: [246, 284, 330, 425], hit: [20, 22, 25, 31] },
+  { place: '모래판 씨름장', names: ['유민', '민재', '상우', '3학년 대표 성원'], hp: [300, 349, 399, 515], hit: [23, 26, 29, 39] },
+  { place: '운동장 트랙', names: ['주원', '지호', '성민', '트랙 에이스 리우'], hp: [380, 432, 490, 630], hit: [28, 31, 35, 43] },
+  { place: '졸업 시험장', names: ['서준', '현준', '동건', '시험 감독 조교 진혁'], hp: [467, 530, 595, 755], hit: [33, 36, 40, 49] },
+  { place: '아카데미 결승 링', names: ['희수', '시온', '준혁', '수석 졸업 후보 은우'], hp: [560, 630, 710, 895], hit: [38, 41, 47, 57] },
 ];
 
 const GEAR = {
@@ -141,14 +141,18 @@ const PACK = [
 const GANG_UP = 0.12;
 const SPLASH = 0.6;
 const BOSS_TIME = 40;
-const CLASSMATES = ['하준', '서아', '도윤', '지유', '이안', '하윤', '시온', '아린', '로운', '채아', '은호', '다은', '태양', '보미', '준호', '수아', '건희', '나연'];
-const MOB_SPRITES = ['mob1', 'mob2', 'mob3', 'mob4', 'mob5', 'mob6', 'mob7', 'mob8'];
+// 무리 졸개는 별명으로 부르는 남자 건달들
+const CLASSMATES = ['빡빡이', '문신', '깍두기', '덩치', '금목걸이', '반삭', '짝눈', '어깨', '츄리닝', '선글라스', '콧수염', '대머리', '삼선 슬리퍼', '배불뚝이', '흉터', '꽁지머리', '쫄티', '구레나룻'];
+// 적 그림(남자). Codex의 건달 그림(thug1~)이 오면 이 목록만 바꾸면 된다
+const MOB_SPRITES = ['rival1', 'mob1', 'rival3', 'mob3', 'mob5'];
+const LEADER_SPRITES = ['rival1', 'rival3', 'mob3'];
+const BOSS_SPRITES = ['boss2', 'boss4', 'boss5', 'boss6'];
 
 // ── 일일 던전: 하루 열쇠 2개, 30초 안에 졸개 셋과 던전 보스를 이기면 다음 단계 ──
 const DUNGEONS = {
-  coin: { name: '상금 토너먼트', boss: '토너먼트 우승 후보', minion: '토너먼트 참가자', reward: 'coin', hp: 4, hit: 0.6, sprite: 'dboss-store', background: 'd-coin', minionSprites: ['mob1', 'mob2', 'mob3'], map: 5, unlock: 'clear' },
-  ticket: { name: '팬 미팅 이벤트전', boss: '인기 스타 선수', minion: '이벤트전 선수', reward: 'ticket', hp: 2.4, hit: 1.5, sprite: 'dboss-quiz', background: 'd-ticket', minionSprites: ['mob4', 'mob5', 'mob8'], map: 9, unlock: 'clear' },
-  badge: { name: '국가대표 선발전', boss: '국가대표 코치', minion: '선발전 선수', reward: 'badge', hp: 3, hit: 1.3, sprite: 'dboss-sports', background: 'd-badge', minionSprites: ['mob3', 'mob6', 'mob7'], map: 11, unlock: 'transfer' },
+  coin: { name: '상금 토너먼트', boss: '토너먼트 우승 후보', minion: '토너먼트 참가자', reward: 'coin', hp: 4, hit: 0.6, sprite: 'dboss-store', background: 'd-coin', minionSprites: ['rival1', 'mob1', 'mob3'], map: 5, unlock: 'clear' },
+  ticket: { name: '팬 미팅 이벤트전', boss: '인기 스타 선수', minion: '이벤트전 선수', reward: 'ticket', hp: 2.4, hit: 1.5, sprite: 'boss6', background: 'd-ticket', minionSprites: ['rival3', 'mob5', 'mob1'], map: 9, unlock: 'clear' },
+  badge: { name: '국가대표 선발전', boss: '국가대표 코치', minion: '선발전 선수', reward: 'badge', hp: 3, hit: 1.3, sprite: 'dboss-sports', background: 'd-badge', minionSprites: ['mob3', 'rival1', 'mob5'], map: 11, unlock: 'transfer' },
 };
 const DUNGEON_PACK = [
   { share: 0.08, hit: 0.3 }, { share: 0.08, hit: 0.3 }, { share: 0.08, hit: 0.3 }, { share: 0.08, hit: 0.3 }, { share: 0.08, hit: 0.3 },
@@ -177,9 +181,9 @@ const ZONE_PLACES = [
   ['시민 체육관 연습장', '시민 체육관 관중석', '시민 체육관 메인 링'],
   ['챔피언전 예선', '챔피언전 준결승', '챔피언전 결승'],
 ];
-const ZONE_LEADERS = ['도장 사범', '체육관 코치', '체육관 주장', '챔피언전 시드'];
-const ZONE_BOSSES = ['동네 도장 관장', '상가 체육관 관장', '시민 체육관 에이스'];
-const FIGHTERS = ['강훈', '서진', '태호', '민혁', '지성', '현우', '도겸', '승철', '유진', '하은', '수빈', '예린', '지아', '다인', '채린', '소윤', '건우', '시혁', '재윤', '한별', '무진', '세라', '규리', '나래'];
+const ZONE_LEADERS = ['골목 행동대장', '시장 깡패 대장', '번화가 해결사', '두목 오른팔'];
+const ZONE_BOSSES = ['동네 건달 두목', '시장 건달 두목', '번화가 큰형님'];
+const FIGHTERS = ['강훈', '서진', '태호', '민혁', '지성', '현우', '도겸', '승철', '용팔', '만수', '덕배', '창식', '병철', '두식', '상철', '봉구', '건우', '시혁', '재윤', '칠성', '무진', '대길', '철민', '광수'];
 const CONTESTS = {
   boxing: { name: '복싱', prop: null, sound: '퍽!', fx: 'spark', motion: 'strike' },
   kickboxing: { name: '킥복싱', prop: null, sound: '팡!', fx: 'spark', motion: 'strike' },
@@ -204,22 +208,45 @@ const DUNGEON_CONTESTS = { coin: 'boxing', ticket: 'kickboxing', badge: 'mma', t
 const TIERS = ['연습생', '아마추어', '세미프로', '프로 데뷔', '랭커', '타이틀 도전자', '챔피언', '통합 챔피언', '전설'];
 const TIER_MULT = 1.3;
 const EXAMINERS = [
-  ['기초반 수석 코치', 'boss1'], ['심판 위원장', 'boss2'], ['아마추어 대회 우승자', 'boss3'], ['세미프로 랭킹 1위', 'boss4'],
-  ['프로 심사 위원', 'boss5'], ['랭킹 1위 선배', 'boss6'], ['현역 챔피언', 'dboss-sports'], ['전설의 챔피언', 'dboss-quiz'],
+  ['기초반 수석 코치', 'rival1'], ['심판 위원장', 'boss2'], ['아마추어 대회 우승자', 'rival3'], ['세미프로 랭킹 1위', 'boss4'],
+  ['프로 심사 위원', 'boss5'], ['랭킹 1위 선배', 'boss6'], ['현역 챔피언', 'dboss-sports'], ['전설의 챔피언', 'dboss-store'],
 ];
 const TRIAL = { name: '승급 심사', minion: '심사 위원', reward: 'tier', hp: 2.6, hit: 1.15, background: 'd-exam', map: 9, solo: true };
 
-// ── 동료: 아카데미 동기들이 내 편에서 함께 대결한다(모집권으로 모집, 겹치면 ★ 업, 보유 효과) ──
+// ── 동료: 전원 여성 파이터(성인). 모집권으로 모집, 겹치면 ★ 업, 보유 효과. 각자 고유 스킬을 쿨타임마다 알아서 쓴다 ──
+// sprite·portrait는 Codex의 동료 전용 그림(mate1~)이 오기 전까지 기존 그림을 빌려 쓴다. 그림이 오면 두 값만 'mate1' 등으로 바꾸면 된다.
+// 동료마다 무술(style) 하나. skill.kind: hit(앞 상대) · aoe(앞 상대 + 뒤 무리) · buff · heal. 피해 = 내 파워 × mult × 동료 배율
+//   한 번에: stun(적 공격 지연 초) boss(대장·보스 배율) pierce(방어 무시) sure(크리티컬 확정) hpPct(남은 체력 비례) execute(졸개 즉시 처치 기준)
+//            randMin~randMax(무작위 배율) heal/shield(최대 체력 비율) cdr(다른 쿨타임 감소 초) charge(필살기 기력) reset(동료 쿨타임 초기화) hits(연타 표시)
+//   지속(dur초): crit critDmg power speed dodge weaken reflect coin bleed(출혈: 파워 × bleed를 dur초에 나눠서)
 const COMPANIONS = {
-  mob1: { name: '복서 도윤', rarity: 'common' },
-  mob2: { name: '레슬러 서아', rarity: 'common' },
-  mob3: { name: '킥복서 이안', rarity: 'uncommon' },
-  mob4: { name: '주짓수 지유', rarity: 'uncommon' },
-  mob5: { name: '유도 시온', rarity: 'rare' },
-  mob6: { name: '태권도 아린', rarity: 'rare' },
-  mob7: { name: '무에타이 태양', rarity: 'epic' },
-  mob8: { name: '종합격투 보미', rarity: 'legend' },
+  // 타격·스피드형
+  mate1: { name: '정하린', style: '복싱', rarity: 'common', sprite: 'rival4', portrait: null, skill: { name: '잽 러시', kind: 'hit', mult: 1.5, hits: 3, speed: 0.4, dodge: 0.25, dur: 6, cd: 12, desc: '잽 3연타(파워 ×1.5), 6초 동안 동작 속도 +40%·회피 25%' } },
+  mate2: { name: '강아린', style: '태권도', rarity: 'uncommon', sprite: 'mob6', portrait: 'mob6', skill: { name: '회오리 연속 차기', kind: 'aoe', mult: 2.4, hits: 3, critDmg: 0.5, dur: 6, cd: 12, desc: '무리 전체 3연타(파워 ×2.4), 6초 동안 크리티컬 피해 +50%' } },
+  mate3: { name: '송미루', style: '절권도', rarity: 'epic', sprite: 'boss3', portrait: 'boss3', skill: { name: '촌경 일격', kind: 'hit', mult: 4, boss: 2.5, pierce: true, cd: 11, desc: '방어를 뚫는 한 방(파워 ×4), 대장·보스에게 2.5배' } },
+  mate4: { name: '최유나', style: '무에타이', rarity: 'rare', sprite: 'mob7', portrait: 'mob7', skill: { name: '팔꿈치·무릎 난타', kind: 'hit', mult: 2, hits: 2, hpPct: 0.04, bleed: 3, dur: 5, cd: 13, desc: '파워 ×2 + 남은 체력 4%, 5초 동안 출혈(파워 ×3)' } },
+  mate5: { name: '한가비', style: '카포에라', rarity: 'uncommon', sprite: 'mob7', portrait: 'mob7', skill: { name: '징가 회전차기', kind: 'aoe', mult: 2.2, dodge: 0.3, dur: 6, cd: 12, desc: '무리 전체 파워 ×2.2, 6초 동안 회피 30%' } },
+  // 잡기·제압형
+  mate6: { name: '윤지유', style: '주짓수', rarity: 'common', sprite: 'mob4', portrait: 'mob4', skill: { name: '암바 조르기', kind: 'hit', mult: 1.5, stun: 2.5, weaken: 0.3, dur: 5, cd: 12, desc: '파워 ×1.5, 2.5초 행동 불가, 5초 동안 적 공격 −30%' } },
+  mate7: { name: '서리나', style: '유도', rarity: 'rare', sprite: 'dboss-quiz', portrait: null, skill: { name: '업어치기', kind: 'hit', mult: 5, boss: 2, stun: 1, cd: 12, desc: '파워 ×5(대장·보스 2배), 1초 기절' } },
+  mate8: { name: '한서아', style: '프로레슬링', rarity: 'uncommon', sprite: 'mob2', portrait: 'mob2', skill: { name: '파워 슬램', kind: 'hit', mult: 3, shield: 0.3, cd: 13, desc: '파워 ×3, 최대 체력 30% 보호막' } },
+  mate9: { name: '오다솜', style: '씨름', rarity: 'common', sprite: 'mob2', portrait: 'mob2', skill: { name: '들배지기', kind: 'hit', mult: 2.5, weaken: 0.35, dur: 6, cd: 12, desc: '파워 ×2.5, 6초 동안 받는 피해 −35%' } },
+  // 기공·특수전형
+  mate10: { name: '진소라', style: '쿵푸', rarity: 'epic', sprite: 'rival2', portrait: null, skill: { name: '태극 기공', kind: 'buff', cdr: 4, charge: 40, cd: 14, desc: '다른 동료·액티브 스킬 쿨타임 −4초, 필살기 기력 +40' } },
+  mate11: { name: '임가은', style: '가라데', rarity: 'uncommon', sprite: 'mob4', portrait: 'mob4', skill: { name: '정권 일격', kind: 'hit', mult: 3, sure: true, execute: 0.15, cd: 12, desc: '크리티컬 확정(파워 ×3), 남은 체력 15% 이하 졸개는 즉시 처치' } },
+  mate12: { name: '이수안', style: '합기도', rarity: 'rare', sprite: 'rival4', portrait: null, skill: { name: '역관절 반사', kind: 'heal', heal: 0.2, reflect: 0.6, dur: 6, cd: 14, desc: '체력 20% 회복, 6초 동안 받은 피해의 60% 반사' } },
+  mate13: { name: '차예진', style: '크라브 마가', rarity: 'rare', sprite: 'mob8', portrait: 'mob8', skill: { name: '급소 타격', kind: 'hit', mult: 2, crit: 0.3, power: 0.25, dur: 6, cd: 13, desc: '파워 ×2, 6초 동안 크리티컬 확률 +30%·팀 피해 +25%' } },
+  mate14: { name: '유세린', style: '펜싱', rarity: 'epic', sprite: 'mob6', portrait: 'mob6', skill: { name: '플레슈 찌르기', kind: 'aoe', mult: 3.5, pierce: true, cd: 12, desc: '방어를 무시하고 무리 끝까지 찌르기(파워 ×3.5)' } },
+  // 파밍·버프형
+  mate15: { name: '주희', style: '취권', rarity: 'legend', sprite: 'boss1', portrait: 'boss1', skill: { name: '취팔선', kind: 'hit', randMin: 1, randMax: 10, coin: 1, dur: 10, cd: 14, desc: '예측 불가 한 방(파워 ×1~10), 10초 동안 코인 2배' } },
+  mate16: { name: '한별', style: '종합격투', rarity: 'legend', sprite: 'boss3', portrait: 'boss3', skill: { name: '챔피언 러시', kind: 'hit', mult: 6, reset: true, cd: 20, desc: '파워 ×6, 다른 동료 스킬 쿨타임 초기화' } },
 };
+// 예전 저장의 동료 id(mob1~8, 남녀 섞인 동기)를 새 여성 동료로 옮긴다
+const LEGACY_MATES = { mob1: 'mate1', mob2: 'mate8', mob3: 'mate5', mob4: 'mate6', mob5: 'mate7', mob6: 'mate2', mob7: 'mate4', mob8: 'mate16' };
+// 출전 칸: 처음 1칸, 아카데미 졸업·시골 4곳 제패·시골 8곳 제패 때마다 1칸(최대 4). 최고 기록 기준이라 재입학해도 유지
+const PARTY_MAX = 4;
+const PARTY_UNLOCKS = [1, REGION_START[4], REGION_START[8]];
+const PARTY_UNLOCK_TEXT = ['', '아카데미 졸업 때 열림', `${REGIONS[3]} 제패 때 열림`, `${REGIONS[7]} 제패 때 열림`];
 const ALLY_POWER = { common: 0.12, uncommon: 0.16, rare: 0.24, epic: 0.36, legend: 0.5 };
 const ALLY_OWNED = { common: 0.01, uncommon: 0.015, rare: 0.02, epic: 0.03, legend: 0.05 };
 const ALLY_INTERVAL = 1.6;
@@ -335,7 +362,7 @@ function newGame() {
 function freshState() {
   return {
     dungeons: Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, 0])), dungeon: null, dungeonResult: null, front: null, pack: [],
-    gems: 0, recruits: 0, companions: {}, party: [null, null, null], allyTimers: [1.1, 1.5, 1.9], tier: 0,
+    gems: 0, recruits: 0, companions: {}, party: [null, null, null, null], allyTimers: [1.1, 1.5, 1.9, 2.3], mateBuffs: {}, shield: 0, tier: 0,
     cooldowns: {}, buffs: {}, autoSkills: true, quest: 0, stats: { pulls: 0, recruits: 0, dungeons: 0 },
     pass: { free: 0, premium: 0 }, premium: { pass: false, adFree: false, monthly: 0, bought: {} }, mail: [], mailSeq: 0,
     profile: null, level: 1, xp: 0, coins: 12, map: 0, wave: 0, wins: 0,
@@ -418,9 +445,9 @@ function transfer(state) {
   state.log = [`${state.prestige.count}번째 재입학! 아카데미 1학년 정문에서 다시 시작해요.`];
   return gain;
 }
-function critPower(state) { return CRIT_BASE + 0.05 * (state.training.critDmg || 0); }
+function critPower(state) { return CRIT_BASE + 0.05 * (state.training.critDmg || 0) + mateBuff(state, 'critDmg'); }
 function regenRate(state) { return 0.001 * (state.training.recover || 0); }
-function critChance(state) { return Math.min(0.6, (state.training.focus || 0) * 0.01 + stickerBonus(state, 'crit')); }
+function critChance(state) { return Math.min(0.6, (state.training.focus || 0) * 0.01 + stickerBonus(state, 'crit')) + mateBuff(state, 'crit'); }
 function coinUnit(state) { return Math.round((8 + 6 * gradeIndex(state.map) + 2 * (state.map % MAPS_PER_GRADE)) * cycleScale(state, 'coin')); }
 function pullCost(state) { return Math.round(30 * 1.22 ** clearedCount(state) * cycleScale(state, 'coin')); }
 function statBonus(state, stat) {
@@ -442,14 +469,14 @@ function enemyHit(state) {
   const base = state.dungeon
     ? atProgress(dungeonReach(state), 'hit') * dungeonInfo(state.dungeon.id).hit
     : MAPS[state.map].hit[state.wave] * GRADE_SCALING[gradeIndex(state.map)].attack * cycleScale(state, 'hit');
-  return base * (state.front?.hit ?? 1) * (1 + GANG_UP * aliveBehind(state));
+  return base * (state.front?.hit ?? 1) * (1 + GANG_UP * aliveBehind(state)) * (1 - mateBuff(state, 'weaken'));
 }
 function winCoins(state, firstBoss) {
   const grade = gradeIndex(state.map);
   const boss = state.wave === BOSS_WAVE;
   const baseCoins = (8 + 6 * grade + 2 * (state.map % MAPS_PER_GRADE) + 2 * state.wave) * (boss ? 2 : 1);
   const coinBonus = state.classId === 'math' ? 1.25 : 1;
-  const extra = statBonus(state, 'coin') * (1 + snackBonus(state, 'coin'));
+  const extra = statBonus(state, 'coin') * (1 + snackBonus(state, 'coin')) * (1 + mateBuff(state, 'coin'));
   return Math.round((baseCoins + (firstBoss ? 15 + 5 * grade : 0)) * coinBonus * extra * cycleScale(state, 'coin'));
 }
 function winXp(state) {
@@ -513,8 +540,8 @@ function waveHp(state) {
 function enemyMaxHp(state) { return state.front?.max ?? Math.max(1, Math.round(waveHp(state))); }
 function rivalSprite(map, wave, cycle = 0) {
   const boss = wave === BOSS_WAVE;
-  if (boss && isGradeFinal(map)) return `boss${(gradeIndex(map) + 2 * cycle) % 6 + 1}`;
-  return boss ? 'rival4' : `rival${(map + wave) % 3 + 1}`;
+  if (boss && isGradeFinal(map)) return BOSS_SPRITES[(gradeIndex(map) + 2 * cycle) % BOSS_SPRITES.length];
+  return boss ? 'mob5' : LEADER_SPRITES[(map + wave) % LEADER_SPRITES.length];
 }
 function mobKey(state) {
   return state.dungeon ? `d:${state.dungeon.id}:${state.dungeon.level}` : `${state.cycle || 0}:${state.map}:${state.wave}:${state.farm?.easy || 0}`;
@@ -583,7 +610,7 @@ function stageNames(cycle, map) {
   const block = gradeIndex(map);
   const pick = k => FIGHTERS[(cycle * 31 + map * 7 + k * 13) % FIGHTERS.length];
   const region = schoolName(cycle).split(' ')[0];
-  const title = !isGradeFinal(map) ? ZONE_LEADERS[block] : block < GRADE_COUNT - 1 ? `${region} ${ZONE_BOSSES[block]}` : lastRound(cycle) ? `${region} 챔피언` : `${region} 상위 랭커`;
+  const title = !isGradeFinal(map) ? ZONE_LEADERS[block] : block < GRADE_COUNT - 1 ? `${region} ${ZONE_BOSSES[block]}` : lastRound(cycle) ? `${region} 보스` : `${region} 부두목`;
   return [pick(0), pick(1), pick(2), `${title} ${pick(3)}`];
 }
 function placeLabel(reached) {
@@ -899,9 +926,22 @@ function rivalStrike(state, move, emit) {
   const multiplier = move === 'counter' ? 2.65 : 1;
   const easier = state.dungeon ? 1 : 0.64 ** (state.farm?.easy || 0);
   const hit = enemyHit(state);
-  const amount = Math.min(state.hp, Math.max(1, Math.round(hit * multiplier * easier)));
+  if (Math.random() < mateBuff(state, 'dodge')) {
+    emit?.('impact', { side: 'rival', move, amount: 0, dodged: true });
+    return;
+  }
+  let amount = Math.max(1, Math.round(hit * multiplier * easier));
+  const reflect = Math.round(amount * mateBuff(state, 'reflect'));
+  const blocked = Math.min(state.shield || 0, amount);
+  if (blocked) { state.shield -= blocked; amount -= blocked; }
+  amount = Math.min(state.hp, amount);
   state.hp -= amount;
-  emit?.('impact', { side: 'rival', move, amount });
+  emit?.('impact', { side: 'rival', move, amount, shielded: blocked });
+  if (reflect > 0 && state.hp > 0 && state.enemyHp > 0) {
+    state.enemyHp = Math.max(0, state.enemyHp - reflect);
+    emit?.('mate', { slot: -1, id: null, amount: reflect, heal: 0, reflect: true });
+    if (state.enemyHp <= 0) { resolveKills(state, 0, emit); return; }
+  }
   if (state.hp <= 0 && state.dungeon) {
     leaveDungeon(state, false, emit);
     return;
@@ -918,7 +958,7 @@ function queuePlayer(state, move, emit) {
   const skill = SKILLS[move];
   const windup = skill?.windup ?? 0.2;
   if (skill) state.charge -= skill.cost;
-  state.nextAttack = interval(state) / (state.buffs?.sprint > 0 ? sprintMult(state) : 1);
+  state.nextAttack = interval(state) / (state.buffs?.sprint > 0 ? sprintMult(state) : 1) / (1 + mateBuff(state, 'speed'));
   state.playerMove = { move, left: windup };
   emit?.('windup', { side: 'player', move, windup });
 }
@@ -940,6 +980,7 @@ function step(state, emit) {
   if (state.cooldowns) {
     for (const id of Object.keys(state.cooldowns)) if (state.cooldowns[id] > 0) state.cooldowns[id] = Math.max(0, state.cooldowns[id] - STEP);
     for (const id of Object.keys(state.buffs)) if (state.buffs[id] > 0) state.buffs[id] = Math.max(0, state.buffs[id] - STEP);
+    for (const buff of Object.values(state.mateBuffs || {})) if (buff.t > 0) buff.t = Math.max(0, buff.t - STEP);
   }
   if (state.snacks) {
     const used = STEP / (state.speed || 1);
@@ -996,6 +1037,12 @@ function step(state, emit) {
       state.allyTimers[slot] = ALLY_INTERVAL;
       allyStrike(state, slot, emit);
       if (state.roundEnd || state.pause > 0) return;
+    }
+    tickBleed(state, emit);
+    if (state.roundEnd || state.pause > 0) return;
+    for (let slot = 0; slot < partySlots(state); slot++) {
+      if (!state.party[slot] || (state.cooldowns[`mate${slot}`] || 0) > 0) continue;
+      if (castMate(state, slot, emit) && (state.roundEnd || state.pause > 0)) return;
     }
     autoCast(state, emit);
     if (state.roundEnd || state.pause > 0) return;
@@ -1075,7 +1122,10 @@ function companionLevel(state, id) {
 function companionOwned(state) {
   return Object.entries(COMPANIONS).reduce((sum, [id, mate]) => sum + ALLY_OWNED[mate.rarity] * companionLevel(state, id), 0);
 }
-function partySlots(state) { return 1 + (state.tier >= 2 ? 1 : 0) + (state.tier >= 4 ? 1 : 0); }
+function partySlots(state) {
+  const best = bestProgress(state);
+  return Math.min(PARTY_MAX, 1 + PARTY_UNLOCKS.filter(cycle => best >= cycle * MAPS.length).length);
+}
 function allyPower(state, id) { return ALLY_POWER[COMPANIONS[id].rarity] * (1 + 0.15 * (companionLevel(state, id) - 1)) * (1 + ALLY_TRAIN.step * allyTrainLevel(state, id)); }
 // 동료 레벨업(코인): 레벨마다 +5%, 최대 레벨은 별(겹친 수)마다 20씩 늘어난다. 동료 공격은 내 파워에 비례하므로 무한히 곱하지 않는다
 function allyTrainLevel(state, id) { return state.allyLv?.[id] || 0; }
@@ -1117,7 +1167,7 @@ function setParty(state, slot, id) {
   state.party[slot] = id;
   return true;
 }
-function buffMult(state) { return state.buffs?.cheer > 0 ? cheerMult(state) : 1; }
+function buffMult(state) { return (state.buffs?.cheer > 0 ? cheerMult(state) : 1) * (1 + mateBuff(state, 'power')); }
 
 // 앞 상대가 쓰러지면 다음 상대로, 넘친 피해는 이어서(관통). 무리가 다 쓰러지면 승리.
 function resolveKills(state, overflow, emit) {
@@ -1156,7 +1206,73 @@ function allyStrike(state, slot, emit) {
   resolveKills(state, overflow, emit);
 }
 
-// ── 액티브 스킬 ──
+// ── 동료 스킬: 출전한 동료가 각자 쿨타임마다 자동으로 쓴다 ──
+function mateScale(state, id) { return (1 + 0.15 * (companionLevel(state, id) - 1)) * (1 + ALLY_TRAIN.step * allyTrainLevel(state, id)); }
+function mateBuff(state, key) { const buff = state.mateBuffs?.[key]; return buff && buff.t > 0 ? buff.v : 0; }
+function castMate(state, slot, emit) {
+  const id = state.party[slot];
+  const skill = COMPANIONS[id].skill;
+  if (skill.kind === 'heal' && state.hp > maxHp(state) * 0.75) return false;
+  state.cooldowns[`mate${slot}`] = skill.cd;
+  const event = { slot, id, amount: 0, heal: 0, hits: skill.hits || 1, crit: Boolean(skill.sure) };
+  let overflow = 0;
+  let damage = 0;
+  const power = attack(state);
+  const leader = Boolean(state.dungeon) || state.wave === BOSS_WAVE || Boolean(state.front?.leader);
+  if (skill.mult || skill.randMax) {
+    const mult = skill.randMax ? skill.randMin + Math.random() * (skill.randMax - skill.randMin) : skill.mult;
+    damage = power * mult * mateScale(state, id) * buffMult(state) * (skill.boss && leader ? skill.boss : 1);
+    if (skill.sure) damage *= critPower(state);
+    if (!skill.pierce && guarding(state)) damage *= 0.23;
+    if (skill.hpPct) damage += Math.min(state.enemyHp * skill.hpPct, power * 20);
+    damage = Math.max(1, Math.round(damage));
+    if (skill.execute && !leader && state.enemyHp - damage > 0 && state.enemyHp - damage < enemyMaxHp(state) * skill.execute) damage = state.enemyHp;
+    event.amount = Math.min(state.enemyHp, damage);
+    overflow = Math.max(0, damage - state.enemyHp);
+    state.enemyHp -= event.amount;
+  }
+  if (skill.stun) state.nextEnemy += skill.stun;
+  for (const key of ['crit', 'critDmg', 'power', 'speed', 'dodge', 'weaken', 'reflect', 'coin']) if (skill[key]) state.mateBuffs = { ...state.mateBuffs, [key]: { t: skill.dur, v: skill[key] } };
+  if (skill.bleed) state.mateBuffs = { ...state.mateBuffs, bleed: { t: skill.dur, v: power * skill.bleed * mateScale(state, id) / skill.dur } };
+  if (skill.heal) {
+    event.heal = Math.max(0, Math.min(maxHp(state) - state.hp, Math.round(maxHp(state) * skill.heal)));
+    state.hp += event.heal;
+  }
+  if (skill.shield) state.shield = Math.max(state.shield || 0, Math.round(maxHp(state) * skill.shield));
+  if (skill.charge) state.charge = Math.min(100, state.charge + skill.charge);
+  if (skill.cdr || skill.reset) {
+    state.party.forEach((other, index) => {
+      const key = `mate${index}`;
+      if (other && index !== slot) state.cooldowns[key] = skill.reset ? 0 : Math.max(0, (state.cooldowns[key] || 0) - skill.cdr);
+    });
+    if (skill.cdr) for (const active of Object.keys(ACTIVE)) state.cooldowns[active] = Math.max(0, (state.cooldowns[active] || 0) - skill.cdr);
+  }
+  emit?.('mate', event);
+  if (skill.kind === 'aoe') sweepPack(state, damage, emit);
+  if (damage) resolveKills(state, overflow, emit);
+  return true;
+}
+// 출혈: 앞 상대의 체력을 조금씩 깎는다
+function tickBleed(state, emit) {
+  const bleed = state.mateBuffs?.bleed;
+  if (!bleed || bleed.t <= 0 || state.enemyHp <= 0) return;
+  state.enemyHp = Math.max(0, state.enemyHp - bleed.v * STEP);
+  if (state.enemyHp <= 0) resolveKills(state, 0, emit);
+}
+// 시뮬레이터용: 동료 스킬 피해를 '초당 내 파워의 몇 배'로 어림
+function mateSkillDps(state, crowd = false) {
+  let total = 0;
+  for (let slot = 0; slot < partySlots(state); slot++) {
+    const id = state.party[slot];
+    const skill = id && COMPANIONS[id].skill;
+    if (!skill) continue;
+    const mult = skill.randMax ? (skill.randMin + skill.randMax) / 2 : skill.mult || 0;
+    const hit = mult * (skill.sure ? critPower(state) : 1) * (skill.kind === 'aoe' && crowd ? 3 : 1) * (skill.boss && !crowd ? skill.boss : 1);
+    total += (hit + (skill.bleed || 0)) * mateScale(state, id) / skill.cd;
+  }
+  return total;
+}
+
 function skillUnlocked(state, id) { return state.tier >= ACTIVE[id].tier; }
 function skillPower(state) { return 2 * (1 + 0.15 * Math.max(0, state.tier - 1)) * (1 + 0.05 * skillLevel(state, 'pencil')); }
 // 스킬 레벨업(코인): 딱지 연타 피해 +5%, 응원 함성·체육 대장 배율 +0.01, 급식 충전 회복 +1%p
@@ -1332,7 +1448,8 @@ function migrateFeatures(s) {
   const count = value => Number.isSafeInteger(value) && value >= 0;
   if (s.training && typeof s.training === 'object') for (const id of Object.keys(TRAINING)) if (s.training[id] === undefined) s.training[id] = 0;
   for (const key of ['allyLv', 'skillLv']) {
-    const levels = s[key] && typeof s[key] === 'object' && !Array.isArray(s[key]) ? s[key] : {};
+    const raw = s[key] && typeof s[key] === 'object' && !Array.isArray(s[key]) ? s[key] : {};
+    const levels = key === 'allyLv' ? Object.fromEntries(Object.entries(raw).map(([id, level]) => [LEGACY_MATES[id] || id, level])) : raw;
     const ids = key === 'allyLv' ? COMPANIONS : ACTIVE;
     s[key] = Object.fromEntries(Object.keys(ids).filter(id => count(levels[id]) && levels[id] > 0).map(id => [id, levels[id]]));
   }
@@ -1364,9 +1481,15 @@ function migrateFeatures(s) {
   const hadMail = Array.isArray(s.mail);
   for (const key of ['gems', 'recruits', 'tier', 'quest', 'mailSeq']) if (!count(s[key])) s[key] = fresh[key];
   for (const key of ['companions', 'cooldowns', 'buffs']) if (!isObject(s[key])) s[key] = {};
-  s.companions = Object.fromEntries(Object.keys(COMPANIONS).filter(id => count(s.companions[id]) && s.companions[id] > 0).map(id => [id, s.companions[id]]));
-  s.party = Array.isArray(s.party) ? [0, 1, 2].map(index => (Object.hasOwn(s.companions, s.party[index]) ? s.party[index] : null)) : [null, null, null];
-  s.allyTimers = [1.1, 1.5, 1.9];
+  const renamed = id => LEGACY_MATES[id] || id;
+  s.companions = Object.fromEntries(Object.entries(s.companions).map(([id, copies]) => [renamed(id), copies]).filter(([id, copies]) => Object.hasOwn(COMPANIONS, id) && count(copies) && copies > 0));
+  if (Array.isArray(s.party)) s.party = s.party.map(renamed);
+  if (s.allyLv && typeof s.allyLv === 'object') s.allyLv = Object.fromEntries(Object.entries(s.allyLv).map(([id, level]) => [renamed(id), level]));
+  s.party = Array.isArray(s.party) ? Array.from({ length: PARTY_MAX }, (_, index) => (Object.hasOwn(s.companions, s.party[index]) ? s.party[index] : null)) : Array(PARTY_MAX).fill(null);
+  s.allyTimers = [1.1, 1.5, 1.9, 2.3];
+  s.mateBuffs = {};
+  if (!Number.isFinite(s.shield) || s.shield < 0) s.shield = 0;
+  if (s.profile && typeof s.profile === 'object') s.profile.gender = 'boy'; // 주인공은 남자로 고정(사용자 결정)
   if (typeof s.autoSkills !== 'boolean') s.autoSkills = true;
   s.stats = isObject(s.stats) ? s.stats : {};
   for (const key of ['pulls', 'recruits', 'dungeons']) if (!count(s.stats[key])) s.stats[key] = 0;
@@ -1482,7 +1605,7 @@ function restore(snapshot) {
 
 if (typeof module !== 'undefined') {
   module.exports = {
-    REGION_ROUNDS, REGION_START, regionIndex, regionRound, lastRound, roundTag, stageLabel, skillPower, skillUnlocked, venueMap, stagePlace, stageNames, stageArt, regionConquered, REGIONS, ZONES, ACADEMY, autoTrain, critPower, regenRate, allyTrainLevel, allyTrainCap, allyTrainCost, trainAlly, skillLevel, skillCost, cheerMult, sprintMult, lunchHeal, trainSkill, ALLY_TRAIN, CRIT_BASE,
+    castMate, mateScale, mateBuff, mateSkillDps, PARTY_MAX, PARTY_UNLOCKS, PARTY_UNLOCK_TEXT, LEGACY_MATES, BOSS_SPRITES, REGION_ROUNDS, REGION_START, regionIndex, regionRound, lastRound, roundTag, stageLabel, skillPower, skillUnlocked, venueMap, stagePlace, stageNames, stageArt, regionConquered, REGIONS, ZONES, ACADEMY, autoTrain, critPower, regenRate, allyTrainLevel, allyTrainCap, allyTrainCost, trainAlly, skillLevel, skillCost, cheerMult, sprintMult, lunchHeal, trainSkill, ALLY_TRAIN, CRIT_BASE,
     CONTESTS, schoolName, gradeLabel, placeLabel, contestId, contest,
     newGame, simulate, restore, trainingCost, maxHp, attack, enemyMaxHp, openFight, activateSkill, gearStats, nextMission, MAPS, GEAR, SLOTS, MAP_REWARDS, BOSS_REWARDS, TRAINING, SKILLS, makeProfile,
     trainingCostAt, enemyHit, winCoins, winXp, interval, critChance, prestigeGain, transfer, perkCost, PERKS, pullStickers, pullCost, progress, xpTarget,

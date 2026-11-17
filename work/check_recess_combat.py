@@ -28,12 +28,12 @@ with sync_playwright() as playwright:
     phone.goto(url)
     # 실제 시간이 흐르지 않게 멈추고, 게임 시간은 run_for로만 넘긴다(스크린숏·대기 중에 무리가 지나가지 않게)
     phone.clock.pause_at(datetime.now() + timedelta(seconds=1))
-    phone.get_by_role('radio', name='여학생').check()
+    phone.get_by_role('radio', name='남학생').check()
     phone.get_by_role('textbox', name='닉네임').fill('별하늘')
     phone.get_by_role('button', name='입학하기').click()
     expect(phone.get_by_role('heading', name='아카데미 정문')).to_be_visible()
     # 1~3번째 대결은 무리: 친구 다섯이 먼저, 무리 대장(민준)이 마지막. 뒤에 선 상대가 화면에 보인다.
-    expect(phone.locator('#rival-name')).to_have_text('하준')
+    expect(phone.locator('#rival-name')).to_have_text('빡빡이')
     expect(phone.locator('#pack .pack-mob')).to_have_count(5)
     expect(phone.locator('#kill-text')).to_have_text('승리 0/18')
     run_until(phone, "document.querySelector('#player-sprite').dataset.pose === 'strike'")
@@ -52,7 +52,7 @@ with sync_playwright() as playwright:
     expect(phone.locator('#enemy-text')).to_have_text('0 / 12')
     expect(phone.locator('#log')).to_contain_text('민준 팀에게 승리')
     phone.screenshot(path=str(workspace / 'work' / 'combat-win.png'))
-    run_until(phone, "document.querySelector('#rival-name').textContent === '소민'")
+    run_until(phone, "document.querySelector('#rival-name').textContent === '태호'")
     expect(phone.locator('#enemy-text')).to_have_text(re.compile(r'/ 15$'))
 
     run_until(phone, "!document.querySelector('#first-loot').hidden")

@@ -966,3 +966,34 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .fighter.rival.minion .sprite { max-height: 82%; }
 .ally .sprite { width: 84px; height: 122px; }
 .quest-bar:has(.loot-offer:not([hidden])) > :not(.loot-offer) { visibility: hidden; }
+/* ════ 동료 시스템: 4명이 함께 싸우고, 스킬을 쓰면 컷인 ════ */
+.allies { left: 0; width: 170px; height: 172px; }
+.ally .sprite { width: 88px; height: 128px; }
+.mate-cutin { position: absolute; z-index: 8; left: 0; top: 63%; display: flex; align-items: center; gap: 8px; max-width: 72%; padding: 4px 14px 4px 4px; border-radius: 0 14px 14px 0; background: linear-gradient(90deg, rgba(30, 16, 60, .92), rgba(60, 30, 110, .82)); box-shadow: 0 4px 14px rgba(0, 0, 0, .35); pointer-events: none; animation: cutin 1.15s cubic-bezier(.2, .8, .3, 1) both; }
+.mate-cutin > span { flex: 0 0 auto; width: 46px; height: 46px; border-radius: 10px; background-color: rgba(255, 255, 255, .12); background-position: center 12%; background-size: 180% auto; }
+.mate-cutin > span.sprite { background-image: var(--sprite-image); background-size: 150% auto; }
+.mate-cutin small { display: block; color: #d9cbff; font-size: 10px; font-weight: 700; }
+.mate-cutin b { display: block; color: #fff; font-size: 16px; font-weight: 900; text-shadow: var(--ol-purple); white-space: nowrap; }
+.mate-cutin.epic b { color: #ffd6ff; }
+.mate-cutin.legend b { color: #ffe27a; text-shadow: var(--ol-gold); }
+@keyframes cutin { 0% { opacity: 0; translate: -60% 0; } 14% { opacity: 1; translate: 0 0; } 80% { opacity: 1; translate: 0 0; } 100% { opacity: 0; translate: -20% 0; } }
+.impact.float-skill .damage { color: #ffe27a; font-size: 22px; }
+.impact.float-heal .damage { color: #9dffb4; font-size: 18px; }
+.impact.float-reflect .damage { color: #bfe8ff; font-size: 16px; }
+.float-skill::before, .float-heal::before, .float-reflect::before { display: none; }
+.party-slots { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.party-slot { min-height: 150px; }
+.mate-style { position: absolute; left: 6px; top: 6px; padding: 1px 6px; border-radius: 6px; background: rgba(40, 24, 80, .78); color: #fff; font-size: 9px; font-weight: 700; }
+.mate-figure { position: relative; }
+.mate-figure .sprite { width: 70%; height: 88px; background: var(--sprite-image) center bottom / contain no-repeat; }
+.mate-skill { margin: 2px 0 4px; color: #6d5f86; font-size: 10px; line-height: 1.35; text-align: center; }
+.gacha-results .mate-skill { display: none; }
+@media (prefers-reduced-motion: reduce) { .mate-cutin { animation: none; } }
+/* 동료 자리를 비우려고 간식 버튼은 위쪽 가로줄로 작게 */
+.snacks { grid-auto-flow: column; gap: 5px; top: 4px; }
+.snack { width: 32px; padding-bottom: 2px; }
+.snack-icon { width: 28px; height: 28px; border-radius: 9px; }
+.snack-icon svg { width: 16px; height: 16px; }
+.snack small { font-size: 8px; line-height: 12px; }
+.fighter.player .sprite { max-width: 128px; }
+.allies { width: 150px; }

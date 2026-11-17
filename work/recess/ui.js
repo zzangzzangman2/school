@@ -137,7 +137,7 @@ function flashHit(target, detail) {
   effect.setAttribute('aria-hidden', 'true');
   const number = document.createElement('span');
   number.className = 'damage';
-  number.textContent = detail.breaks ? `방어 풀기 · ${fmt(detail.amount)}` : detail.blocked ? `방어 · ${fmt(detail.amount)}` : detail.lucky ? `크리티컬! ${fmt(detail.amount)}` : `−${fmt(detail.amount)}`;
+  number.textContent = detail.dodged ? '회피!' : detail.shielded && !detail.amount ? '보호막' : detail.breaks ? `방어 풀기 · ${fmt(detail.amount)}` : detail.blocked ? `방어 · ${fmt(detail.amount)}` : detail.lucky ? `크리티컬! ${fmt(detail.amount)}` : `−${fmt(detail.amount)}`;
   const sound = document.createElement('span');
   sound.className = 'onomatopoeia';
   sound.textContent = game.sound;
@@ -174,6 +174,7 @@ function combatEvent(type, event) {
   if (type === 'kill') flyCoins(1);
   if (type === 'enter') renderedContest = '';
   if (type === 'ally') onAlly(event);
+  if (type === 'mate') onMate(event);
   if (type === 'active') onActive(event);
   if (type === 'splash' && !reducedMotion.matches) {
     $('pack').classList.remove('hit');
@@ -1508,7 +1509,8 @@ function showProfileEditor() {
   $('enrollment').hidden = false;
   $('nickname').value = state.profile?.name || '';
   $('profile-error').hidden = true;
-  for (const option of $('profile-form').elements.gender) option.checked = option.value === state.profile?.gender;
+  // 주인공은 남자로 고정(선택지 하나). 선택지가 하나면 RadioNodeList가 아니라 input 하나가 돌아온다
+  $('profile-form').querySelectorAll('input[name="gender"]').forEach(option => { option.checked = option.value === 'boy'; });
   $('enroll-submit').firstChild.textContent = state.profile ? '저장하고 돌아가기 ' : '입학하기 ';
   $('cancel-profile').hidden = !state.profile;
   window.scrollTo(0, 0);
@@ -1543,7 +1545,7 @@ function start() {
   $('profile-form').addEventListener('submit', event => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const profile = makeProfile(data.get('nickname'), data.get('gender'));
+    const profile = makeProfile(data.get('nickname'), 'boy');
     if (!profile) {
       $('profile-error').textContent = '닉네임을 1~12자로 입력해 주세요.';
       $('profile-error').hidden = false;

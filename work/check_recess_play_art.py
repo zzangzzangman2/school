@@ -85,13 +85,13 @@ with sync_playwright() as playwright:
         page.clock.run_for(750)
 
     page.evaluate('''() => {
-      state.profile.gender = 'girl';
+      state.profile.gender = 'boy';
       state.cycle = 0;
       openFight(state, 0, 0, 500);
       setPoses('player', [['victory', 30000]]);
       commit();
     }''')
-    assert from_asset(page.locator('#player-sprite').evaluate("e => getComputedStyle(e).getPropertyValue('--pose-image')"), 'motion-girl-victory')
+    assert from_asset(page.locator('#player-sprite').evaluate("e => getComputedStyle(e).getPropertyValue('--pose-image')"), 'motion-boy-victory')
     assert not failures, failures
     browser.close()
 

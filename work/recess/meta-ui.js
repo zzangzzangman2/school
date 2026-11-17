@@ -135,8 +135,9 @@ function onActive(event) {
   playSound(event.id === 'lunch' ? 'win' : 'bell');
 }
 
-// ── 동료 표시(주인공 뒤) ──
-const ALLY_SLOTS = [{ x: 0, y: 0, s: 0.82 }, { x: 34, y: 30, s: 0.7 }, { x: 0, y: 46, s: 0.66 }];
+// ── 동료 표시: 주인공 옆·뒤로 최대 4명이 함께 싸운다 ──
+// 앞줄 2명(크게) + 뒷줄 2명(작게, 위쪽). 주인공은 그 오른쪽 앞에 선다
+const ALLY_SLOTS = [{ x: 14, y: 0, s: 0.86 }, { x: 64, y: 8, s: 0.8 }, { x: 0, y: 50, s: 0.68 }, { x: 46, y: 56, s: 0.64 }];
 
 function renderAllies() {
   const ids = state.party.slice(0, partySlots(state)).map((id, slot) => (id ? `${slot}:${id}` : '')).filter(Boolean);
@@ -153,11 +154,11 @@ function renderAllies() {
       ally.style.setProperty('--x', `${place.x}px`);
       ally.style.setProperty('--y', `${place.y}px`);
       ally.style.setProperty('--s', place.s);
-      ally.style.zIndex = 3 - index;
+      ally.style.zIndex = 4 - index;
       const sprite = document.createElement('span');
       sprite.className = 'sprite';
-      sprite.dataset.sprite = id;
-      sprite.dataset.spar = protectiveSprite(id);
+      sprite.dataset.sprite = COMPANIONS[id].sprite;
+      sprite.dataset.spar = protectiveSprite(COMPANIONS[id].sprite);
       sprite.dataset.pose = 'ready';
       ally.append(sprite);
       return ally;
@@ -169,6 +170,19 @@ function renderAllies() {
     const sprite = ally.firstElementChild;
     if (sprite.dataset.pose !== pose) sprite.dataset.pose = pose;
   }
+}
+
+function floatText(target, text, kind) {
+  if (reducedMotion.matches) return;
+  const effect = document.createElement('span');
+  effect.className = `impact ally-hit float-${kind}`;
+  effect.setAttribute('aria-hidden', 'true');
+  const number = document.createElement('span');
+  number.className = 'damage';
+  number.textContent = text;
+  effect.append(number);
+  $(target).append(effect);
+  setTimeout(() => effect.remove(), 700);
 }
 
 function onAlly(event) {
@@ -186,6 +200,48 @@ function onAlly(event) {
     $('rival').append(effect);
     setTimeout(() => effect.remove(), 590);
   }
+}
+
+// 동료 스킬: 공격 동작 + 이름 컷인 + 숫자
+function mateFace(id) {
+  const mate = COMPANIONS[id];
+  const face = document.createElement('span');
+  face.setAttribute('aria-hidden', 'true');
+  if (mate.portrait) {
+    face.className = 'portrait-figure';
+    face.dataset.portrait = mate.portrait;
+  } else {
+    face.className = 'sprite';
+    face.dataset.sprite = mate.sprite;
+  }
+  return face;
+}
+
+function onMate(event) {
+  if (event.reflect) {
+    floatText('rival', `반사 ${fmt(event.amount)}`, 'reflect');
+    return;
+  }
+  const mate = COMPANIONS[event.id];
+  const now = performance.now();
+  const rate = state?.speed || 1;
+  allyPoses.set(String(event.slot), [{ pose: 'windup', until: now + 110 / rate }, { pose: 'strike', until: now + 520 / rate }]);
+  const arena = $('arena');
+  arena.querySelectorAll('.mate-cutin').forEach((old, index, all) => { if (all.length - index > 1) old.remove(); });
+  const cut = document.createElement('div');
+  cut.className = `mate-cutin ${mate.rarity}`;
+  cut.setAttribute('role', 'status');
+  const text = document.createElement('div');
+  const style = document.createElement('small');
+  style.textContent = `${mate.style} · ${mate.name}`;
+  const name = document.createElement('b');
+  name.textContent = mate.skill.name;
+  text.append(style, name);
+  cut.append(mateFace(event.id), text);
+  arena.append(cut);
+  setTimeout(() => cut.remove(), 1150);
+  if (event.amount) floatText('rival', `${event.crit ? '크리티컬 ' : ''}${event.hits > 1 ? `${event.hits}연타 ` : ''}${fmt(event.amount)}`, 'skill');
+  if (event.heal) floatText('player', `+${fmt(event.heal)}`, 'heal');
 }
 
 // ── 성장 탭 ──
@@ -272,7 +328,6 @@ function renderTierPanel() {
     const unlocks = [];
     const skill = Object.values(ACTIVE).find(entry => entry.tier === tier);
     if (skill) unlocks.push(`스킬 ${skill.name}`);
-    if (tier === 2 || tier === 4) unlocks.push('동료 칸 +1');
     info.textContent = `${QUEST_TEXT.best(tierReq(tier))} · Lv.${tierLevel(tier)}${unlocks.length ? ` · ${unlocks.join(' · ')}` : ''}`;
     item.append(name, info);
     list.push(item);
@@ -288,11 +343,11 @@ function mateCard(id) {
   card.className = `mate-card ${mate.rarity}${level ? '' : ' unknown'}`;
   const figure = document.createElement('span');
   figure.className = 'mate-figure';
-  const portrait = document.createElement('span');
-  portrait.className = 'portrait-figure';
-  portrait.dataset.portrait = id;
-  portrait.ariaHidden = 'true';
-  figure.append(portrait);
+  figure.append(mateFace(id));
+  const style = document.createElement('small');
+  style.className = 'mate-style';
+  style.textContent = mate.style;
+  figure.append(style);
   const rarity = document.createElement('small');
   rarity.className = 'rarity';
   rarity.textContent = RARITIES[mate.rarity].name;
@@ -305,14 +360,14 @@ function mateCard(id) {
 function renderParty() {
   const slots = partySlots(state);
   setText('party-owned', `${Object.keys(state.companions).length} / ${Object.keys(COMPANIONS).length}명`);
-  setText('party-summary', `보유 효과 파워 +${Math.round(companionOwned(state) * 100)}% · 출전한 동료는 ${ALLY_INTERVAL}초마다 함께 대결해요. 코인으로 레벨업하면 레벨마다 +5%(★마다 최대 레벨 +20).`);
-  $('party-slots').replaceChildren(...[0, 1, 2].map(slot => {
+  setText('party-summary', `출전 ${partySlots(state)}/${PARTY_MAX}칸 · 보유 효과 파워 +${Math.round(companionOwned(state) * 100)}% · 출전한 동료는 함께 싸우고 자기 무술 스킬을 쿨타임마다 써요. 코인으로 레벨업하면 레벨마다 +5%.`);
+  $('party-slots').replaceChildren(...Array.from({ length: PARTY_MAX }, (_, slot) => slot).map(slot => {
     const box = document.createElement('div');
     const id = state.party[slot];
     const open = slot < slots;
     box.className = `party-slot${open ? '' : ' locked'}${id ? ' filled' : ''}`;
     if (!open) {
-      box.textContent = `${tierName(slot === 1 ? 2 : 4)} 승급 때 열림`;
+      box.textContent = PARTY_UNLOCK_TEXT[slot];
       return box;
     }
     if (!id) {
@@ -350,7 +405,10 @@ function renderParty() {
     out.textContent = '빼기';
     out.ariaLabel = `${COMPANIONS[id].name} 출전 빼기`;
     out.addEventListener('click', () => { setParty(state, slot, null); commit(); });
-    card.append(power, up, out);
+    const skill = document.createElement('p');
+    skill.className = 'mate-skill';
+    skill.textContent = `${COMPANIONS[id].skill.name} · ${COMPANIONS[id].skill.desc}`;
+    card.append(power, skill, up, out);
     box.append(card);
     return box;
   }));
@@ -380,7 +438,10 @@ function renderParty() {
       message(`${mate.name} 출전!`);
       commit();
     });
-    card.append(meter, info, button);
+    const skillLine = document.createElement('p');
+    skillLine.className = 'mate-skill';
+    skillLine.textContent = level ? `${mate.skill.name} · ${mate.skill.desc}` : `${mate.style} · ${mate.skill.name}`;
+    card.append(meter, info, skillLine, button);
     return card;
   }));
 }
