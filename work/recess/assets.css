@@ -50,6 +50,7 @@
 [data-map='z03c'] { --map-image: url('assets/map-z03c.webp'); }
 [data-map='z04c'] { --map-image: url('assets/map-z04c.webp'); }
 [data-map='d-exam'] { --map-image: url('assets/exam-hall.webp'); }
+[data-track='academy-entry'] { --map-image: url('assets/map-academy-entry.webp'); }
 [data-portrait='boy'] { --portrait-image: url('assets/stand-boy.webp'); }
 [data-portrait='girl'] { --portrait-image: url('assets/stand-girl.webp'); }
 [data-portrait='mob1'] { --portrait-image: url('assets/stand-mob1.webp'); }

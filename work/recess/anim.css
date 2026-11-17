@@ -1,0 +1,58 @@
+/* ════ Codex 7차 모션 띠: 동작 하나 = 가로 띠 한 장(한 칸 280×255) ════
+   anim.js가 이 변수(--anim-동작)를 읽어 스프라이트 안 캔버스에 한 칸씩 그린다.
+   주인공 띠와 장비 마스크는 장비 색 합성에 쓰이므로 wardrobe.css에 있다. 띠가 없는 그림은 기존 정지 그림이 그대로 보인다. */
+[data-sprite='mate1'] { --anim-attack: url('assets/anim-mate1-attack.webp'); --anim-idle: url('assets/anim-mate1-idle.webp'); --anim-run: url('assets/anim-mate1-run.webp'); --anim-skill: url('assets/anim-mate1-skill.webp'); }
+[data-sprite='mate2'] { --anim-attack: url('assets/anim-mate2-attack.webp'); --anim-idle: url('assets/anim-mate2-idle.webp'); --anim-run: url('assets/anim-mate2-run.webp'); --anim-skill: url('assets/anim-mate2-skill.webp'); }
+[data-sprite='mate3'] { --anim-attack: url('assets/anim-mate3-attack.webp'); --anim-idle: url('assets/anim-mate3-idle.webp'); --anim-run: url('assets/anim-mate3-run.webp'); --anim-skill: url('assets/anim-mate3-skill.webp'); }
+[data-sprite='mate4'] { --anim-attack: url('assets/anim-mate4-attack.webp'); --anim-idle: url('assets/anim-mate4-idle.webp'); --anim-run: url('assets/anim-mate4-run.webp'); --anim-skill: url('assets/anim-mate4-skill.webp'); }
+[data-sprite='mate5'] { --anim-attack: url('assets/anim-mate5-attack.webp'); --anim-idle: url('assets/anim-mate5-idle.webp'); --anim-run: url('assets/anim-mate5-run.webp'); --anim-skill: url('assets/anim-mate5-skill.webp'); }
+[data-sprite='mate6'] { --anim-attack: url('assets/anim-mate6-attack.webp'); --anim-idle: url('assets/anim-mate6-idle.webp'); --anim-run: url('assets/anim-mate6-run.webp'); --anim-skill: url('assets/anim-mate6-skill.webp'); }
+[data-sprite='mate7'] { --anim-attack: url('assets/anim-mate7-attack.webp'); --anim-idle: url('assets/anim-mate7-idle.webp'); --anim-run: url('assets/anim-mate7-run.webp'); --anim-skill: url('assets/anim-mate7-skill.webp'); }
+[data-sprite='mate8'] { --anim-attack: url('assets/anim-mate8-attack.webp'); --anim-idle: url('assets/anim-mate8-idle.webp'); --anim-run: url('assets/anim-mate8-run.webp'); --anim-skill: url('assets/anim-mate8-skill.webp'); }
+[data-sprite='mate9'] { --anim-attack: url('assets/anim-mate9-attack.webp'); --anim-idle: url('assets/anim-mate9-idle.webp'); --anim-run: url('assets/anim-mate9-run.webp'); --anim-skill: url('assets/anim-mate9-skill.webp'); }
+[data-sprite='mate10'] { --anim-attack: url('assets/anim-mate10-attack.webp'); --anim-idle: url('assets/anim-mate10-idle.webp'); --anim-run: url('assets/anim-mate10-run.webp'); --anim-skill: url('assets/anim-mate10-skill.webp'); }
+[data-sprite='mate11'] { --anim-attack: url('assets/anim-mate11-attack.webp'); --anim-idle: url('assets/anim-mate11-idle.webp'); --anim-run: url('assets/anim-mate11-run.webp'); --anim-skill: url('assets/anim-mate11-skill.webp'); }
+[data-sprite='mate12'] { --anim-attack: url('assets/anim-mate12-attack.webp'); --anim-idle: url('assets/anim-mate12-idle.webp'); --anim-run: url('assets/anim-mate12-run.webp'); --anim-skill: url('assets/anim-mate12-skill.webp'); }
+[data-sprite='mate13'] { --anim-attack: url('assets/anim-mate13-attack.webp'); --anim-idle: url('assets/anim-mate13-idle.webp'); --anim-run: url('assets/anim-mate13-run.webp'); --anim-skill: url('assets/anim-mate13-skill.webp'); }
+[data-sprite='mate14'] { --anim-attack: url('assets/anim-mate14-attack.webp'); --anim-idle: url('assets/anim-mate14-idle.webp'); --anim-run: url('assets/anim-mate14-run.webp'); --anim-skill: url('assets/anim-mate14-skill.webp'); }
+[data-sprite='mate15'] { --anim-attack: url('assets/anim-mate15-attack.webp'); --anim-idle: url('assets/anim-mate15-idle.webp'); --anim-run: url('assets/anim-mate15-run.webp'); --anim-skill: url('assets/anim-mate15-skill.webp'); }
+[data-sprite='mate16'] { --anim-attack: url('assets/anim-mate16-attack.webp'); --anim-idle: url('assets/anim-mate16-idle.webp'); --anim-run: url('assets/anim-mate16-run.webp'); --anim-skill: url('assets/anim-mate16-skill.webp'); }
+[data-sprite='thug1'] { --anim-attack: url('assets/anim-thug1-attack.webp'); --anim-down: url('assets/anim-thug1-down.webp'); --anim-hit: url('assets/anim-thug1-hit.webp'); --anim-idle: url('assets/anim-thug1-idle.webp'); }
+[data-sprite='thug2'] { --anim-attack: url('assets/anim-thug2-attack.webp'); --anim-down: url('assets/anim-thug2-down.webp'); --anim-hit: url('assets/anim-thug2-hit.webp'); --anim-idle: url('assets/anim-thug2-idle.webp'); }
+[data-sprite='thug3'] { --anim-attack: url('assets/anim-thug3-attack.webp'); --anim-down: url('assets/anim-thug3-down.webp'); --anim-hit: url('assets/anim-thug3-hit.webp'); --anim-idle: url('assets/anim-thug3-idle.webp'); }
+[data-sprite='thug4'] { --anim-attack: url('assets/anim-thug4-attack.webp'); --anim-down: url('assets/anim-thug4-down.webp'); --anim-hit: url('assets/anim-thug4-hit.webp'); --anim-idle: url('assets/anim-thug4-idle.webp'); }
+[data-sprite='thug5'] { --anim-attack: url('assets/anim-thug5-attack.webp'); --anim-down: url('assets/anim-thug5-down.webp'); --anim-hit: url('assets/anim-thug5-hit.webp'); --anim-idle: url('assets/anim-thug5-idle.webp'); }
+[data-sprite='thug6'] { --anim-attack: url('assets/anim-thug6-attack.webp'); --anim-down: url('assets/anim-thug6-down.webp'); --anim-hit: url('assets/anim-thug6-hit.webp'); --anim-idle: url('assets/anim-thug6-idle.webp'); }
+[data-sprite='thug7'] { --anim-attack: url('assets/anim-thug7-attack.webp'); --anim-down: url('assets/anim-thug7-down.webp'); --anim-hit: url('assets/anim-thug7-hit.webp'); --anim-idle: url('assets/anim-thug7-idle.webp'); }
+[data-sprite='thug8'] { --anim-attack: url('assets/anim-thug8-attack.webp'); --anim-down: url('assets/anim-thug8-down.webp'); --anim-hit: url('assets/anim-thug8-hit.webp'); --anim-idle: url('assets/anim-thug8-idle.webp'); }
+[data-sprite='thug-boss1'] { --anim-attack: url('assets/anim-thug-boss1-attack.webp'); --anim-down: url('assets/anim-thug-boss1-down.webp'); --anim-hit: url('assets/anim-thug-boss1-hit.webp'); --anim-idle: url('assets/anim-thug-boss1-idle.webp'); }
+[data-sprite='thug-boss2'] { --anim-attack: url('assets/anim-thug-boss2-attack.webp'); --anim-down: url('assets/anim-thug-boss2-down.webp'); --anim-hit: url('assets/anim-thug-boss2-hit.webp'); --anim-idle: url('assets/anim-thug-boss2-idle.webp'); }
+[data-sprite='thug-boss3'] { --anim-attack: url('assets/anim-thug-boss3-attack.webp'); --anim-down: url('assets/anim-thug-boss3-down.webp'); --anim-hit: url('assets/anim-thug-boss3-hit.webp'); --anim-idle: url('assets/anim-thug-boss3-idle.webp'); }
+[data-sprite='thug-boss4'] { --anim-attack: url('assets/anim-thug-boss4-attack.webp'); --anim-down: url('assets/anim-thug-boss4-down.webp'); --anim-hit: url('assets/anim-thug-boss4-hit.webp'); --anim-idle: url('assets/anim-thug-boss4-idle.webp'); }
+
+/* 띠를 그리는 동안에는 정지 그림·장비 정지 캔버스를 숨기고 띠 캔버스만 보인다(크기·위치는 정지 그림과 같은 contain·아래 맞춤) */
+.sprite > canvas.anim { display: none; }
+.sprite.anim-on { background-image: none !important; }
+.sprite.anim-on > canvas:not(.anim) { display: none !important; }
+.sprite.anim-on > canvas.anim { display: block !important; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; pointer-events: none; }
+
+/* 숨 쉬기·흔들기는 그림 칸이 맡으므로 CSS 위아래 흔들기를 끈다(전진할 때 새 상대가 들어오는 연출은 그대로) */
+.fighter:not(.traveling) .sprite.anim-on[data-pose] { animation: none; }
+.pack-mob .sprite.anim-on { animation: none; }
+.allies .ally .sprite.anim-on { animation: none; }
+
+/* 앞으로 뻗는 이동: 순간이동 대신 가속·감속 곡선. 몸 기울기·들림은 그림 칸에 이미 있으므로 0 */
+.fighter .sprite.anim-on { --rise: 0px; --tilt: 0deg; transition: transform .24s cubic-bezier(.25, .8, .35, 1), filter .07s; }
+.fighter .sprite.anim-on:is([data-pose='run'], [data-pose='launch']) { transition: transform .22s cubic-bezier(.45, 0, .25, 1), filter .07s; }
+.fighter .sprite.anim-on[data-pose='windup'] { transition: transform .14s ease-out, filter .07s; }
+.fighter .sprite.anim-on[data-pose='strike'] { transition: transform .07s cubic-bezier(.2, .9, .3, 1), filter .07s; }
+.fighter .sprite.anim-on[data-pose='follow'] { transition: transform .16s ease-out, filter .07s; }
+.fighter .sprite.anim-on[data-pose='hit'] { transition: transform .08s ease-out, filter .05s; }
+.ally .sprite.anim-on { transition: transform .12s ease-out; }
+.ally .sprite.anim-on[data-pose="windup"] { transform: translateX(-4px); }
+
+/* 강타(스킬·크리티컬·방어 풀기·반격) 순간: 그림 칸을 잠깐 멈추고(anim.js) 화면을 짧게 흔든다 */
+.arena.hitstop .sprite { animation-play-state: paused; }
+.arena.shake .fight { animation: arena-shake .2s linear; }
+@keyframes arena-shake { 15% { translate: 4px -2px; } 35% { translate: -4px 1px; } 55% { translate: 3px 1px; } 75% { translate: -2px -1px; } 100% { translate: 0 0; } }
+@media (prefers-reduced-motion: reduce) { .arena.shake .fight { animation: none; } }

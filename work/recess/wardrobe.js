@@ -87,7 +87,7 @@ function renderOutfit(sprite, equipped) {
   }
   frame.then(image => {
     if (displayedOutfits.get(sprite) !== key) return;
-    let canvas = sprite.querySelector('canvas');
+    let canvas = sprite.querySelector('canvas:not(.anim)');
     if (!canvas) {
       canvas = document.createElement('canvas');
       canvas.width = image.width;

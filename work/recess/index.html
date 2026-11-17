@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="assets.css">
   <link rel="stylesheet" href="motion.css">
   <link rel="stylesheet" href="wardrobe.css">
+  <link rel="stylesheet" href="anim.css">
 </head>
 <body>
   <svg class="svg-defs" width="0" height="0" aria-hidden="true">
@@ -343,6 +344,15 @@
     <form method="dialog"><button class="confirm">닫기</button></form>
   </dialog>
   <button class="test-badge" id="test-badge" type="button" hidden>TEST</button>
+  <div class="motion-lab" id="motion-lab" role="group" aria-label="동작 확인" hidden>
+    <div class="ml-row">
+      <select id="ml-target" aria-label="동작을 볼 대상"></select>
+      <button type="button" id="ml-speed" aria-pressed="false">느리게</button>
+      <button type="button" id="ml-close">끝내기</button>
+    </div>
+    <div class="ml-actions" id="ml-actions"></div>
+    <p class="ml-note" id="ml-note" role="status"></p>
+  </div>
   <dialog id="test-dialog" class="test-dialog" aria-labelledby="test-title">
     <h2 id="test-title">테스트 도구</h2>
     <p class="test-hint">테스트 모드 저장은 진짜 저장과 따로예요. 마음껏 눌러 보세요.</p>
@@ -363,7 +373,7 @@
     <h3>대결</h3>
     <div class="test-grid">
       <button type="button" data-test="heal">체력 회복</button><button type="button" data-test="finish">앞 상대 체력 1</button>
-      <button type="button" data-test="boss">이 경기장 보스로</button>
+      <button type="button" data-test="boss">이 경기장 보스로</button><button type="button" data-test="lab">동작 확인(모션 띠)</button>
     </div>
     <p class="test-note" id="test-note" role="status"></p>
     <form method="dialog"><button class="confirm">닫기</button></form>
@@ -423,6 +433,7 @@
   <noscript>게임을 실행하려면 브라우저에서 JavaScript를 켜 주세요.</noscript>
   <script src="game.js"></script>
   <script src="wardrobe.js"></script>
+  <script src="anim.js"></script>
   <script src="meta-ui.js"></script>
   <script src="ui.js"></script>
 </body>

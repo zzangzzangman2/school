@@ -43,6 +43,7 @@ with sync_playwright() as playwright:
     assert phone.locator('.bottom-nav').bounding_box()['y'] < 844
     first_art = phone.locator('.arena-art').evaluate('e => getComputedStyle(e).backgroundImage')
     assert 'data:image/webp' in first_art
+    first_pan = phone.locator('#arena').evaluate("e => parseFloat(e.style.getPropertyValue('--pan'))")
     phone.screenshot(path=str(root / 'work' / 'recess-v2-battle.png'))
 
     phone.get_by_role('button', name='성장', exact=True).click()
@@ -56,7 +57,11 @@ with sync_playwright() as playwright:
     phone.get_by_role('button', name='대결', exact=True).click()
     phone.clock.run_for(9500)
     expect(phone.get_by_role('heading', name='기숙사 복도')).to_be_visible()
-    assert phone.locator('.arena-art').evaluate('e => getComputedStyle(e).backgroundImage') != first_art
+    # 정문(1-1)과 기숙사 복도(1-2)는 한 장의 이어진 배경(academy-entry)을 왼쪽부터 차례로 지나간다. 그 밖의 장소는 배경이 바뀐다
+    if phone.locator('#arena').get_attribute('data-track') == 'academy-entry':
+        assert phone.locator('#arena').evaluate("e => parseFloat(e.style.getPropertyValue('--pan'))") > first_pan
+    else:
+        assert phone.locator('.arena-art').evaluate('e => getComputedStyle(e).backgroundImage') != first_art
     phone.get_by_role('button', name='대결 지도', exact=True).click()
     expect(phone.get_by_text('1 / 12 완료')).to_be_visible()
     assert phone.locator('.map-thumb').count() == 12

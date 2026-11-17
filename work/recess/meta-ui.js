@@ -167,11 +167,16 @@ function renderAllies() {
       return ally;
     }));
   }
-  const now = performance.now();
-  for (const ally of box.children) {
-    const pose = (allyPoses.get(ally.dataset.slot) || []).find(entry => entry.until > now)?.pose || 'ready';
+  renderAllyPoses();
+}
+
+function renderAllyPoses(now = performance.now()) {
+  for (const ally of $('allies').children) {
+    const timed = activePose(allyPoses.get(ally.dataset.slot), now);
+    const pose = timed?.pose || 'ready';
     const sprite = ally.firstElementChild;
     if (sprite.dataset.pose !== pose) sprite.dataset.pose = pose;
+    animate(sprite, pose, timed);
   }
 }
 
@@ -221,7 +226,7 @@ function allyRun(slot, poses, { dash = true, hitAt = 0, onHit = () => {}, skill 
   const body = poses.reduce((sum, [, ms]) => sum + ms, 0);
   const frames = [...(move ? [['step', out]] : []), ...poses, ...(move ? [['step', back]] : [])];
   let until = now;
-  allyPoses.set(key, frames.map(([pose, ms]) => ({ pose, until: (until += ms / rate) })));
+  allyPoses.set(key, frames.map(([pose, ms]) => ({ pose, from: until, until: (until += ms / rate) })));
   const timers = [setTimeout(onHit, (out + hitAt) / rate)];
   if (move) {
     ally.classList.add('running');
@@ -998,6 +1003,7 @@ function testAct(action) {
     heal: () => { state.hp = maxHp(state); return '체력 회복'; },
     finish: () => { if (state.roundEnd || state.enemyHp <= 1) return '지금은 쓰러뜨릴 상대가 없어요'; state.enemyHp = 1; return '앞 상대 체력 1'; },
     boss: () => { state.roundEnd = null; state.farm = null; openFight(state, state.map, BOSS_WAVE, 0.4); return '이 경기장 보스로'; },
+    lab: () => { openLab(); return '동작 확인: 대결을 멈추고 동작을 하나씩 재생해요'; },
   };
   return acts[action]?.();
 }
@@ -1017,6 +1023,146 @@ function testMove() {
   return `${stageLabel(cycle, map)}로 이동`;
 }
 
+// ── 테스트 모드 · 동작 확인: 대결을 멈추고 주인공·상대·동료·무리의 동작을 하나씩 재생한다 ──
+// 새 모션 띠가 들어오면 칸 순서·타격 칸·발 떨림을 여기서 바로 본다. '느리게'는 4배 느리게, 아래 줄에 지금 몇 번째 칸인지 표시
+let testHold = false;
+let labSlow = false;
+let labContest;
+let labTimer = 0;
+const LAB_ACTIONS = {
+  hero: [['idle', '대기'], ['run', '달리기'], ['punch', '주먹'], ['kick', '발차기'], ['knee', '무릎'], ['throw', '메치기'], ['hold', '굳히기'], ['hit', '맞음'], ['guard', '방어'], ['down', '쓰러짐'], ['victory', '승리'], ['rush', '돌진'], ['counter', '카운터'], ['combo', '연타'], ['cheer', '응원'], ['drink', '음료'], ['step', '스텝']],
+  rival: [['idle', '대기'], ['attack', '공격'], ['hit', '맞음'], ['down', '쓰러짐']],
+  ally: [['idle', '대기'], ['run', '달리기'], ['attack', '공격'], ['skill', '스킬']],
+  pack: [['idle', '대기'], ['attack', '공격'], ['hit', '맞음']],
+};
+const LAB_CONTEST = { punch: 'boxing', kick: 'kickboxing', knee: 'muaythai', throw: 'wrestling', hold: 'jiujitsu' };
+
+function labTargets() {
+  const allies = state.party.slice(0, partySlots(state)).map((id, slot) => [slot, id]).filter(([, id]) => id);
+  return [['hero', '주인공'], ['rival', '앞 상대'], ...allies.map(([slot, id]) => [`ally${slot}`, `동료 ${slot + 1}번 · ${COMPANIONS[id].name}`]), ...(aliveBehind(state) ? [['pack', '뒤 무리']] : [])];
+}
+
+function labSprite(target) {
+  if (target === 'hero') return $('player-sprite');
+  if (target === 'rival') return $('rival-sprite');
+  if (target === 'pack') return document.querySelector('#pack .sprite');
+  return document.querySelector(`#allies .ally[data-slot="${target.slice(4)}"] .sprite`);
+}
+
+function renderLabActions() {
+  const target = $('ml-target').value;
+  const kind = target.startsWith('ally') ? 'ally' : target;
+  $('ml-actions').replaceChildren(...LAB_ACTIONS[kind].map(([action, label]) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.action = action;
+    button.textContent = label;
+    return button;
+  }));
+}
+
+function openLab() {
+  $('test-dialog').close();
+  labContest = state.test?.contest;
+  state.roundEnd = null;
+  state.farm = null;
+  state.dungeon = null;
+  openFight(state, state.map, Math.min(state.wave, BOSS_WAVE - 1), 0);
+  state.hp = maxHp(state);
+  testHold = true;
+  poses.player = [];
+  poses.rival = [];
+  packPoses.clear();
+  allyPoses.clear();
+  $('ml-target').replaceChildren(...labTargets().map(([value, label]) => new Option(label, value)));
+  renderLabActions();
+  $('motion-lab').hidden = false;
+  clearInterval(labTimer);
+  labTimer = setInterval(labNote, 90);
+}
+
+function closeLab() {
+  testHold = false;
+  labSlow = false;
+  animTimeScale = 1;
+  $('ml-speed').setAttribute('aria-pressed', 'false');
+  state.test = { ...state.test, contest: labContest };
+  renderedContest = '';
+  $('motion-lab').hidden = true;
+  clearInterval(labTimer);
+  commit();
+}
+
+function labNote() {
+  const target = $('ml-target').value;
+  const sprite = labSprite(target);
+  const s = sprite && animStates.get(sprite);
+  const name = $('ml-target').selectedOptions[0]?.textContent || '';
+  const art = !sprite ? '없음' : sprite.classList.contains('anim-on') && s?.plan ? `띠 ${s.plan[0]} ${s.frame + 1}/${s.frames}칸` : s?.plan ? '띠 불러오는 중' : '정지 그림(띠 없음)';
+  setText('ml-note', `${name} · ${sprite?.dataset.pose || '-'} → ${art}${labSlow ? ' · 느리게' : ''}`);
+}
+
+function labPlay(target, action) {
+  const k = labSlow ? 4 : 1;
+  const T = frames => frames.map(([pose, ms]) => [pose, ms * k]);
+  const now = performance.now();
+  const timeline = frames => {
+    let until = now;
+    return T(frames).map(([pose, ms]) => ({ pose, from: until, until: (until += ms / motionRate()) }));
+  };
+  if (target === 'hero') {
+    if (LAB_CONTEST[action]) {
+      state.test = { ...state.test, contest: LAB_CONTEST[action] };
+      renderedContest = '';
+      render();
+      setPoses('player', T([['windup', 75], ['run', 145], ['strike', 110], ['follow', 170]]));
+      setPoses('rival', T([['ready', 220], ['hit', 240]]));
+      return;
+    }
+    const moves = {
+      idle: [], run: [['run', 1600]], hit: [['hit', 240]], guard: [['guard', 300]], down: [['down', 1500]], victory: [['victory', 1500]],
+      rush: [['skill-rush-windup', 170], ['skill-rush-strike', 180], ['follow', 170]],
+      counter: [['skill-counter-guard', 220], ['skill-counter-strike', 180], ['follow', 170]],
+      combo: ACTIVE_POSES.pencil, cheer: ACTIVE_POSES.cheer, drink: ACTIVE_POSES.lunch, step: ACTIVE_POSES.sprint,
+    };
+    setPoses('player', T(moves[action]));
+    return;
+  }
+  if (target === 'rival') {
+    const moves = { idle: [], attack: [['windup', 75], ['launch', 195], ['strike', 110], ['follow', 170]], hit: [['hit', 240]], down: [['down', 1500]] };
+    setPoses('rival', T(moves[action]));
+    if (action === 'attack') setPoses('player', T([['ready', 270], ['hit', 240]]));
+    return;
+  }
+  if (target === 'pack') {
+    const count = $('pack').children.length;
+    for (let index = 0; index < count; index++) {
+      if (action === 'idle') packPoses.delete(index);
+      else packPoses.set(index, timeline(action === 'hit' ? [['hit', 240]] : [['ready', index * 60], ['windup', 90], ['strike', 260]]));
+    }
+    return;
+  }
+  const slot = Number(target.slice(4));
+  if (action === 'idle') allyPoses.delete(String(slot));
+  else if (action === 'run') allyPoses.set(String(slot), timeline([['step', 1600]]));
+  else if (action === 'attack') allyRun(slot, T([['windup', 80], ['strike', 150], ['follow', 110]]), { dash: !labSlow, hitAt: 80 * k });
+  else allyRun(slot, T([['skill-a', 180], ['skill-b', 500]]), { dash: !labSlow, hitAt: 180 * k, skill: true });
+}
+
+function bindLab() {
+  $('ml-target').addEventListener('change', renderLabActions);
+  $('ml-actions').addEventListener('click', event => {
+    const button = event.target.closest('[data-action]');
+    if (button) labPlay($('ml-target').value, button.dataset.action);
+  });
+  $('ml-speed').addEventListener('click', () => {
+    labSlow = !labSlow;
+    animTimeScale = labSlow ? 0.25 : 1;
+    $('ml-speed').setAttribute('aria-pressed', String(labSlow));
+  });
+  $('ml-close').addEventListener('click', closeLab);
+}
+
 function bindTestTools() {
   $('test-mode').addEventListener('click', () => {
     const url = new URL(location.href);
@@ -1028,6 +1174,7 @@ function bindTestTools() {
   $('test-open').hidden = !TEST_MODE;
   $('test-badge').hidden = !TEST_MODE;
   if (!TEST_MODE) return;
+  bindLab();
   $('test-place').replaceChildren(...testPlaces().map(([name, cycle]) => new Option(name, cycle)));
   $('test-map').replaceChildren(...MAPS.map((_, map) => new Option(mapCode(map), map)));
   $('test-contest').replaceChildren(new Option('경기장대로', ''), ...Object.entries(CONTESTS).map(([id, game]) => new Option(game.name, id)));

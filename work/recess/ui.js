@@ -129,7 +129,15 @@ function motionRate() { return (state?.speed || 1) * (state && rushing(state) ? 
 function setPoses(side, frames) {
   let until = performance.now();
   const rate = motionRate();
-  poses[side] = frames.map(([pose, ms]) => ({ pose, until: (until += ms / rate) }));
+  poses[side] = frames.map(([pose, ms]) => ({ pose, from: until, until: (until += ms / rate) }));
+}
+
+// 시간표(poses·packPoses·allyPoses)에서 지금 항목과 그 시작·끝·바로 앞 상태(띠 재생이 이어 붙일 때 쓴다)
+function activePose(list, now) {
+  const index = (list || []).findIndex(entry => entry.until > now);
+  if (index < 0) return null;
+  const entry = list[index];
+  return { pose: entry.pose, from: entry.from ?? (index ? list[index - 1].until : now), until: entry.until, prev: index ? list[index - 1].pose : null };
 }
 
 function flashHit(target, detail) {
@@ -167,7 +175,8 @@ function combatEvent(type, event) {
   if (type === 'impact') {
     const target = event.side === 'player' ? 'rival' : 'player';
     const special = event.side === 'player' && heroSkillPose(event.move);
-    setPoses(event.side, special ? [[special[1], 180], ['follow', 100]] : [['strike', 110], ['follow', 100]]);
+    setPoses(event.side, special ? [[special[1], 180], ['follow', 170]] : [['strike', 110], ['follow', 170]]);
+    animImpact(event.breaks || event.lucky || (event.move !== 'attack' && event.move !== 'crit') || (event.side === 'rival' && isDaon(state) && state.bossPhase === 'counter'));
     setPoses(target, [[event.blocked ? 'guard' : 'hit', event.breaks ? 240 : 160]]);
     if (!reducedMotion.matches) flashHit(target, event);
     if (event.side === 'rival' && aliveBehind(state)) packAct('strike', 1 + Math.floor(Math.random() * 2), 260);
@@ -226,7 +235,8 @@ function renderMotion() {
   const now = performance.now();
   const phase = isDaon(state) ? state.bossPhase : '';
   for (const side of ['player', 'rival']) {
-    const action = poses[side].find(entry => entry.until > now)?.pose;
+    const timed = activePose(poses[side], now);
+    const action = timed?.pose;
     let resting = 'ready';
     if (state.roundEnd) {
       const won = state.roundEnd.result === 'win';
@@ -238,8 +248,10 @@ function renderMotion() {
     else if (side === 'player' ? state.playerMove : state.enemyMove) resting = 'windup';
     const sprite = $(`${side}-sprite`);
     let next = action || resting;
-    if (next === 'ready' && side === 'player' && $('arena').dataset.motion !== 'spar' && Math.floor(now / 700) % 2) next = 'ready-b';
+    // 띠 그림이 있으면 대기 숨 고르기는 띠가 맡는다(정지 그림 두 장을 0.7초마다 바꾸던 깜빡임 없음)
+    if (next === 'ready' && side === 'player' && $('arena').dataset.motion !== 'spar' && !sprite.classList.contains('anim-on') && Math.floor(now / 700) % 2) next = 'ready-b';
     if (sprite.dataset.pose !== next) sprite.dataset.pose = next;
+    animate(sprite, next, action ? timed : null);
   }
 }
 
@@ -351,15 +363,29 @@ function renderPack() {
       return slot;
     }));
   }
-  const now = performance.now();
   pack.slice(0, PACK_SLOTS.length).forEach((mob, index) => {
     const slot = box.children[index];
-    if (!slot) return;
-    slot.querySelector('.pack-hp i').style.width = `${clamp(mob.hp / mob.max, 0, 1) * 100}%`;
-    const sprite = slot.querySelector('.sprite');
-    const pose = (packPoses.get(index) || []).find(entry => entry.until > now)?.pose || 'ready';
-    if (sprite.dataset.pose !== pose) sprite.dataset.pose = pose;
+    if (slot) slot.querySelector('.pack-hp i').style.width = `${clamp(mob.hp / mob.max, 0, 1) * 100}%`;
   });
+  renderPackPoses();
+}
+
+function renderPackPoses(now = performance.now()) {
+  for (const [index, slot] of Array.from($('pack').children).entries()) {
+    const sprite = slot.querySelector('.sprite');
+    const timed = activePose(packPoses.get(index), now);
+    const pose = timed?.pose || 'ready';
+    if (sprite.dataset.pose !== pose) sprite.dataset.pose = pose;
+    animate(sprite, pose, timed);
+  }
+}
+
+// 화면 주사율(초당 약 60번)로 상태 → 포즈만 갱신한다. 나머지 화면(render)은 그대로 42ms마다
+function renderPoses(now) {
+  if (document.visibilityState !== 'visible' || editingProfile || !state?.profile) return;
+  renderMotion();
+  renderPackPoses(now);
+  renderAllyPoses(now);
 }
 
 function packAct(pose, count, ms) {
@@ -370,8 +396,8 @@ function packAct(pose, count, ms) {
   const rate = motionRate();
   for (const index of picks) {
     const delay = pose === 'hit' ? 0 : Math.random() * 120;
-    if (pose === 'hit') packPoses.set(index, [{ pose: 'hit', until: now + ms / rate }]);
-    else packPoses.set(index, [{ pose: 'ready', until: now + delay }, { pose: 'windup', until: now + delay + 90 / rate }, { pose: 'strike', until: now + delay + ms / rate }]);
+    if (pose === 'hit') packPoses.set(index, [{ pose: 'hit', from: now, until: now + ms / rate }]);
+    else packPoses.set(index, [{ pose: 'ready', from: now, until: now + delay }, { pose: 'windup', until: now + delay + 90 / rate }, { pose: 'strike', until: now + delay + ms / rate }]);
   }
 }
 
@@ -495,7 +521,7 @@ function travelRun(ms) {
   const rate = motionRate();
   setPoses('player', [['run', ms]]);
   const now = performance.now();
-  for (let slot = 0; slot < PARTY_MAX; slot++) allyPoses.set(String(slot), [{ pose: 'step', until: now + ms / rate }]);
+  for (let slot = 0; slot < PARTY_MAX; slot++) allyPoses.set(String(slot), [{ pose: 'step', from: now, until: now + ms / rate }]);
   for (const id of ['allies', 'rival', 'pack']) {
     const box = $(id);
     box.classList.remove('traveling');
@@ -1884,9 +1910,12 @@ function start() {
   });
   if (state.profile) enterGame();
   else showProfileEditor();
+  startAnim(renderPoses);
   setInterval(() => {
     if (document.visibilityState !== 'visible' || editingProfile || !state.profile) return;
-    updateClock();
+    // 테스트 모드 동작 확인 중에는 대결 시간을 멈춘다(멈춘 시간은 나중에 몰아서 돌리지 않음)
+    if (testHold) openedAt = Date.now();
+    else updateClock();
     render();
   }, 42);
 }

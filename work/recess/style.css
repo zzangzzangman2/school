@@ -1143,3 +1143,13 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .mate-dialog-rule { display: block; margin-top: 3px; color: #1f7a48 !important; font-weight: 700; }
 @media (prefers-reduced-motion: reduce) { .rule-banner.show { animation: none; } }
 .rule-banner { background: rgba(24, 14, 48, .96); border: 1.5px solid rgba(255, 211, 107, .75); }
+/* ════ 테스트 모드 · 동작 확인 패널(대결을 멈추고 동작을 하나씩 재생) ════ */
+.motion-lab { position: fixed; z-index: 49; left: 50%; bottom: calc(108px + env(safe-area-inset-bottom)); width: min(calc(100vw - 16px), 430px); translate: -50% 0; padding: 8px; border-radius: 14px; background: rgba(24, 14, 44, .93); color: #fff; box-shadow: 0 6px 18px rgba(0, 0, 0, .4); }
+.motion-lab[hidden] { display: none; }
+.ml-row { display: flex; gap: 6px; align-items: center; }
+.ml-row select { flex: 1 1 auto; min-width: 0; min-height: 32px; padding: 0 6px; border: 1px solid rgba(255, 255, 255, .3); border-radius: 9px; background: #2e1d52; color: #fff; font: inherit; font-size: 12px; }
+.motion-lab button { min-height: 30px; padding: 0 9px; border: 1px solid rgba(255, 255, 255, .25); border-radius: 9px; background: rgba(255, 255, 255, .1); color: #fff; font-size: 12px; font-weight: 700; }
+.motion-lab button:active { transform: translateY(1px); }
+#ml-speed[aria-pressed='true'] { background: #ffcf4a; color: #2a1640; }
+.ml-actions { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.ml-note { min-height: 15px; margin: 6px 0 0; color: #ffd9e6; font-size: 11px; }

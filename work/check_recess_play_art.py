@@ -44,6 +44,21 @@ for n in range(1, 17):
 for id in [f'thug{n}' for n in range(1, 9)] + [f'thug-boss{n}' for n in range(1, 5)]:
     for pose in ('ready', 'step', 'windup', 'strike', 'follow', 'hit', 'down', 'guard', 'open'):
         assert Image.open(assets / f'motion-{id}-{pose}.webp').size == (280, 255)
+# 7차 모션 띠: 한 칸 280×255, 칸 수 = 띠 폭 ÷ 280(타격 칸 뒤에 마무리 칸이 남을 만큼). 주인공 띠는 같은 크기의 장비 마스크 띠가 있다
+STRIP_MIN = {
+    'boy': {'idle': 2, 'run': 2, 'punch': 4, 'hit': 2, 'down': 2, 'victory': 2, 'kick': 4, 'knee': 4, 'throw': 5, 'hold': 3, 'guard': 2,
+            'rush': 4, 'counter': 4, 'combo': 4, 'cheer': 2, 'drink': 2, 'step': 4},
+    'thug': {'idle': 2, 'attack': 4, 'hit': 2, 'down': 2},
+    'mate': {'idle': 2, 'run': 2, 'attack': 5, 'skill': 4},
+}
+strip_css = (site / 'anim.css').read_text(encoding='utf-8') + (site / 'wardrobe.css').read_text(encoding='utf-8')
+for strip_id, family in [('boy', 'boy')] + [(f'thug{n}', 'thug') for n in range(1, 9)] + [(f'thug-boss{n}', 'thug') for n in range(1, 5)] + [(f'mate{n}', 'mate') for n in range(1, 17)]:
+    for clip, least in STRIP_MIN[family].items():
+        strip = Image.open(assets / f'anim-{strip_id}-{clip}.webp')
+        assert strip.height == 255 and strip.width % 280 == 0 and strip.width // 280 >= least, (strip_id, clip, strip.size)
+        assert f"--anim-{clip}: url('assets/anim-{strip_id}-{clip}.webp')" in strip_css, (strip_id, clip)
+        if strip_id == 'boy':
+            assert Image.open(assets / f'animmask-boy-{clip}.webp').size == strip.size, clip
 # 아카데미 경기장 12곳과 지역 구역 배경(시골·도시 4구역씩)
 for id in [f'a{n:02d}' for n in range(1, 13)] + [f'z0{n}{kind}' for n in range(1, 5) for kind in 'rc']:
     assert Image.open(assets / f'map-{id}.webp').size == (535, 302)
@@ -79,6 +94,8 @@ with sync_playwright() as playwright:
         assert from_asset(path, 'motion-boy-strike' if motion == 'strike' else f'motion-boy-{motion}-strike')
         if motion == 'spar':
             assert 'wardrobe-rendered' not in (page.locator('#player-sprite').get_attribute('class') or '')
+            # 태권도는 보호구 정지 그림이라 7차 모션 띠를 쓰지 않는다
+            assert 'anim-on' not in (page.locator('#player-sprite').get_attribute('class') or '')
             # 지역의 건달은 보호구로 바꾸지 않고 자기 그림 그대로
             rival = page.locator('#rival-sprite').get_attribute('data-sprite')
             color = page.locator('#rival-sprite').get_attribute('data-spar') or rival
@@ -86,9 +103,16 @@ with sync_playwright() as playwright:
             assert from_asset(path, f'motion-{color}-hit'), color
             assert rival.startswith('thug') == (not page.locator('#rival-sprite').get_attribute('data-spar')), rival
         else:
-            expect(page.locator('#player-sprite canvas')).to_have_attribute('data-frame', re.compile(f':{motion}$'))
+            expect(page.locator('#player-sprite canvas:not(.anim)')).to_have_attribute('data-frame', re.compile(f':{motion}$'))
+            # 7차 모션 띠: 타격 상태에서는 그 종목 띠의 타격 칸(주먹·발차기·무릎 3번째, 메치기 4번째, 굳히기 2번째)을 장비 색으로 그린다
+            clip = 'punch' if motion == 'strike' else motion
+            impact = {'punch': 2, 'kick': 2, 'knee': 2, 'throw': 3, 'hold': 1}[clip]
+            expect(page.locator('#player-sprite')).to_have_class(re.compile('(^| )anim-on( |$)'))
+            expect(page.locator('#player-sprite canvas.anim')).to_have_attribute('data-frame', f'boy:{clip}:{impact}')
             # 잡기 종목: 맞는 쪽은 메쳐져 뜨거나(throw) 눌린다(hold). 그 그림이 있는 상대(아카데미 선수)만
             rival = page.locator('#rival-sprite').get_attribute('data-sprite')
+            if rival.startswith('thug'):
+                expect(page.locator('#rival-sprite canvas.anim')).to_have_attribute('data-frame', re.compile(f'^{rival}:hit:[01]$'))
             if motion in ('throw', 'hold') and (assets / f'motion-{rival}-thrown.webp').exists():
                 path = page.locator('#rival-sprite').evaluate("e => getComputedStyle(e).getPropertyValue('--pose-image')")
                 assert from_asset(path, f"motion-{rival}-{'thrown' if motion == 'throw' else 'pinned'}"), rival
@@ -113,7 +137,28 @@ with sync_playwright() as playwright:
       commit();
     }''')
     assert from_asset(page.locator('#player-sprite').evaluate("e => getComputedStyle(e).getPropertyValue('--pose-image')"), 'motion-boy-victory')
+
+    # 테스트 모드 · 동작 확인: 대결을 멈추고 동작을 하나씩 재생하며 지금 몇 번째 칸인지 보여 준다
+    lab = browser.new_page(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True)
+    lab.on('pageerror', lambda error: failures.append(str(error)))
+    lab.goto(url + '?test')
+    lab.get_by_role('radio', name='남학생').check()
+    lab.get_by_role('textbox', name='닉네임').fill('검사')
+    lab.get_by_role('button', name='입학하기').click()
+    lab.locator('#test-badge').click()
+    lab.get_by_role('button', name='동작 확인(모션 띠)').click()
+    expect(lab.locator('#motion-lab')).to_be_visible()
+    lab.locator('#ml-actions').get_by_role('button', name='주먹').click()
+    expect(lab.locator('#ml-note')).to_contain_text('띠 punch')
+    lab.locator('#ml-actions').get_by_role('button', name='승리').click()
+    expect(lab.locator('#ml-note')).to_contain_text('띠 victory')
+    wins = lab.evaluate('state.wins')
+    lab.wait_for_timeout(1500)
+    assert lab.evaluate('state.wins') == wins
+    lab.get_by_role('button', name='끝내기').click()
+    expect(lab.locator('#motion-lab')).to_be_hidden()
+    lab.close()
     assert not failures, failures
     browser.close()
 
-print('Cover, pose families, fighting-contest mapping (strike/grapple), protective rivals, six-frame effects and art assets verified.')
+print('Cover, pose families, fighting-contest mapping (strike/grapple), protective rivals, six-frame effects, motion strips (hero/thugs/mates, tinted hero), motion lab and art assets verified.')

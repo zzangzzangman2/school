@@ -22,16 +22,16 @@ def embed_images(css):
 
 
 html = (source / 'index.html').read_text(encoding='utf-8')
-for filename in ('style.css', 'assets.css', 'motion.css', 'wardrobe.css'):
+for filename in ('style.css', 'assets.css', 'motion.css', 'wardrobe.css', 'anim.css'):
     css = embed_images((source / filename).read_text(encoding='utf-8'))
     html = html.replace(f'<link rel="stylesheet" href="{filename}">', f'<style>\n{css}\n</style>')
-for filename in ('game.js', 'wardrobe.js', 'meta-ui.js', 'ui.js'):
+for filename in ('game.js', 'wardrobe.js', 'anim.js', 'meta-ui.js', 'ui.js'):
     code = (source / filename).read_text(encoding='utf-8')
     html = html.replace(f'<script src="{filename}"></script>', f'<script>\n{code}\n</script>')
 (output / 'recess-king.html').write_text(html, encoding='utf-8')
 
 with ZipFile(output / 'recess-king-source.zip', 'w', compression=ZIP_DEFLATED) as archive:
-    for name in ('index.html', 'style.css', 'assets.css', 'motion.css', 'game.js', 'wardrobe.js', 'meta-ui.js', 'ui.js', 'hero.webp', 'README.md'):
+    for name in ('index.html', 'style.css', 'assets.css', 'motion.css', 'anim.css', 'game.js', 'wardrobe.js', 'anim.js', 'meta-ui.js', 'ui.js', 'hero.webp', 'README.md'):
         archive.write(source / name, f'recess-king/{name}')
     # Inline canvas inputs so the editable game also works when opened via file://.
     archive.writestr('recess-king/wardrobe.css', embed_images((source / 'wardrobe.css').read_text(encoding='utf-8')))
