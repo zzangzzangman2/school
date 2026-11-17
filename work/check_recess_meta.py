@@ -79,6 +79,20 @@ with sync_playwright() as playwright:
     }''')
     assert grade == {'allS': True, 'max': [5, 0, 0], 'unlock': [True, 1], 'drop': 2, 'rates': 100}, grade
 
+    # 출전 번호 = 자리: 1번을 비우면 2번 동료는 2번 자리(전열 왼쪽)에 그대로 선다. 공격하면 상대 앞으로 달려갔다 돌아온다
+    page.evaluate("state.test = { slots: true }; for (const id of Object.keys(COMPANIONS)) state.companions[id] = state.companions[id] || 1; state.party = [null, 'mate1', null, 'mate8']; commit()")
+    page.clock.run_for(100)
+    assert page.evaluate("[...document.querySelectorAll('#allies .ally')].map(a => [a.dataset.slot, a.style.getPropertyValue('--d')])") == [['1', '1.04'], ['3', '0.78']]
+    expect(page.locator('#party-slots .party-slot').nth(1).locator('.slot-tag')).to_have_text('2번 · 전열')
+    page.evaluate("state.allyTimers = [99, 99, 99, 99]; for (let i = 0; i < 4; i++) state.cooldowns['mate' + i] = 99; onAlly({ slot: 1, amount: 5 })")
+    page.clock.run_for(200)
+    dash = page.evaluate("(() => { const a = document.querySelector('#allies .ally[data-slot=\"1\"]'); return [a.style.translate, a.classList.contains('running')]; })()")
+    assert dash[0] not in ('', '0px', '0px 0px') and dash[1], dash
+    page.clock.run_for(1200)
+    back = page.evaluate("(() => { const a = document.querySelector('#allies .ally[data-slot=\"1\"]'); return [a.style.translate, a.classList.contains('running'), a.firstElementChild.dataset.pose]; })()")
+    assert back[0] in ('0px', '0px 0px') and not back[1] and back[2] == 'ready', back
+    page.evaluate("delete state.test; state.party = ['mate1', null, null, null]; state.allyTimers = [1.1, 1.5, 1.9, 2.3]; state.cooldowns = {}; commit()")
+
     # 퀘스트: 힘 훈련 Lv.3 → 받기 → 보석
     expect(page.locator('#objective-title')).to_contain_text('힘 훈련 Lv.3')
     page.evaluate('state.coins = 5000; state.training.power = 3; commit()')

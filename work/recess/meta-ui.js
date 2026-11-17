@@ -140,25 +140,24 @@ function onActive(event) {
 
 // ── 동료 표시: 주인공과 같은 크기(--unit)로 2줄 대형, 몸이 서로 겹치지 않게 ──
 // d = 주인공 몸 중심에서 왼쪽으로 떨어진 거리, y = 바닥에서 띄운 높이(둘 다 --unit 배수), s = 크기
-// 앞줄: 주인공 · 0번 · 1번(몸 폭 0.4~0.5 + 틈). 뒷줄: 2번·3번이 앞줄 머리 높이(0.8)에서 앞줄 사이사이에 선다
+// 출전 번호가 곧 자리: 1·2번 = 전열(주인공 옆), 3·4번 = 후열(앞줄 머리 높이 0.8에서 사이사이). 빈 번호는 자리를 비워 둔다
 const ALLY_SLOTS = [{ d: 0.52, y: 0, s: 1 }, { d: 1.04, y: 0, s: 1 }, { d: 0.26, y: 0.8, s: 0.85 }, { d: 0.78, y: 0.8, s: 0.85 }];
 
 function renderAllies() {
-  const ids = state.party.slice(0, partySlots(state)).map((id, slot) => (id ? `${slot}:${id}` : '')).filter(Boolean);
-  const key = ids.join('|');
+  const entries = state.party.slice(0, partySlots(state)).map((id, slot) => [slot, id]).filter(([, id]) => id);
+  const key = entries.map(([slot, id]) => `${slot}:${id}`).join('|');
   const box = $('allies');
   if (key !== renderedAllies) {
     renderedAllies = key;
-    box.replaceChildren(...ids.map((entry, index) => {
-      const [slot, id] = entry.split(':');
-      const place = ALLY_SLOTS[index];
+    box.replaceChildren(...entries.map(([slot, id]) => {
+      const place = ALLY_SLOTS[slot];
       const ally = document.createElement('span');
       ally.className = 'ally';
       ally.dataset.slot = slot;
       ally.style.setProperty('--d', place.d);
       ally.style.setProperty('--y', place.y);
       ally.style.setProperty('--s', place.s);
-      ally.style.zIndex = 4 - index;
+      ally.style.zIndex = 4 - slot;
       const sprite = document.createElement('span');
       sprite.className = 'sprite';
       sprite.dataset.sprite = COMPANIONS[id].sprite;
@@ -189,11 +188,63 @@ function floatText(target, text, kind) {
   setTimeout(() => effect.remove(), 700);
 }
 
-function onAlly(event) {
+// ── 동료 공격 연출: 출전 자리(대기점)에서 상대 앞까지 달려가 치고, 뒷걸음으로 돌아온다 ──
+// 화면 연출만 바꾼다. 피해·쿨타임·오프라인 계산은 엔진(allyStrike·castMate) 그대로이고, 피해 숫자만 타격 순간에 띄운다.
+// 여럿이 한꺼번에 달려와도 겹치지 않게 출전 번호마다 접근 지점을 다르게 둔다(x: 앞뒤, y: 높이, px)
+const ALLY_APPROACH = [{ x: 0, y: 0 }, { x: -46, y: 10 }, { x: -22, y: -26 }, { x: -68, y: -14 }];
+const ALLY_RUN = { out: 170, back: 210 };
+const allyRuns = new Map();
+
+function allyApproach(ally, slot) {
+  const from = ally.getBoundingClientRect();
+  const target = $('rival-sprite').getBoundingClientRect();
+  if (!from.width || !target.width) return null;
+  const lane = ALLY_APPROACH[slot] || ALLY_APPROACH[0];
+  // 동료 몸 앞쪽(그림 폭의 0.68)이 상대 몸 앞쪽(상대 그림 폭의 0.36)에 닿을 만큼
+  const x = target.left + target.width * 0.36 - (from.left + from.width * 0.68) + lane.x;
+  const y = target.bottom - from.bottom + lane.y;
+  return { x: Math.round(Math.max(0, x)), y: Math.round(y) };
+}
+
+// poses: [[pose, ms], ...] 제자리 동작. dash면 앞뒤로 달리기(step)를 붙인다. hitAt = 제자리 동작 시작부터 타격까지(ms)
+function allyRun(slot, poses, { dash = true, hitAt = 0, onHit = () => {}, skill = false } = {}) {
+  const key = String(slot);
   const now = performance.now();
   const rate = state?.speed || 1;
-  allyPoses.set(String(event.slot), [{ pose: 'windup', until: now + 80 / rate }, { pose: 'strike', until: now + 260 / rate }]);
-  if (!reducedMotion.matches) {
+  const prev = allyRuns.get(key);
+  if (prev && prev.skill && !skill && prev.until > now) { onHit(); return; } // 스킬 연출 중에는 평타 숫자만
+  prev?.timers.forEach(clearTimeout);
+  const ally = document.querySelector(`#allies .ally[data-slot="${key}"]`);
+  const move = dash && ally && !reducedMotion.matches ? allyApproach(ally, slot) : null;
+  const out = move ? ALLY_RUN.out : 0;
+  const back = move ? ALLY_RUN.back : 0;
+  const body = poses.reduce((sum, [, ms]) => sum + ms, 0);
+  const frames = [...(move ? [['step', out]] : []), ...poses, ...(move ? [['step', back]] : [])];
+  let until = now;
+  allyPoses.set(key, frames.map(([pose, ms]) => ({ pose, until: (until += ms / rate) })));
+  const timers = [setTimeout(onHit, (out + hitAt) / rate)];
+  if (move) {
+    ally.classList.add('running');
+    ally.style.transition = `translate ${out / rate}ms cubic-bezier(.2, .8, .3, 1)`;
+    ally.style.translate = `${move.x}px ${move.y}px`;
+    timers.push(setTimeout(() => {
+      ally.style.transition = `translate ${back / rate}ms ease-in-out`;
+      ally.style.translate = '0px 0px';
+    }, (out + body) / rate));
+    timers.push(setTimeout(() => ally.classList.remove('running'), (out + body + back) / rate));
+  } else if (ally) {
+    ally.style.translate = '';
+    ally.classList.remove('running');
+  }
+  allyRuns.set(key, { timers, until, skill });
+}
+
+function onAlly(event) {
+  allyRun(event.slot, [['windup', 80], ['strike', 150], ['follow', 110]], { hitAt: 80, onHit: () => allyHit(event) });
+}
+
+function allyHit(event) {
+  if (!reducedMotion.matches && state) {
     const effect = document.createElement('span');
     effect.className = `impact ally-hit fx-${contest(state).fx}`;
     effect.setAttribute('aria-hidden', 'true');
@@ -229,7 +280,11 @@ function onMate(event) {
   const mate = COMPANIONS[event.id];
   const now = performance.now();
   const rate = state?.speed || 1;
-  allyPoses.set(String(event.slot), [{ pose: 'skill-a', until: now + 180 / rate }, { pose: 'skill-b', until: now + 680 / rate }]);
+  const inPlace = ['buff', 'heal'].includes(mate.skill.kind);
+  const hit = () => {
+    if (event.amount) floatText('rival', `${event.crit ? '크리티컬 ' : ''}${event.hits > 1 ? `${event.hits}연타 ` : ''}${fmt(event.amount)}`, 'skill');
+  };
+  allyRun(event.slot, [['skill-a', 180], ['skill-b', 500]], { dash: !inPlace, hitAt: 180, onHit: hit, skill: true });
   const arena = $('arena');
   arena.querySelectorAll('.mate-cutin').forEach((old, index, all) => { if (all.length - index > 1) old.remove(); });
   const cut = document.createElement('div');
@@ -244,7 +299,6 @@ function onMate(event) {
   cut.append(mateFace(event.id), text);
   arena.append(cut);
   setTimeout(() => cut.remove(), 1150);
-  if (event.amount) floatText('rival', `${event.crit ? '크리티컬 ' : ''}${event.hits > 1 ? `${event.hits}연타 ` : ''}${fmt(event.amount)}`, 'skill');
   if (event.heal) floatText('player', `+${fmt(event.heal)}`, 'heal');
 }
 
@@ -386,12 +440,15 @@ function renderParty() {
     const id = state.party[slot];
     const open = slot < slots;
     box.className = `party-slot${open ? '' : ' locked'}${id ? ' filled' : ''}`;
-    if (!open) {
-      box.textContent = PARTY_UNLOCK_TEXT[slot];
-      return box;
-    }
-    if (!id) {
-      box.textContent = '빈 자리';
+    box.dataset.slot = slot;
+    const tag = document.createElement('small');
+    tag.className = 'slot-tag';
+    tag.textContent = `${slot + 1}번 · ${slot < 2 ? '전열' : '후열'}`;
+    box.append(tag);
+    if (!open || !id) {
+      const note = document.createElement('span');
+      note.textContent = open ? '빈 자리' : PARTY_UNLOCK_TEXT[slot];
+      box.append(note);
       return box;
     }
     const card = mateCard(id);

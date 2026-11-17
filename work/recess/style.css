@@ -1047,3 +1047,11 @@ p, small, .item-body p, .muted { font-weight: 400; }
 /* 간식 버튼은 주인공 머리 위쪽에서 오른쪽으로(뒷줄 동료는 그 왼쪽, 상대 머리는 그 오른쪽) */
 .snacks { left: calc(50% - 6px - var(--unit) * .35); top: 2px; translate: none; gap: 3px; }
 .snacks .snack { width: 30px; }
+/* 출전 번호 = 자리. 공격할 때 대기점에서 상대 앞으로 달려갔다 돌아온다(translate는 JS) */
+.ally.running .sprite { animation: none; }
+.party-slot { position: relative; }
+.party-slot .slot-tag { position: absolute; left: 6px; top: 4px; z-index: 3; padding: 0 6px; border-radius: 6px; background: rgba(60, 40, 100, .1); color: #6d5f86; font-size: 9px; font-weight: 800; line-height: 15px; }
+.party-slot.filled .slot-tag { background: var(--gold); color: #5a3b00; }
+.party-slot.filled .mate-style { top: 22px; }
+/* 달려간 동료가 상대 그림 뒤로 숨지 않게 동료 줄을 앞에 그린다(대기 자리는 주인공과 몸이 겹치지 않음) */
+.allies { z-index: 2; }
