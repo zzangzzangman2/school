@@ -858,3 +858,43 @@ p, small, .item-body p, .muted { font-weight: 400; }
   .actives { gap: 3px; }
   .mate-grid, .shop-grid { gap: 6px; }
 }
+
+/* ════ 놀이 대결 연출: 주먹 스파크 대신 먼지 구름·의성어·종목 도구 ════ */
+.impact.fx-dust::before, .impact.fx-cloud::before {
+  width: 70px; height: 52px; clip-path: none; border-radius: 50%;
+  background: radial-gradient(circle at 28% 62%, #fffdf6 0 20%, transparent 21%), radial-gradient(circle at 52% 40%, #f4efe3 0 24%, transparent 25%), radial-gradient(circle at 74% 64%, #fffdf6 0 19%, transparent 20%), radial-gradient(circle at 50% 70%, #e9e1d0 0 22%, transparent 23%);
+  filter: drop-shadow(0 2px 0 rgba(60, 40, 20, .25));
+  animation: dust-puff .45s ease-out both;
+}
+.impact.fx-cloud::before { width: 96px; height: 64px; }
+.impact.fx-dust.strong::before, .impact.fx-cloud.strong::before { width: 120px; height: 82px; }
+.impact.fx-dust.strong::after, .impact.fx-cloud.strong::after { border-style: dashed; border-color: rgba(255, 255, 255, .8); }
+@keyframes dust-puff { 0% { opacity: .95; scale: .35; } 45% { opacity: .9; scale: 1.05; } 100% { opacity: 0; scale: 1.25; translate: -50% -60%; } }
+.onomatopoeia { position: absolute; left: 50%; top: 4%; translate: -50% 0; rotate: -8deg; color: #fff; font-size: 21px; font-weight: 700; white-space: nowrap; text-shadow: 0 2px 0 #c2412a, 1.5px 0 0 #c2412a, -1.5px 0 0 #c2412a, 0 -1.5px 0 #c2412a, 1px 1px 0 #c2412a, -1px -1px 0 #c2412a; animation: sound-pop .6s ease-out both; }
+.fx-spark .onomatopoeia { text-shadow: var(--ol-purple); }
+.strong .onomatopoeia { font-size: 27px; }
+@keyframes sound-pop { 0% { opacity: 0; scale: .5; } 25% { opacity: 1; scale: 1.15; } 70% { opacity: 1; scale: 1; } 100% { opacity: 0; translate: -50% -10px; } }
+
+/* 종목 도구가 날아간다 */
+.prop { position: absolute; z-index: 5; bottom: 46%; width: 24px; height: 24px; pointer-events: none; }
+.prop.to-right { animation: prop-right .38s cubic-bezier(.3, .2, .6, 1) both; }
+.prop.to-left { animation: prop-left .38s cubic-bezier(.3, .2, .6, 1) both; }
+@keyframes prop-right { 0% { left: 34%; translate: 0 0; rotate: 0deg; } 50% { translate: 0 -34px; } 100% { left: 66%; translate: 0 6px; rotate: 300deg; } }
+@keyframes prop-left { 0% { left: 62%; translate: 0 0; rotate: 0deg; } 50% { translate: 0 -34px; } 100% { left: 30%; translate: 0 6px; rotate: -300deg; } }
+.prop-ddakji { border-radius: 3px; background: linear-gradient(45deg, transparent 46%, rgba(255, 255, 255, .7) 47% 53%, transparent 54%), linear-gradient(-45deg, transparent 46%, rgba(255, 255, 255, .7) 47% 53%, transparent 54%), linear-gradient(135deg, #ff6a4a 50%, #3a86e8 50%); box-shadow: 0 0 0 2px #fff, 0 2px 3px rgba(0, 0, 0, .3); }
+.prop-eraser { width: 24px; height: 14px; border-radius: 4px; background: linear-gradient(90deg, #fff 0 45%, #3a86e8 45% 100%); box-shadow: 0 0 0 1.5px #2a5fae, 0 2px 3px rgba(0, 0, 0, .3); }
+.prop-dodgeball { border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffb3a0 0 18%, transparent 19%), radial-gradient(circle, #f0566a 0 60%, #c9364f 61%); box-shadow: 0 2px 3px rgba(0, 0, 0, .3); }
+.prop-basketball { border-radius: 50%; background: linear-gradient(90deg, transparent 47%, #5a2a00 47% 53%, transparent 53%), linear-gradient(0deg, transparent 47%, #5a2a00 47% 53%, transparent 53%), radial-gradient(circle, #ff9a3d 0 62%, #d0651a 63%); box-shadow: 0 2px 3px rgba(0, 0, 0, .3); }
+
+/* 지금 종목 칩 */
+.contest-chip { flex: 0 0 auto; padding-right: 8px; border-color: #ffd27a; background: rgba(90, 50, 10, .78); }
+.contest-chip b { color: #fff3c2; }
+.contest-mark { display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: linear-gradient(135deg, #ff6a4a 50%, #3a86e8 50%); box-shadow: 0 0 0 1.5px #fff; }
+.contest-chip[data-contest='eraser'] .contest-mark { height: 8px; border-radius: 2px; background: linear-gradient(90deg, #fff 50%, #3a86e8 50%); }
+.contest-chip[data-contest='dodge'] .contest-mark, .contest-chip[data-contest='dodgeLeague'] .contest-mark { border-radius: 50%; background: #f0566a; }
+.contest-chip[data-contest='basket'] .contest-mark, .contest-chip[data-contest='basketLeague'] .contest-mark { border-radius: 50%; background: #ff9a3d; }
+.contest-chip[data-contest='scuffle'] .contest-mark, .contest-chip[data-contest='ssireum'] .contest-mark, .contest-chip[data-contest='judo'] .contest-mark { border-radius: 50%; background: #f4efe3; }
+.contest-chip[data-contest='arm'] .contest-mark { border-radius: 6px 6px 2px 2px; background: #ffcf9a; }
+.contest-chip[data-contest='taekwondo'] .contest-mark, .contest-chip[data-contest='sparring'] .contest-mark { border-radius: 4px; background: linear-gradient(#3a86e8 50%, #f0566a 50%); }
+.status-line .kill-bar { min-width: 0; }
+@media (max-width: 360px) { .contest-chip b { font-size: 9px; } }

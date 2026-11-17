@@ -10,7 +10,7 @@ const allyPoses = new Map();
 const ACTIVE_ICONS = { pencil: '#st-goldpen', cheer: '#i-megaphone', lunch: '#i-tray', sprint: '#i-run' };
 const ACTIVE_TONES = { pencil: 'yellow', cheer: 'pink', lunch: 'green', sprint: 'blue' };
 const QUEST_TEXT = {
-  best: n => `${Math.floor((n - 1) / MAPS.length) + 1}년차 ${mapCode((n - 1) % MAPS.length)} 클리어`,
+  best: n => `${placeLabel(n - 1)} 클리어`,
   power: n => `힘 훈련 Lv.${n}`,
   health: n => `체력 훈련 Lv.${n}`,
   level: n => `레벨 ${n} 달성`,
@@ -220,7 +220,7 @@ function renderTierPanel() {
   copy.className = 'tier-copy';
   const now = document.createElement('small');
   const mult = TIER_MULT ** state.tier;
-  now.textContent = `지금 ${tierName(state.tier)} · 공격력·체력 ×${mult >= 1000 ? fmt(mult) : mult.toFixed(2)}`;
+  now.textContent = `지금 ${tierName(state.tier)} · 파워·체력 ×${mult >= 1000 ? fmt(mult) : mult.toFixed(2)}`;
   const title = document.createElement('b');
   title.textContent = `다음: ${tierName(next)}`;
   const needs = document.createElement('ul');
@@ -290,7 +290,7 @@ function mateCard(id) {
 function renderParty() {
   const slots = partySlots(state);
   setText('party-owned', `${Object.keys(state.companions).length} / ${Object.keys(COMPANIONS).length}명`);
-  setText('party-summary', `보유 효과 공격력 +${Math.round(companionOwned(state) * 100)}% · 출전한 동료는 ${ALLY_INTERVAL}초마다 공격해요.`);
+  setText('party-summary', `보유 효과 파워 +${Math.round(companionOwned(state) * 100)}% · 출전한 동료는 ${ALLY_INTERVAL}초마다 함께 대결해요.`);
   $('party-slots').replaceChildren(...[0, 1, 2].map(slot => {
     const box = document.createElement('div');
     const id = state.party[slot];
@@ -306,7 +306,7 @@ function renderParty() {
     }
     const card = mateCard(id);
     const power = document.createElement('em');
-    power.textContent = `Lv.${companionLevel(state, id)} · 공격력의 ${Math.round(allyPower(state, id) * 100)}%`;
+    power.textContent = `Lv.${companionLevel(state, id)} · 내 파워의 ${Math.round(allyPower(state, id) * 100)}%`;
     const out = document.createElement('button');
     out.type = 'button';
     out.textContent = '빼기';
@@ -329,7 +329,7 @@ function renderParty() {
     fill.style.width = `${level ? clamp((copies - prev) / (nextNeed - prev), 0, 1) * 100 : 0}%`;
     meter.append(fill);
     const info = document.createElement('em');
-    info.textContent = level ? `Lv.${level} · 보유 공격력 +${(ALLY_OWNED[mate.rarity] * level * 100).toFixed(1)}%` : '미보유';
+    info.textContent = level ? `Lv.${level} · 보유 파워 +${(ALLY_OWNED[mate.rarity] * level * 100).toFixed(1)}%` : '미보유';
     const button = document.createElement('button');
     button.type = 'button';
     const inParty = state.party.includes(id);

@@ -63,10 +63,10 @@ function queuePopup(open) {
 
 const DAON_TEXT = {
   ready: ['반장 다온', '방어 뒤 강한 반격을 준비해요.'],
-  guard: ['방어 자세', '보통 공격 피해 감소 · 종소리로 방어 파괴'],
+  guard: ['방어 자세', '보통 동작 효과가 줄어요 · 종소리로 방어 풀기'],
   counter: ['반격 예고', '종소리로 반격을 끊을 수 있어요.'],
   open: ['반격 뒤 빈틈', '쏜살 돌진이 더 강해져요.'],
-  broken: ['방어 파괴', '반격 취소 · 받는 피해 증가'],
+  broken: ['방어 풀기', '반격 취소 · 빈틈이 커져요'],
 };
 
 function message(text) {
@@ -132,14 +132,19 @@ function setPoses(side, frames) {
 function flashHit(target, detail) {
   const effect = document.createElement('span');
   const emphasis = detail.move !== 'attack' || detail.breaks;
-  effect.className = `impact${detail.blocked ? ' blocked' : ''}${emphasis || detail.lucky ? ' strong' : ''}${detail.breaks ? ' break' : ''}${detail.lucky ? ' lucky' : ''}`;
+  const game = contest(state);
+  effect.className = `impact fx-${game.fx}${detail.blocked ? ' blocked' : ''}${emphasis || detail.lucky ? ' strong' : ''}${detail.breaks ? ' break' : ''}${detail.lucky ? ' lucky' : ''}`;
   effect.setAttribute('aria-hidden', 'true');
   const number = document.createElement('span');
   number.className = 'damage';
-  number.textContent = detail.breaks ? `방어 파괴 · ${fmt(detail.amount)}` : detail.blocked ? `방어 · ${fmt(detail.amount)}` : detail.lucky ? `치명타! ${fmt(detail.amount)}` : `−${fmt(detail.amount)}`;
-  effect.append(number);
+  number.textContent = detail.breaks ? `방어 풀기 · ${fmt(detail.amount)}` : detail.blocked ? `방어 · ${fmt(detail.amount)}` : detail.lucky ? `크리티컬! ${fmt(detail.amount)}` : `−${fmt(detail.amount)}`;
+  const sound = document.createElement('span');
+  sound.className = 'onomatopoeia';
+  sound.textContent = game.sound;
+  effect.append(number, sound);
   $(target).append(effect);
-  setTimeout(() => effect.remove(), 590);
+  setTimeout(() => effect.remove(), 640);
+  if (game.prop) throwProp(game.prop, target);
 }
 
 function combatEvent(type, event) {
@@ -167,6 +172,7 @@ function combatEvent(type, event) {
   if (type === 'finish' && event.result === 'win' && (event.boss || event.reward)) playSound('win');
   if (type === 'finish' && event.result === 'win') flyCoins(event.boss ? 6 : 2);
   if (type === 'kill') flyCoins(1);
+  if (type === 'enter') renderedContest = '';
   if (type === 'ally') onAlly(event);
   if (type === 'active') onActive(event);
   if (type === 'splash' && !reducedMotion.matches) {
@@ -358,18 +364,42 @@ function renderDungeonTimer() {
   setText('dungeon-timer-title', state.dungeon ? `${dungeonInfo(state.dungeon.id).name} Lv.${state.dungeon.level}` : `보스 도전 · ${currentEnemy(state)}`);
   const left2 = Math.ceil(left);
   setText('dungeon-timer-text', state.dungeon
-    ? (state.dungeon.id === 'trial' ? `승급 시험 남은 ${left2}초` : `던전 남은 ${left2}초${state.front?.leader ? ' · 보스!' : ` · 졸개 ${aliveBehind(state) + 1}`}`)
+    ? (state.dungeon.id === 'trial' ? `승급 시험 남은 ${left2}초` : `던전 남은 ${left2}초${state.front?.leader ? ' · 보스!' : ` · 참가자 ${aliveBehind(state) + 1}`}`)
     : `보스 도전 · 남은 ${left2}초`);
   $('dungeon-timer-fill').style.width = `${left / total * 100}%`;
   $('dungeon-timer').classList.toggle('hurry', left < 8);
   $('dungeon-timer').classList.toggle('boss-timer', boss);
 }
 
+let renderedContest = '';
+
+function renderContest() {
+  const id = contestId(state);
+  if (id === renderedContest) return;
+  renderedContest = id;
+  setText('contest-name', CONTESTS[id].name);
+  $('contest-chip').dataset.contest = id;
+  // 종목별 동작 그림 연결 자리: motion.css에서 .arena[data-motion='toss'] [data-sprite='boy'][data-pose='strike'] 처럼 덮어쓴다
+  $('arena').dataset.contest = id;
+  $('arena').dataset.motion = CONTESTS[id].motion;
+}
+
+// 종목 도구(딱지·지우개·피구공·농구공)가 공격하는 쪽에서 상대 쪽으로 날아간다
+function throwProp(prop, target) {
+  const fight = document.querySelector('.fight');
+  if (!fight) return;
+  const item = document.createElement('span');
+  item.className = `prop prop-${prop} ${target === 'rival' ? 'to-right' : 'to-left'}`;
+  item.setAttribute('aria-hidden', 'true');
+  fight.append(item);
+  setTimeout(() => item.remove(), 420);
+}
+
 function renderKills() {
   const { done, total } = killProgress(state);
   const boss = !state.dungeon && state.wave === BOSS_WAVE;
   $('kill-fill').style.width = `${done / total * 100}%`;
-  setText('kill-text', state.dungeon ? `졸개 ${aliveBehind(state) + (state.front?.leader ? 0 : 1)}명` : boss ? '보스 도전!' : `처치 ${done}/${total}`);
+  setText('kill-text', state.dungeon ? `참가자 ${aliveBehind(state) + (state.front?.leader ? 0 : 1)}명` : boss ? '보스 도전!' : `승리 ${done}/${total}`);
   $('kill-bar').classList.toggle('boss', boss);
   $('kill-bar').hidden = Boolean(state.dungeon) || (boss && !state.roundEnd) || Boolean(state.farm || state.roundEnd?.nextFarm);
   const pan = state.dungeon ? 50 : [8, 36, 64, 92][state.wave] ?? 50;
@@ -380,13 +410,13 @@ function renderBattle() {
   const map = MAPS[state.map];
   const gradeNumber = gradeIndex(state.map) + 1;
   const dungeon = state.dungeon ? dungeonInfo(state.dungeon.id) : null;
-  setText('stage-number', dungeon ? (state.dungeon.id === 'trial' ? `승급 시험 · ${tierName(state.dungeon.level)}` : `던전 · Lv.${state.dungeon.level}`) : `${state.cycle + 1}년차 ${gradeNumber}학년 · ${mapCode(state.map)}`);
+  setText('stage-number', dungeon ? (state.dungeon.id === 'trial' ? `승급 시험 · ${tierName(state.dungeon.level)}` : `던전 · Lv.${state.dungeon.level}`) : `${schoolName(state.cycle)} ${gradeLabel(state.cycle, state.map)} · ${mapCode(state.map)}`);
   setText('battle-title', dungeon ? dungeon.name : map.place);
   $('arena').dataset.map = dungeon ? (dungeon.background || dungeon.map + 1) : state.map + 1;
   $('arena').classList.toggle('dungeon-round', Boolean(dungeon));
   const status = $('battle-status');
   const resting = state.roundEnd?.result === 'loss';
-  setText('battle-status', resting ? '잠깐 쉬는 중' : state.roundEnd ? '승리' : dungeon ? '던전 도전 중' : state.farm ? '반복 수련 중' : '자동 전투 중');
+  setText('battle-status', resting ? '잠깐 쉬는 중' : state.roundEnd ? '승리' : dungeon ? '던전 도전 중' : state.farm ? '반복 수련 중' : '자동 대결 중');
   status.classList.toggle('rest', resting);
   const boss = !dungeon && state.wave === BOSS_WAVE;
   const round = `${state.map}:${state.wave}:${state.farm ? 1 : 0}:${state.dungeon?.id || ''}${state.dungeon?.level || ''}`;
@@ -419,14 +449,15 @@ function renderBattle() {
   }
   const behind = aliveBehind(state);
   const finalBoss = boss && isGradeFinal(state.map);
-  setText('round-label', dungeon ? (behind ? `졸개 ${behind + 1}명 남음` : '던전 보스전') : finalBoss ? '학년 대표전' : boss ? '보스 대결' : `대결 ${state.wave + 1}/${BOSS_WAVE + 1} · ${behind + 1}명`);
+  setText('round-label', dungeon ? (behind ? `참가자 ${behind + 1}명 남음` : '던전 보스전') : finalBoss ? '학년 대표전' : boss ? '보스 대결' : `대결 ${state.wave + 1}/${BOSS_WAVE + 1} · ${behind + 1}명`);
   renderPack();
   renderDungeonTimer();
   renderKills();
+  renderContest();
   $('player-name').textContent = state.profile.name;
   $('player-sprite').dataset.sprite = state.profile.gender;
   $('player-tag').textContent = `LV. ${state.level}`;
-  setText('rival-tag', dungeon ? (state.front?.leader ? '던전 보스' : '졸개') : state.farm ? '수련' : boss ? '보스' : state.front?.leader ? '대장' : `${gradeNumber}학년`);
+  setText('rival-tag', dungeon ? (state.front?.leader ? '던전 보스' : '참가자') : state.farm ? '수련' : boss ? '보스' : state.front?.leader ? '대장' : `${gradeNumber}학년`);
   $('rival-name').textContent = currentEnemy(state);
   const totalHp = maxHp(state);
   const totalEnemy = enemyMaxHp(state);
@@ -465,9 +496,9 @@ function renderRoster() {
     figure.append(sprite);
     const tag = document.createElement('small');
     tag.className = 'rival-tag';
-    tag.textContent = status === 'current' ? '대결 중' : status === 'past' ? '승리' : wave === BOSS_WAVE ? '보스 1:1' : `무리 ${PACK.length}명`;
+    tag.textContent = status === 'current' ? '대결 중' : status === 'past' ? '승리' : wave === BOSS_WAVE ? '보스 1:1' : `팀 ${PACK.length}명`;
     const label = document.createElement('b');
-    label.textContent = wave === BOSS_WAVE ? name : `${name} 무리`;
+    label.textContent = wave === BOSS_WAVE ? name : `${name} 팀`;
     const hp = document.createElement('span');
     hp.className = 'rival-hp';
     hp.textContent = `체력 ${fmt(map.hp[wave] * GRADE_SCALING[gradeIndex(state.map)].hp * cycleScale(state, 'hp'))}`;
@@ -495,7 +526,7 @@ function renderRoundResult() {
   if (!show) return;
   result.dataset.result = end.result;
   const timeout = state.dungeonResult?.reason === 'timeout';
-  setText('round-result', end.leaveDungeon ? (end.result === 'win' ? '던전 클리어!' : timeout ? '시간 초과!' : '던전 실패') : end.result === 'loss' ? '다시 도전!' : state.wave === BOSS_WAVE ? '보스 격파!' : '무리 격파!');
+  setText('round-result', end.leaveDungeon ? (end.result === 'win' ? '던전 클리어!' : timeout ? '시간 초과!' : '던전 실패') : end.result === 'loss' ? '다시 도전!' : state.wave === BOSS_WAVE ? '보스전 승리!' : '팀 승리!');
 }
 
 function renderPattern() {
@@ -521,7 +552,7 @@ function renderSkill() {
   $('skill').setAttribute('aria-disabled', String(!ready));
   setIcon($('skill-icon'), ICONS.skills[state.skillId] || move.glyph);
   $('skill-name').textContent = move.name;
-  let detail = state.autoSkill ? '스킬 자동 사용 중' : '공격으로 충전';
+  let detail = state.autoSkill ? '스킬 자동 사용 중' : '대결하며 충전';
   if (ready) {
     detail = '탭해서 발동';
     if (state.autoSkill && isDaon(state)) {
@@ -726,7 +757,7 @@ function gearRow(id) {
   const { slot, starter } = GEAR[id];
   const { attack, hp } = gearStats(state, id);
   const rank = state.ranks[id] || 0;
-  const detail = [SLOTS[slot], attack && `공격력 +${attack}`, hp && `체력 +${hp}`, rank && `착용 시 공격·체력 +${Math.round(rank * RANK_BONUS * 100)}%`].filter(Boolean).join(' · ');
+  const detail = [SLOTS[slot], attack && `파워 +${attack}`, hp && `체력 +${hp}`, rank && `착용 시 파워·체력 +${Math.round(rank * RANK_BONUS * 100)}%`].filter(Boolean).join(' · ');
   const equipped = state.equipped[slot] === id;
   const article = row(ICONS.slots[slot] || SLOT_ICONS[slot], itemLabel(id), detail, equipped ? '착용 중' : '장착', () => equip(id), {
     selected: equipped, disabled: equipped, kind: equipped ? 'worn' : 'equip', tone: SLOT_TONES[slot], tile: gearTile(id),
@@ -887,10 +918,10 @@ function renderPrestige() {
   const reached = progress(state);
   const p = state.prestige;
   setText('badge-count', fmt(p.badges));
-  setText('prestige-stats', `전학 ${fmt(p.count)}번 · 최고 기록 ${Math.floor(Math.max(p.best, reached) / MAPS.length) + 1}년차 · 받은 배지 ${fmt(p.earned)}개`);
+  setText('prestige-stats', `전학 ${fmt(p.count)}번 · 최고 기록 ${placeLabel(Math.max(1, Math.max(p.best, reached)) - 1)} · 받은 배지 ${fmt(p.earned)}개`);
   const button = $('prestige-button');
   button.disabled = gain <= 0;
-  setText('prestige-gain', gain > 0 ? `지금 전학 가면 명예 배지 +${fmt(gain)}` : `1년차 2-3까지 깨면 전학할 수 있어요 (지금 ${reached}/${PRESTIGE_UNLOCK})`);
+  setText('prestige-gain', gain > 0 ? `지금 전학 가면 명예 배지 +${fmt(gain)}` : `해솔초 2-3까지 깨면 전학할 수 있어요 (지금 ${reached}/${PRESTIGE_UNLOCK})`);
   $('perk-list').replaceChildren(...Object.keys(PERKS).map(id => {
     const perk = PERKS[id];
     const level = p.perks[id];
@@ -929,14 +960,14 @@ function doTransfer() {
   renderedRound = '';
   previousObjective = '';
   openView('training:academy');
-  showDialog('새 학교 첫날!', [`${state.prestige.count}번째 전학이에요. 1년차 1-1 신발장 입구부터 다시 시작해요.`, `명예 배지 +${fmt(gain)}`, '아래 방과 후 학원에서 배지로 영구 능력치를 올리세요.'], '#i-star');
+  showDialog('새 학교 첫날!', [`${state.prestige.count}번째 전학이에요. 해솔초 1-1 신발장 입구부터 다시 시작해요.`, `명예 배지 +${fmt(gain)}`, '아래 방과 후 학원에서 배지로 영구 능력치를 올리세요.'], '#i-star');
   $('dialog-content').classList.add('reward-lines');
   commit();
 }
 
 function renderGrades() {
   renderPrestige();
-  setText('grades-title', `${state.cycle + 1}년차 학교 지도`);
+  setText('grades-title', `${schoolName(state.cycle)} 학교 지도`);
   $('grade-count').textContent = `${state.cleared.filter(Boolean).length} / ${MAPS.length} 완료`;
   const groups = Array.from({ length: GRADE_COUNT }, (_, grade) => {
     const firstMap = grade * MAPS_PER_GRADE;
@@ -961,7 +992,7 @@ function renderGrades() {
       const selected = index === state.map;
       const locked = !unlocked(state, index);
       const buttonLabel = selected ? '현재 위치' : locked ? '잠김' : state.cleared[index] ? '재도전' : '도전';
-      const description = `${state.cleared[index] ? '보스 격파' : map.names[BOSS_WAVE]} · ${GEAR[MAP_REWARDS[index]].name}`;
+      const description = `${state.cleared[index] ? '보스 승리' : map.names[BOSS_WAVE]} · ${GEAR[MAP_REWARDS[index]].name}`;
       list.append(row(mapCode(index), map.place, description, buttonLabel, () => {
         if (index === state.map || !unlocked(state, index)) return;
         startMap(index);
@@ -1230,7 +1261,7 @@ function renderObjective() {
   $('objective-label').textContent = next < 0 ? '18개 맵 완료' : '다음 목표';
   $('objective-title').textContent = next < 0 ? '쉬는 시간의 왕 등극!' : `${mapCode(next)} · ${MAPS[next].names[BOSS_WAVE]}`;
   $('objective-reward').textContent = next < 0 ? '지도에서 어떤 맵이든 다시 대결할 수 있어요.'
-    : next === MAPS.length - 1 ? `첫 승리 시 ${state.cycle + 2}년차 시작` : isGradeFinal(next) ? `첫 승리 장비 · ${GEAR[BOSS_REWARDS[gradeIndex(next)]].name}` : `첫 승리 시 ${MAPS[next + 1].place} 해금`;
+    : next === MAPS.length - 1 ? `첫 승리 시 ${schoolName(state.cycle + 1)} 진학` : isGradeFinal(next) ? `첫 승리 장비 · ${GEAR[BOSS_REWARDS[gradeIndex(next)]].name}` : `첫 승리 시 ${MAPS[next + 1].place} 해금`;
 }
 
 function setText(id, text) {
@@ -1470,7 +1501,7 @@ function start() {
   $('sound').addEventListener('click', () => {
     state.sound = !state.sound;
     if (state.sound) unlockAudio();
-    message(state.sound ? '전투 효과음 켜짐' : '전투 효과음 꺼짐');
+    message(state.sound ? '대결 효과음 켜짐' : '대결 효과음 꺼짐');
     commit();
   });
   $('advance').addEventListener('click', () => {
@@ -1484,7 +1515,7 @@ function start() {
     '보스를 이기면 다음 장소가 열려요. 자동 진격을 끄면 같은 장소에서 코인을 모아요.',
     '졌을 때는 같은 맵에서 반복 수련을 시작해요. 수련에서 3승을 하면 자동으로 다시 도전해요.',
     `게임을 닫아도 최대 ${offlineLimit(state) / 3600}시간 동안 대결과 보상이 쌓여요. 진행 상황은 이 브라우저에 저장돼요.`,
-    '6-3 보스를 깨면 다음 년차로 넘어가요. 막히면 지도 탭에서 전학을 가고, 명예 배지로 방과 후 학원을 다녀 영구 능력치를 올리세요.',
+    '6-3 보스를 이기면 해솔초 → 해솔중 → 해솔고 → 전국 리그로 진학해요. 학년마다 딱지치기·지우개 따먹기·피구 같은 놀이 대결 종목이 바뀌어요. 막히면 지도 탭에서 전학을 가고, 명예 배지로 방과 후 학원을 다녀 영구 능력치를 올리세요.',
   ], '?'));
   document.addEventListener('visibilitychange', () => {
     if (editingProfile || !state.profile) return;

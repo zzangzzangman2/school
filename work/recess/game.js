@@ -78,19 +78,19 @@ const MISSIONS = {
 };
 const BOSS_REWARDS = ['shoes', 'jersey', 'jumper', 'gloves', 'vest', 'badge'];
 const TRAINING = {
-  power: { name: '힘 훈련', glyph: '✧', bonus: '공격력 +4', base: 22, cap: 1e9, scale: 1.16, milestone: true },
+  power: { name: '힘 훈련', glyph: '✧', bonus: '파워 +4', base: 22, cap: 1e9, scale: 1.16, milestone: true },
   health: { name: '체력 훈련', glyph: '♥', bonus: '최대 체력 +15', base: 18, cap: 1e9, scale: 1.13, milestone: true },
-  speed: { name: '순발력 훈련', glyph: 'ϟ', bonus: '공격 간격 −0.04초', base: 31, cap: 11, scale: 1.31 },
-  focus: { name: '집중력 훈련', glyph: '◎', bonus: '치명타 확률 +1%', base: 45, cap: 30, scale: 1.2 },
+  speed: { name: '순발력 훈련', glyph: 'ϟ', bonus: '동작 간격 −0.04초', base: 31, cap: 11, scale: 1.31 },
+  focus: { name: '집중력 훈련', glyph: '◎', bonus: '크리티컬 확률 +1%', base: 45, cap: 30, scale: 1.2 },
 };
 const CLASSES = {
-  gym: { name: '체육', glyph: '↗', bonus: '공격 간격 18% 단축' },
+  gym: { name: '체육', glyph: '↗', bonus: '동작 간격 18% 단축' },
   math: { name: '수학', glyph: '+', bonus: '대결 코인 보상 25% 증가' },
   music: { name: '음악', glyph: '♪', bonus: '필살기 충전량 50% 증가' },
 };
 const SKILLS = {
   rush: { name: '쏜살 돌진', glyph: '➤', cost: 54, multiplier: 2.2, windup: 0.15, detail: '빠르게 충전돼요. 다온이 반격 뒤 빈틈을 보일 때 사용해 큰 피해를 줘요.' },
-  bell: { name: '종소리 반격', glyph: '✷', cost: 72, multiplier: 2.7, windup: 0.2, detail: '다온의 방어를 깨고 반격을 끊어요. 자동 사용은 방어할 때까지 기다려요.' },
+  bell: { name: '종소리 반격', glyph: '✷', cost: 72, multiplier: 2.7, windup: 0.2, detail: '다온의 방어를 풀고 반격을 끊어요. 자동 사용은 방어할 때까지 기다려요.' },
 };
 // ── 방치형 기본 기능: 스티커 뽑기·도감, 매점 간식 버프, 출석, 일일 미션 ──
 const RARITIES = {
@@ -115,10 +115,10 @@ const STICKERS = {
   captain: { name: '반장 배지', rarity: 'epic', stat: 'coin', value: 0.1 },
   goldpen: { name: '황금 샤프', rarity: 'legend', stat: 'attack', value: 0.12 },
 };
-const STICKER_STATS = { attack: '공격력', hp: '체력', coin: '코인', xp: '경험치', crit: '치명타' };
+const STICKER_STATS = { attack: '파워', hp: '체력', coin: '코인', xp: '경험치', crit: '크리티컬' };
 const STICKER_LEVELS = Array.from({ length: 100 }, (_, index) => (index + 1) * (index + 2) / 2);
 const SNACKS = {
-  choco: { name: '초코우유', stat: 'attack', bonus: 0.5, label: '공격력 +50%' },
+  choco: { name: '초코우유', stat: 'attack', bonus: 0.5, label: '파워 +50%' },
   banana: { name: '바나나우유', stat: 'coin', bonus: 1, label: '코인 2배' },
   berry: { name: '딸기우유', stat: 'xp', bonus: 1, label: '경험치 2배' },
 };
@@ -150,7 +150,7 @@ const MOB_SPRITES = ['mob1', 'mob2', 'mob3', 'mob4', 'mob5', 'mob6', 'mob7', 'mo
 
 // ── 일일 던전: 하루 열쇠 2개, 30초 안에 졸개 셋과 던전 보스를 이기면 다음 단계 ──
 const DUNGEONS = {
-  coin: { name: '매점 쟁탈전', boss: '매점 줄서기 대장', minion: '새치기 친구', reward: 'coin', hp: 4, hit: 0.6, sprite: 'dboss-store', background: 'd-coin', minionSprites: ['mob1', 'mob2', 'mob3'], map: 5, unlock: 'clear' },
+  coin: { name: '매점 줄서기 대회', boss: '매점 줄서기 대장', minion: '줄서기 참가자', reward: 'coin', hp: 4, hit: 0.6, sprite: 'dboss-store', background: 'd-coin', minionSprites: ['mob1', 'mob2', 'mob3'], map: 5, unlock: 'clear' },
   ticket: { name: '도서실 퀴즈왕', boss: '퀴즈 대장 책벌레', minion: '퀴즈 참가자', reward: 'ticket', hp: 2.4, hit: 1.5, sprite: 'dboss-quiz', background: 'd-ticket', minionSprites: ['mob4', 'mob5', 'mob8'], map: 9, unlock: 'clear' },
   badge: { name: '전국 체력장', boss: '체력장 1등 선배', minion: '체력장 선배', reward: 'badge', hp: 3, hit: 1.3, sprite: 'dboss-sports', background: 'd-badge', minionSprites: ['mob3', 'mob6', 'mob7'], map: 17, unlock: 'transfer' },
 };
@@ -161,7 +161,37 @@ const DUNGEON_PACK = [
 const DUNGEON_KEYS = 2;
 const DUNGEON_TIME = 30;
 
-// ── 승급: 시험(1:1, 30초)을 통과하면 공격력·체력 ×1.5, 스킬 칸·동료 칸이 열린다. 전학해도 유지 ──
+// ── 학교 단계와 놀이 대결 종목(구글 플레이 정책: 학교 폭력이 아닌 '쉬는 시간 놀이 대결') ──
+// motion: 동작 그림 묶음. toss=던지기·치기(딱지·공), push=밀기·버티기(씨름·팔씨름·유도), spar=보호구 낀 정식 스포츠 겨루기
+// 초·중학교는 놀이·스포츠 종목, 고등학교부터 보호구를 갖춘 정식 스파링. 회차(cycle)마다 학교가 바뀐다.
+const SCHOOLS = [
+  { name: '해솔초', grades: 6 },
+  { name: '해솔중', grades: 3 },
+  { name: '해솔고', grades: 3 },
+];
+const CONTESTS = {
+  ddakji: { name: '딱지치기', prop: 'ddakji', sound: '딱!', fx: 'dust', motion: 'toss' },
+  eraser: { name: '지우개 따먹기', prop: 'eraser', sound: '톡!', fx: 'dust', motion: 'toss' },
+  dodge: { name: '피구', prop: 'dodgeball', sound: '통!', fx: 'dust', motion: 'toss' },
+  scuffle: { name: '코믹 밀치기', prop: null, sound: '뿅!', fx: 'cloud', motion: 'push' },
+  arm: { name: '팔씨름', prop: null, sound: '끄응!', fx: 'dust', motion: 'push' },
+  basket: { name: '1:1 농구', prop: 'basketball', sound: '슛!', fx: 'dust', motion: 'toss' },
+  ssireum: { name: '씨름', prop: null, sound: '영차!', fx: 'cloud', motion: 'push' },
+  dodgeLeague: { name: '피구 대항전', prop: 'dodgeball', sound: '통!', fx: 'dust', motion: 'toss' },
+  basketLeague: { name: '농구 리그', prop: 'basketball', sound: '슛!', fx: 'dust', motion: 'toss' },
+  taekwondo: { name: '태권도 겨루기', prop: null, sound: '얍!', fx: 'spark', motion: 'spar' },
+  judo: { name: '유도 대련', prop: null, sound: '한판!', fx: 'cloud', motion: 'push' },
+  sparring: { name: '정식 스파링', prop: null, sound: '팡!', fx: 'spark', motion: 'spar' },
+};
+const CONTEST_PLAN = [
+  ['ddakji', 'eraser', 'dodge', 'scuffle', 'arm', 'basket'],
+  ['ssireum', 'arm', 'dodgeLeague', 'basketLeague', 'taekwondo', 'taekwondo'],
+  ['taekwondo', 'judo', 'sparring', 'sparring', 'basketLeague', 'sparring'],
+];
+const LEAGUE_PLAN = ['dodgeLeague', 'basketLeague', 'ssireum', 'taekwondo', 'judo', 'sparring'];
+const DUNGEON_CONTESTS = { coin: 'ddakji', ticket: 'eraser', badge: 'basket', trial: 'arm' };
+
+// ── 승급: 시험(1:1, 30초)을 통과하면 파워·체력 ×1.5, 스킬 칸·동료 칸이 열린다. 전학해도 유지 ──
 const TIERS = ['새내기', '모범생', '선도부', '학급 반장', '학년 대표', '학생회 임원', '학생회장', '전교 회장', '명예 졸업생'];
 const TIER_MULT = 1.3;
 const EXAMINERS = [
@@ -170,7 +200,7 @@ const EXAMINERS = [
 ];
 const TRIAL = { name: '승급 시험', minion: '시험 감독', reward: 'tier', hp: 2.6, hit: 1.15, background: 'd-ticket', map: 9, solo: true };
 
-// ── 동료: 반 친구들이 내 편에서 함께 싸운다(모집권으로 모집, 겹치면 레벨 업, 보유 효과) ──
+// ── 동료: 반 친구들이 내 편에서 함께 대결한다(모집권으로 모집, 겹치면 레벨 업, 보유 효과) ──
 const COMPANIONS = {
   mob1: { name: '노란 모자 도윤', rarity: 'common' },
   mob2: { name: '분홍 원피스 서아', rarity: 'common' },
@@ -187,10 +217,10 @@ const ALLY_INTERVAL = 1.6;
 
 // ── 액티브 스킬: 승급할 때마다 한 칸씩 열리고, 쿨타임이 돌면 자동으로 쓴다 ──
 const ACTIVE = {
-  pencil: { name: '필통 던지기', tier: 1, cd: 8, desc: '앞 상대와 뒤 무리 모두에게 큰 피해' },
-  cheer: { name: '응원 함성', tier: 2, cd: 15, dur: 6, desc: '6초 동안 나와 동료 공격력 1.5배' },
+  pencil: { name: '딱지 연타', tier: 1, cd: 8, desc: '딱지를 연달아 쳐서 앞 상대와 뒤의 팀 모두를 몰아붙여요' },
+  cheer: { name: '응원 함성', tier: 2, cd: 15, dur: 6, desc: '6초 동안 나와 동료 파워 1.5배' },
   lunch: { name: '급식 충전', tier: 3, cd: 12, desc: '체력 35% 회복' },
-  sprint: { name: '체육 대장', tier: 4, cd: 18, dur: 6, desc: '6초 동안 공격 속도 1.5배' },
+  sprint: { name: '체육 대장', tier: 4, cd: 18, dur: 6, desc: '6초 동안 동작 속도 1.5배' },
 };
 
 // ── 보석(유료 재화 자리)·상점·우편·퀘스트·성장 패스 ──
@@ -493,6 +523,25 @@ function atProgress(reached, kind) {
   return baseValue(map, kind) * cycleScale({ cycle: Math.floor(reached / MAPS.length), map }, kind);
 }
 function dungeonProgress(level) { return 3 * level - 1; }
+function schoolName(cycle) { return cycle < SCHOOLS.length ? SCHOOLS[cycle].name : `전국 리그 ${cycle - SCHOOLS.length + 1}시즌`; }
+function gradeLabel(cycle, map) {
+  const block = gradeIndex(map);
+  if (cycle === 0) return `${block + 1}학년`;
+  if (cycle < SCHOOLS.length) return `${Math.floor(block / 2) + 1}학년 ${block % 2 + 1}학기`;
+  return `${block + 1}라운드`;
+}
+function placeLabel(reached) {
+  const cycle = Math.floor(reached / MAPS.length);
+  const map = reached % MAPS.length;
+  return `${schoolName(cycle)} ${mapCode(map)}`;
+}
+function contestId(state) {
+  if (state.dungeon) return DUNGEON_CONTESTS[state.dungeon.id] || 'ddakji';
+  const cycle = state.cycle || 0;
+  const block = gradeIndex(state.map);
+  return cycle < CONTEST_PLAN.length ? CONTEST_PLAN[cycle][block] : LEAGUE_PLAN[(block + cycle) % LEAGUE_PLAN.length];
+}
+function contest(state) { return CONTESTS[contestId(state)]; }
 function dungeonInfo(id) { return id === 'trial' ? TRIAL : DUNGEONS[id]; }
 function dungeonReach(state) { return state.dungeon.id === 'trial' ? tierReq(state.dungeon.level) : dungeonProgress(state.dungeon.level); }
 function dungeonUnlocked(state, id) {
@@ -550,7 +599,7 @@ function leaveDungeon(state, win, emit, reason = '') {
     text = '레벨을 더 올리고 다시 도전해요.';
     if (win) {
       state.tier = Math.max(state.tier, level);
-      text = `${tierName(state.tier)} 승급! 공격력·체력 ×${TIER_MULT}`;
+      text = `${tierName(state.tier)} 승급! 파워·체력 ×${TIER_MULT}`;
     }
   } else if (win) {
     state.stats.dungeons++;
@@ -673,14 +722,14 @@ function win(state, emit) {
   state.coins += coins;
   state.xp += Math.round(winXp(state) * share);
   emit?.('kill', { coins, name: currentEnemy(state) });
-  record(state, `${boss ? currentEnemy(state) : `${currentEnemy(state)} 무리`}에게 승리 · 코인 +${fmt(coins)}`);
+  record(state, `${boss ? currentEnemy(state) : `${currentEnemy(state)} 팀`}에게 승리 · 코인 +${fmt(coins)}`);
   if (firstBoss) {
     state.totalClears = (state.totalClears || 0) + 1;
     if (progress(state) + 1 > (state.prestige?.best || 0)) {
       const tickets = isGradeFinal(map) ? 5 : 2;
       state.tickets += tickets;
       if (isGradeFinal(map)) state.gems = (state.gems || 0) + 20;
-      record(state, `최고 기록 보스 격파 · 뽑기권 +${tickets}`);
+      record(state, `최고 기록 보스 승리 · 뽑기권 +${tickets}`);
     }
   }
 
@@ -720,7 +769,7 @@ function win(state, emit) {
     state.cycle = (state.cycle || 0) + 1;
     state.cleared = MAPS.map(() => false);
     state.hp = maxHp(state);
-    record(state, `${state.cycle}년차 졸업! ${state.cycle + 1}년차 1-1부터 더 강한 상대가 기다려요.`);
+    record(state, `${schoolName(state.cycle - 1)} 졸업! ${schoolName(state.cycle)}에서 새 대결이 시작돼요.`);
     finishRound(state, 'win', 0, 0, 1.6, emit, reward);
     return;
   }
@@ -761,7 +810,7 @@ function strike(state, move, emit) {
   state.enemyHp -= amount;
   if (breaks) {
     changeBossPhase(state, 'broken', emit);
-    record(state, '종소리 반격으로 다온의 방어를 깼어요!');
+    record(state, '종소리 반격으로 다온의 방어를 풀었어요!');
   }
   emit?.('impact', { side: 'player', move, amount, blocked, breaks, lucky });
   // 필살기는 뒤에 선 상대까지 맞힌다
@@ -1294,6 +1343,7 @@ function restore(snapshot) {
 
 if (typeof module !== 'undefined') {
   module.exports = {
+    SCHOOLS, CONTESTS, schoolName, gradeLabel, placeLabel, contestId, contest,
     newGame, simulate, restore, trainingCost, maxHp, attack, enemyMaxHp, openFight, activateSkill, gearStats, nextMission, MAPS, GEAR, SLOTS, MAP_REWARDS, BOSS_REWARDS, TRAINING, SKILLS, makeProfile,
     trainingCostAt, enemyHit, winCoins, winXp, interval, critChance, prestigeGain, transfer, perkCost, PERKS, pullStickers, pullCost, progress, xpTarget,
     GROWTH, MAX_RANK, BOSS_WAVE, MAPS_PER_GRADE, fmt, STICKERS, DROP_WINS,

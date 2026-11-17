@@ -36,21 +36,21 @@ with sync_playwright() as playwright:
     })()''')
     page.reload()
     page.clock.run_for(4000)
-    expect(page.locator('#stage-number')).to_contain_text('2년차')
+    expect(page.locator('#stage-number')).to_contain_text('해솔중')
     assert page.evaluate('state.cycle') == 1 and page.evaluate('state.cleared.every(done => !done) || state.cleared[0]')
 
-    # 던전: 열쇠로 매점 쟁탈전 Lv.1에 들어가 졸개+던전 보스를 이기면 단계·보상·열쇠가 바뀌는지
+    # 던전: 열쇠로 매점 줄서기 대회 Lv.1에 들어가 졸개+던전 보스를 이기면 단계·보상·열쇠가 바뀌는지
     coins = page.evaluate('state.coins')
     page.get_by_role('button', name='대결', exact=True).click()
-    page.get_by_role('button', name='매점 쟁탈전 Lv.1 도전').click()
-    expect(page.locator('#battle-title')).to_have_text('매점 쟁탈전')
+    page.get_by_role('button', name='매점 줄서기 대회 Lv.1 도전').click()
+    expect(page.locator('#battle-title')).to_have_text('매점 줄서기 대회')
     expect(page.locator('#dungeon-timer')).to_be_visible()
     page.clock.run_for(8000)
     assert page.evaluate('state.dungeons.coin') == 1 and page.evaluate('state.daily.keys.coin') == 1
     assert page.evaluate('state.coins') > coins
-    page.get_by_role('button', name='매점 쟁탈전 Lv.1 소탕').click()
+    page.get_by_role('button', name='매점 줄서기 대회 Lv.1 소탕').click()
     assert page.evaluate('state.daily.keys.coin') == 0
-    expect(page.get_by_role('button', name='매점 쟁탈전 Lv.2 도전')).to_be_disabled()
+    expect(page.get_by_role('button', name='매점 줄서기 대회 Lv.2 도전')).to_be_disabled()
 
     # 전학: 배지를 받고 1년차 Lv.1로 돌아가며, 방과 후 학원을 배울 수 있는지
     page.get_by_role('button', name='성장', exact=True).click()
@@ -61,7 +61,7 @@ with sync_playwright() as playwright:
     expect(page.get_by_role('heading', name='새 학교 첫날!')).to_be_visible()
     page.get_by_role('button', name='좋아요').click()
     expect(page.locator('#level')).to_have_text('1')
-    expect(page.locator('#stage-number')).to_contain_text('1년차')
+    expect(page.locator('#stage-number')).to_contain_text('해솔초')
     assert int(page.locator('#badge-count').inner_text().replace(',', '')) > 0
     page.locator('#perk-list button').first.click()
     expect(page.locator('#perk-list .item').first).to_contain_text('Lv.1')

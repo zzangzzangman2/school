@@ -70,7 +70,7 @@
       <div class="enrollment-heading"><p>해솔초등학교</p><h1 id="enrollment-title">쉬는 시간의 왕<span>!</span></h1></div>
     </div>
     <form class="enrollment-form" id="profile-form">
-      <div class="enrollment-intro"><h2>1학년 1반 입학</h2><p>쉬는 시간에 도전할 주인공을 골라 주세요.</p></div>
+      <div class="enrollment-intro"><h2>1학년 1반 입학</h2><p>딱지치기부터 피구까지! 쉬는 시간 놀이 대결에 나설 주인공을 골라 주세요.</p></div>
       <fieldset>
         <legend>주인공 선택</legend>
         <div class="character-options">
@@ -95,7 +95,7 @@
           <span class="lv-badge"><small>Lv</small><b id="level">1</b></span>
           <span class="hud-id">
             <span class="hud-nameline"><b class="hud-name" id="hero-label">새봄</b><em class="hud-tier" id="hud-tier">새내기</em></span>
-            <span class="hud-power" title="전투력"><svg aria-hidden="true"><use href="#i-bolt"/></svg><span class="sr-only">전투력</span><b id="power">87</b></span>
+            <span class="hud-power" title="실력"><svg aria-hidden="true"><use href="#i-bolt"/></svg><span class="sr-only">실력</span><b id="power">87</b></span>
           </span>
           <div class="experience" role="progressbar" aria-label="레벨 경험치" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="xp-fill"></i></div>
         </div>
@@ -108,7 +108,7 @@
 
       <div class="stage-row">
         <div class="stage-title">
-          <div class="stage-meta"><p class="eyebrow" id="stage-number">1학년 · 1-1</p><span id="battle-status" class="live">자동 전투 중</span></div>
+          <div class="stage-meta"><p class="eyebrow" id="stage-number">1학년 · 1-1</p><span id="battle-status" class="live">자동 대결 중</span></div>
           <h2 id="battle-title">신발장 입구</h2>
         </div>
         <div class="hud-buttons">
@@ -120,7 +120,8 @@
       </div>
 
       <div class="status-line">
-        <div class="kill-bar" id="kill-bar" aria-hidden="true"><i id="kill-fill"></i><span id="kill-text">처치 0/18</span><b>BOSS</b></div>
+        <div class="chip contest-chip" id="contest-chip"><span class="contest-mark" aria-hidden="true"></span><b id="contest-name">딱지치기</b></div>
+        <div class="kill-bar" id="kill-bar" aria-hidden="true"><i id="kill-fill"></i><span id="kill-text">승리 0/18</span><b>BOSS</b></div>
         <div class="chip timer-chip" id="dungeon-timer" hidden><i class="fill" id="dungeon-timer-fill"></i><svg aria-hidden="true"><use href="#i-bolt"/></svg><b id="dungeon-timer-text"></b><span class="sr-only" id="dungeon-timer-title"></span></div>
         <div class="chip farm-chip" id="farm" hidden><i class="fill" id="farm-fill"></i><svg aria-hidden="true"><use href="#i-refresh"/></svg><b id="farm-title"></b><small id="farm-progress"></small><button id="retry-map" type="button">재도전</button></div>
         <div class="chip phase-chip" id="pattern" hidden><i class="fill" id="pattern-fill"></i><svg aria-hidden="true"><use href="#i-shield"/></svg><b id="pattern-title"></b><span class="sr-only" id="pattern-hint"></span></div>
@@ -148,7 +149,7 @@
 
 
       <div class="battle-actions">
-        <button type="button" id="skill" class="skill"><span class="charge-fill" id="charge-fill"></span><span class="skill-icon" id="skill-icon" aria-hidden="true">➤</span><span class="skill-copy"><b id="skill-name">쏜살 돌진</b><small id="skill-detail">공격으로 충전</small></span><strong id="charge-text">0%</strong></button>
+        <button type="button" id="skill" class="skill"><span class="charge-fill" id="charge-fill"></span><span class="skill-icon" id="skill-icon" aria-hidden="true">➤</span><span class="skill-copy"><b id="skill-name">쏜살 돌진</b><small id="skill-detail">대결하며 충전</small></span><strong id="charge-text">0%</strong></button>
         <div class="actives" id="actives" aria-label="액티브 스킬"></div>
         <button type="button" id="speed" class="advance speed" aria-label="2배속" aria-pressed="false"><b id="speed-label">x1</b><span>배속</span></button>
         <button type="button" id="advance" class="advance" role="switch" aria-checked="true"><span class="switch"></span><span>자동 진격</span></button>
@@ -156,7 +157,7 @@
     </section>
 
     <div class="quest-bar">
-      <div class="loot-offer" id="first-loot" hidden><span class="loot-icon" aria-hidden="true"><svg><use href="#i-gift"/></svg></span><div><small>첫 장비 획득!</small><b>별무늬 손목띠 <em>공격력 +4</em></b></div><button type="button" id="equip-first">바로 장착</button></div>
+      <div class="loot-offer" id="first-loot" hidden><span class="loot-icon" aria-hidden="true"><svg><use href="#i-gift"/></svg></span><div><small>첫 장비 획득!</small><b>별무늬 손목띠 <em>파워 +4</em></b></div><button type="button" id="equip-first">바로 장착</button></div>
       <div class="objective">
         <span class="objective-icon" aria-hidden="true"><svg><use href="#i-flag"/></svg></span>
         <div><small id="objective-label">다음 목표</small><b id="objective-title"></b><p id="objective-reward"></p></div>
@@ -171,7 +172,7 @@
 
     <main class="panel" id="panel">
       <section class="view" id="view-battle" aria-labelledby="roster-title">
-        <div class="section-head"><div><h2 id="dungeon-title">방과 후 던전</h2><p>매일 열쇠 2개 · 30초 안에 졸개와 던전 보스를 이기면 다음 단계가 열려요.</p></div></div>
+        <div class="section-head"><div><h2 id="dungeon-title">방과 후 던전</h2><p>매일 열쇠 2개 · 30초 안에 참가자와 던전 보스를 이기면 다음 단계가 열려요.</p></div></div>
         <div class="stack" id="dungeon-list"></div>
         <div class="section-head sub"><div><h2 id="roster-title">이번 장소 상대</h2><p id="roster-note">상대 넷을 모두 이기면 다음 장소가 열려요.</p></div><span class="pill saved" id="saved">자동 저장</span></div>
         <ol class="roster" id="roster"></ol>
@@ -195,12 +196,12 @@
         <div class="subpanel" data-panel="skills" hidden>
           <div class="section-head"><div><h2>액티브 스킬</h2><p>승급할 때마다 한 칸씩 열리고, 켜 두면 자동으로 써요.</p></div><button type="button" class="auto-skill small" id="auto-actives" role="switch" aria-checked="true"><span>자동</span><span class="switch"></span></button></div>
           <div class="stack" id="active-list"></div>
-          <div class="section-head sub"><div><h3 class="subhead">필살기</h3><p>공격으로 기력을 모아 쓰는 큰 기술이에요.</p></div><button type="button" id="skill-picker" class="pill-button" aria-haspopup="dialog">스킬 변경</button></div>
+          <div class="section-head sub"><div><h3 class="subhead">필살기</h3><p>대결하며 기력을 모아 쓰는 큰 기술이에요.</p></div><button type="button" id="skill-picker" class="pill-button" aria-haspopup="dialog">스킬 변경</button></div>
           <div class="stack" id="ultimate-card"></div>
         </div>
         <div class="subpanel" data-panel="tier" hidden>
           <div class="tier-card" id="tier-card"></div>
-          <div class="section-head sub"><div><h3 class="subhead">승급 단계</h3><p>승급할 때마다 공격력·체력 ×1.3, 2·4단계에서 동료 칸이 하나씩 늘어요.</p></div></div>
+          <div class="section-head sub"><div><h3 class="subhead">승급 단계</h3><p>승급할 때마다 파워·체력 ×1.3, 2·4단계에서 동료 칸이 하나씩 늘어요.</p></div></div>
           <ol class="tier-list" id="tier-list"></ol>
         </div>
         <div class="subpanel" data-panel="academy" hidden>
@@ -215,7 +216,7 @@
       </section>
 
       <section class="view" id="view-party" aria-labelledby="party-title" hidden>
-        <div class="section-head"><div><h2 id="party-title">동료</h2><p>출전한 친구가 함께 싸워요. 갖고만 있어도 공격력이 올라요.</p></div><span class="pill" id="party-owned"></span></div>
+        <div class="section-head"><div><h2 id="party-title">동료</h2><p>출전한 친구가 함께 대결해요. 갖고만 있어도 파워가 올라요.</p></div><span class="pill" id="party-owned"></span></div>
         <div class="party-slots" id="party-slots"></div>
         <div class="section-head sub"><div><h3 class="subhead">반 친구들</h3><p id="party-summary"></p></div><button type="button" class="pill-button" id="go-recruit">동료 모집</button></div>
         <div class="mate-grid" id="mate-grid"></div>
@@ -236,7 +237,7 @@
       </section>
 
       <section class="view" id="view-grades" aria-labelledby="grades-title" hidden>
-        <div class="section-head"><div><h2 id="grades-title">학교 지도</h2><p>6-3 보스를 이기면 다음 년차로 넘어가요.</p></div><span class="pill" id="grade-count"></span></div>
+        <div class="section-head"><div><h2 id="grades-title">학교 지도</h2><p>6-3 보스를 이기면 다음 학교로 진학해요.</p></div><span class="pill" id="grade-count"></span></div>
         <div class="stack" id="grade-list"></div>
       </section>
 
@@ -303,7 +304,7 @@
     <div class="dialog-icon" aria-hidden="true"><svg><use href="#i-school"/></svg></div><h2 id="transfer-title">정말 전학 갈까요?</h2>
     <p class="transfer-gain"><i class="cur badge" aria-hidden="true"></i>명예 배지 <b id="transfer-gain">+0</b></p>
     <ul class="transfer-list">
-      <li class="reset"><b>처음부터</b>년차·맵, 레벨, 코인, 훈련</li>
+      <li class="reset"><b>처음부터</b>학교·맵, 레벨, 코인, 훈련</li>
       <li class="keep"><b>그대로</b>장비·강화, 스티커, 뽑기권, 천 조각, 방과 후 학원, 출석·미션</li>
     </ul>
     <div class="dialog-actions"><form method="dialog"><button class="confirm ghost-light">다음에</button></form><form method="dialog"><button class="confirm gold" id="transfer-confirm">전학 가기</button></form></div>
@@ -316,7 +317,7 @@
   <dialog id="settings-dialog" aria-labelledby="settings-title">
     <div class="dialog-icon" aria-hidden="true"><svg><use href="#i-gear"/></svg></div><h2 id="settings-title">설정</h2>
     <div class="settings-list">
-      <button class="setting-row sound-button" id="sound" type="button" aria-label="전투 효과음" aria-pressed="true"><svg aria-hidden="true"><use href="#i-note"/></svg><span>전투 효과음</span><b class="switch"></b></button>
+      <button class="setting-row sound-button" id="sound" type="button" aria-label="대결 효과음" aria-pressed="true"><svg aria-hidden="true"><use href="#i-note"/></svg><span>대결 효과음</span><b class="switch"></b></button>
       <button class="setting-row" id="profile-button" type="button" aria-label="캐릭터 설정"><svg aria-hidden="true"><use href="#i-user"/></svg><span>캐릭터·닉네임 바꾸기</span><b>›</b></button>
       <button class="setting-row" id="help" type="button" aria-label="게임 도움말"><svg aria-hidden="true"><use href="#i-help"/></svg><span>게임 도움말</span><b>›</b></button>
     </div>
@@ -328,7 +329,7 @@
     <div class="dialog-actions"><form method="dialog"><button class="confirm ghost-light">닫기</button></form><button type="button" class="confirm gold" id="mail-claim-all">모두 받기</button></div>
   </dialog>
   <dialog id="skill-dialog" aria-labelledby="skill-dialog-title">
-    <div class="dialog-icon" aria-hidden="true"><svg><use href="#i-swords"/></svg></div><h2 id="skill-dialog-title">전투 스킬</h2><p>스킬 하나를 장착하세요. 전투 중에도 바꿀 수 있어요.</p>
+    <div class="dialog-icon" aria-hidden="true"><svg><use href="#i-swords"/></svg></div><h2 id="skill-dialog-title">대결 스킬</h2><p>스킬 하나를 장착하세요. 대결 중에도 바꿀 수 있어요.</p>
     <div class="stack" id="skill-choices"></div>
     <button type="button" class="auto-skill" id="auto-skill" role="switch" aria-checked="true"><span>스킬 자동 사용</span><span class="switch"></span></button>
     <form method="dialog"><button class="confirm">대결로 돌아가기</button></form>
