@@ -115,7 +115,7 @@ svg { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2
 .fight { display: grid; grid-template-columns: 1fr 12px 1fr; align-items: end; flex: 1 1 auto; min-height: 64px; padding: 0 14px 4px; }
 .fighter { --side: 1; position: relative; display: flex; align-items: flex-end; justify-content: center; height: 100%; min-width: 0; }
 .fighter.rival { --side: -1; }
-.sprite { display: block; background: var(--sprite-image) center bottom / contain no-repeat; image-rendering: pixelated; }
+.sprite { display: block; background: var(--sprite-image) center bottom / contain no-repeat; }
 .fighter .sprite { --shift: 0px; --rise: 0px; --tilt: 0deg; position: relative; z-index: 1; width: 100%; max-width: 176px; height: 100%; max-height: 186px; transform-origin: center bottom; background-image: var(--pose-image, var(--sprite-image)); transform: translate(calc(var(--side) * var(--shift)), var(--rise)) rotate(calc(var(--side) * var(--tilt))) scaleX(var(--side)) scaleX(var(--size, 1)); filter: drop-shadow(0 3px 2px rgba(30, 16, 50, .5)); transition: transform .09s ease-out, filter .07s; }
 .fighter .sprite[data-pose='ready'] { animation: breath .95s ease-in-out infinite alternate; }
 .fighter .sprite[data-pose='step'] { --shift: 9px; --rise: -4px; }
@@ -130,7 +130,7 @@ svg { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2
 .fighter .sprite[data-pose='victory'] { animation: cheer .38s cubic-bezier(.2, .78, .48, 1); }
 .fighter .sprite.wardrobe-rendered, .wardrobe-preview .sprite.wardrobe-rendered { background-image: none; }
 .sprite:not(.wardrobe-rendered) canvas { display: none; }
-.wardrobe-rendered canvas { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; image-rendering: pixelated; }
+.wardrobe-rendered canvas { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
 .shadow { position: absolute; bottom: 0; z-index: 0; width: 62%; height: 12px; border-radius: 50%; background: rgba(20, 10, 40, .45); }
 .arena[data-boss-phase='guard'] .rival::after, .arena[data-boss-phase='counter'] .rival::after { content: ''; position: absolute; z-index: 2; left: 12%; bottom: 4%; width: 76%; height: min(82%, 160px); border-radius: 45%; border: 2px solid #bff1ffce; background: #abedff35; box-shadow: inset 0 0 14px #abe6ffaa, 0 0 12px #d1faff; pointer-events: none; }
 .arena[data-boss-phase='counter'] .rival::after { background: #ff8d4a37; border-color: #ffe18c; box-shadow: inset 0 0 10px #ff8b60, 0 0 14px #ffab69; animation: blink .5s ease-in-out infinite; }
@@ -367,7 +367,8 @@ h1 { margin-top: 4px; font-size: clamp(30px, 9vw, 44px); font-weight: 1000; line
 .character-card { display: grid; justify-items: center; gap: 4px; padding: 8px 8px 10px; border-radius: 16px; border: 2px solid var(--line); background: linear-gradient(#fffdf8, #f3ecdf); font-size: 13px; font-weight: 900; box-shadow: 0 2px 0 var(--card-shadow); }
 .character-option input:checked + .character-card { border-color: var(--gold); background: linear-gradient(#fff9e3, #ffecb0); color: #5a3a00; box-shadow: 0 0 0 3px rgba(255, 200, 61, .35), 0 2px 0 var(--gold-deep); }
 .character-option input:focus-visible + .character-card { outline: 3px solid var(--brand); outline-offset: 2px; }
-.character-preview { width: 91%; height: 110px; filter: drop-shadow(0 3px 1px rgba(83, 56, 121, .25)); }
+.portrait-figure { display: block; background: var(--portrait-image) center bottom / contain no-repeat; }
+.character-preview { width: 100%; height: clamp(140px, 45vw, 195px); filter: drop-shadow(0 3px 2px rgba(83, 56, 121, .2)); }
 .nickname-input { display: block; width: 100%; min-height: 48px; padding: 6px 12px; border-radius: 12px; border: 2px solid var(--line); background: var(--card); color: var(--ink); font: inherit; font-size: 16px; font-weight: 800; }
 .nickname-input:focus { outline: none; border-color: var(--brand-hi); box-shadow: 0 0 0 3px rgba(138, 108, 255, .25); }
 .enroll { position: relative; display: flex; align-items: center; justify-content: center; min-height: 52px; margin-top: 14px; background: linear-gradient(var(--gold-hi), #ffbf2e); color: #4a2a00; box-shadow: inset 0 -4px var(--gold-deep); }
@@ -788,8 +789,8 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .mate-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .mate-card { position: relative; display: grid; justify-items: center; gap: 3px; min-width: 0; padding: 8px 6px 10px; border-radius: 16px; border: 1px solid var(--line); background: var(--card); text-align: center; box-shadow: 0 2px 0 var(--card-shadow); }
 .mate-figure { display: grid; place-items: end center; width: 100%; height: 92px; overflow: hidden; border-radius: 12px; background: linear-gradient(color-mix(in srgb, var(--r) 18%, white), color-mix(in srgb, var(--r) 34%, white)); }
-.mate-figure .sprite { width: 80%; height: 88px; }
-.mate-card.unknown .mate-figure .sprite { filter: brightness(0) opacity(.25); }
+.mate-figure .portrait-figure { width: 96%; height: 88px; }
+.mate-card.unknown .mate-figure .portrait-figure { filter: brightness(0) opacity(.25); }
 .mate-card .rarity { padding: 1px 8px; border-radius: 999px; background: color-mix(in srgb, var(--r) 15%, white); color: var(--r); font-size: 10px; font-weight: 700; }
 .mate-card b { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
 .mate-card em { color: var(--muted); font-size: 10px; font-style: normal; }
@@ -801,7 +802,7 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .gacha-button.gem { background: linear-gradient(#8fd8ff, #3a86e8); box-shadow: inset 0 -4px #1d5fae; text-shadow: 0 2px 0 #1d4f8e, 1.5px 0 0 #1d4f8e, -1.5px 0 0 #1d4f8e, 0 -1.5px 0 #1d4f8e; }
 .gacha-results .mate-card { padding: 4px 2px; border-color: rgba(255, 255, 255, .14); background: rgba(255, 255, 255, .08); box-shadow: none; color: #fff; animation: reveal .42s cubic-bezier(.2, 1.5, .4, 1) both; }
 .gacha-results .mate-figure { height: 58px; }
-.gacha-results .mate-figure .sprite { height: 56px; }
+.gacha-results .mate-figure .portrait-figure { height: 56px; }
 .gacha-results .mate-card b { color: #fff; font-size: 9px; }
 .gacha-results .mate-card .rarity { padding: 0 5px; font-size: 9px; }
 
@@ -934,11 +935,23 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .party-slot button.lvup.short, .party-slot button.lvup:disabled { background: #ece6f0; color: #9b90ad; }
 .school-dialog { text-align: center; }
 .school-art { display: grid; place-items: end center; height: 150px; margin: -6px auto 6px; border-radius: 18px; background: radial-gradient(ellipse at 50% 85%, #ffe7a8 0 34%, transparent 35%), linear-gradient(#cfe8ff, #fff6dc); }
-.school-art .sprite { position: relative; width: 90px; height: 148px; background: var(--sprite-image) center bottom / contain no-repeat; }
+.school-art .portrait-figure { width: 90px; height: 148px; }
 .school-dialog p { margin: 6px 0 14px; color: var(--muted); font-size: 13px; line-height: 1.5; }
-/* 격투 종목 칩: 타격은 글러브, 태권도는 헤드기어, 잡기 종목은 띠 */
-.contest-chip:is([data-contest='boxing'], [data-contest='kickboxing'], [data-contest='muaythai'], [data-contest='mma']) { --contest-prop: url('assets/prop-glove.webp'); }
-.contest-chip:is([data-contest='wrestling'], [data-contest='judo'], [data-contest='jiujitsu'], [data-contest='ssireum']) .contest-mark { border-radius: 0; background: url('assets/prop-satba.webp') center / contain no-repeat; }
+.contest-chip[data-contest] > .contest-mark { width: 19px; height: 19px; border-radius: 0; background: var(--contest-icon, var(--contest-prop, none)) center / contain no-repeat; }
+.sticker[data-sticker]::before { content: ''; width: 91%; height: 91%; background: var(--sticker-image) center / contain no-repeat; }
+.active-icon[data-active-art] { display: block; width: 27px; height: 27px; margin: auto; background: var(--skill-art) center / contain no-repeat; }
+#view-shop > [data-open-portrait] { margin-bottom: 8px; }
+.portrait-dialog { width: min(94vw, 430px); max-height: calc(100dvh - 24px); padding: 12px; overflow: auto; background: #f6f5ff; }
+.portrait-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 4px 8px; }
+.portrait-close { display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid #e1def2; border-radius: 50%; background: #fff; color: #453666; font-size: 23px; }
+.portrait-stage { display: grid; place-items: end center; height: clamp(240px, 57dvh, 500px); padding: 12px 12px 0; overflow: hidden; border-radius: 16px; background: radial-gradient(ellipse at 50% 36%, #fff 4%, #f4f0ff 45%, transparent 72%), linear-gradient(160deg, #d1d9fa, #ecf8f5); }
+.portrait-stage .portrait-figure { width: 100%; height: 100%; filter: drop-shadow(4px 8px 10px #66519138); }
+.portrait-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 8px; }
+.portrait-tabs button { min-height: 42px; border: 1px solid #e1def2; border-radius: 11px; background: #fff; color: #4e416b; font-weight: 850; }
+.portrait-tabs button[aria-pressed='true'] { border-color: #7563aa; background: #ebe4ff; color: #34215f; }
+.portrait-info { padding: 11px 8px 3px; text-align: center; }
+.portrait-info h3 { margin: 0; font-size: 16px; }
+.portrait-info p { margin: 2px 0 0; }
 .region-board { margin-top: 12px; padding: 10px; border-radius: 16px; border: 1px solid var(--line); background: var(--card); }
 .region-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .region-head h3 { margin: 0; font-size: 15px; }
@@ -947,3 +960,9 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .region::before { content: counter(region) '. '; opacity: .7; }
 .region.done { background: linear-gradient(#ffd86b, #ffb428); color: #5a3a00; font-weight: 700; }
 .region.now { outline: 2px solid var(--gold-deep, #d68a00); background: #fff4d6; color: #6b4300; font-weight: 700; }
+/* ════ 성인 비율 캐릭터에 맞춘 대결 화면: 무대를 더 크게, 겹치는 띠 정리 ════ */
+.game { grid-template-rows: minmax(292px, 1.75fr) auto minmax(150px, 1fr) auto; }
+.fighter .sprite { max-height: 230px; }
+.fighter.rival.minion .sprite { max-height: 82%; }
+.ally .sprite { width: 84px; height: 122px; }
+.quest-bar:has(.loot-offer:not([hidden])) > :not(.loot-offer) { visibility: hidden; }

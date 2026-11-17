@@ -203,7 +203,7 @@ const EXAMINERS = [
   ['기초반 수석 코치', 'boss1'], ['심판 위원장', 'boss2'], ['아마추어 대회 우승자', 'boss3'], ['세미프로 랭킹 1위', 'boss4'],
   ['프로 심사 위원', 'boss5'], ['랭킹 1위 선배', 'boss6'], ['현역 챔피언', 'dboss-sports'], ['전설의 챔피언', 'dboss-quiz'],
 ];
-const TRIAL = { name: '승급 심사', minion: '심사 위원', reward: 'tier', hp: 2.6, hit: 1.15, background: 'd-ticket', map: 9, solo: true };
+const TRIAL = { name: '승급 심사', minion: '심사 위원', reward: 'tier', hp: 2.6, hit: 1.15, background: 'd-exam', map: 9, solo: true };
 
 // ── 동료: 아카데미 동기들이 내 편에서 함께 대결한다(모집권으로 모집, 겹치면 ★ 업, 보유 효과) ──
 const COMPANIONS = {
@@ -571,14 +571,19 @@ function contestId(state) {
   return REGION_PLANS[(cycle - 1) % REGION_PLANS.length][gradeIndex(state.map)];
 }
 function contest(state) { return CONTESTS[contestId(state)]; }
-// 배경: 아카데미는 경기장 그림, 지역은 구역에 맞는 대결장(도장·체육관·관중석 링·결승 링). 씨름은 모래판
-const ACADEMY_ART = ['1', '2', 'm01', '13', '5', 'h02', 'h01', 'h03', 'm02', '17', '14', 'h04'];
-const ZONE_ART = ['h01', 'm01', 'h04', 'h02'];
-function stageArt(cycle, map) { return cycle ? ZONE_ART[gradeIndex(map)] : ACADEMY_ART[map]; }
+const ACADEMY_ART = ['a01', 'a02', 'a03', 'a04', 'a05', 'a06', 'a07', 'a08', 'a09', 'a10', 'a11', 'a12'];
+const ZONE_ART = {
+  rural: ['z01r', 'z02r', 'z03r', 'z04r'],
+  city: ['z01c', 'z02c', 'z03c', 'z04c'],
+};
+function stageArt(cycle, map) {
+  if (!cycle) return ACADEMY_ART[map];
+  return ZONE_ART[cycle <= 8 ? 'rural' : 'city'][gradeIndex(map)];
+}
 function venueMap(state) {
   if (state.dungeon) return null;
   const cycle = state.cycle || 0;
-  if (cycle && contestId(state) === 'ssireum') return 'm02';
+  if (cycle && contestId(state) === 'ssireum') return 'a09';
   return stageArt(cycle, state.map);
 }
 function regionConquered(state, index) { return bestProgress(state) >= (index + 2) * MAPS.length; }

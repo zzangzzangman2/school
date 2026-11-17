@@ -31,7 +31,8 @@ for name in ('dust', 'cloud'):
 for name in ('ddakji', 'eraser', 'dodgeball', 'basketball', 'satba', 'headgear', 'glove'):
     icon = Image.open(assets / f'prop-{name}.webp')
     assert icon.size == ((48, 28) if name == 'eraser' else (48, 48)) and icon.mode == 'RGBA'
-for id in ('m01', 'm02', 'h01', 'h02', 'h03', 'h04'):
+# 아카데미 경기장 12곳과 지역 구역 배경(시골·도시 4구역씩)
+for id in [f'a{n:02d}' for n in range(1, 13)] + [f'z0{n}{kind}' for n in range(1, 5) for kind in 'rc']:
     assert Image.open(assets / f'map-{id}.webp').size == (535, 302)
 
 with sync_playwright() as playwright:

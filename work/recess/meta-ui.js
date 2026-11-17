@@ -95,7 +95,8 @@ function renderActives() {
       button.dataset.skill = id;
       const icon = document.createElement('span');
       icon.className = 'active-icon';
-      icon.append(svgIcon(ACTIVE_ICONS[id]));
+      icon.dataset.activeArt = id;
+      icon.ariaHidden = 'true';
       const cd = document.createElement('small');
       button.append(icon, cd);
       button.addEventListener('click', () => {
@@ -287,10 +288,11 @@ function mateCard(id) {
   card.className = `mate-card ${mate.rarity}${level ? '' : ' unknown'}`;
   const figure = document.createElement('span');
   figure.className = 'mate-figure';
-  const sprite = document.createElement('span');
-  sprite.className = 'sprite';
-  sprite.dataset.sprite = id;
-  figure.append(sprite);
+  const portrait = document.createElement('span');
+  portrait.className = 'portrait-figure';
+  portrait.dataset.portrait = id;
+  portrait.ariaHidden = 'true';
+  figure.append(portrait);
   const rarity = document.createElement('small');
   rarity.className = 'rarity';
   rarity.textContent = RARITIES[mate.rarity].name;

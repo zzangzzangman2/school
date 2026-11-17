@@ -1040,7 +1040,8 @@ function stickerCard(id, { compact = false } = {}) {
   card.className = `sticker-card ${sticker.rarity}${level ? '' : ' unknown'}`;
   const art = document.createElement('span');
   art.className = `sticker ${sticker.rarity}`;
-  art.append(svgIcon(`#st-${id}`));
+  art.dataset.sticker = id;
+  art.ariaHidden = 'true';
   const rarity = document.createElement('small');
   rarity.className = 'rarity';
   rarity.textContent = RARITIES[sticker.rarity].name;
@@ -1197,7 +1198,7 @@ let lastCycle = null;
 function showSchool() {
   const dialog = $('school-dialog');
   if (!dialog || dialog.open) return;
-  $('school-sprite').dataset.sprite = state.profile.gender;
+  $('school-sprite').dataset.portrait = state.profile.gender;
   const cycle = state.cycle;
   setText('school-title', cycle === 1 ? '아카데미 졸업!' : `${schoolName(cycle - 1)} 제패!`);
   const conquered = Math.min(cycle - 1, REGIONS.length);
@@ -1481,6 +1482,22 @@ function selectView(view) {
   render();
 }
 
+const PORTRAIT_TITLES = { lobby: '선수 로비', skins: '스킨 미리보기', chat: 'AI 대화' };
+function openPortrait(view) {
+  const dialog = $('portrait-dialog');
+  $('lobby-figure').dataset.portrait = state.profile.gender;
+  setText('portrait-title', PORTRAIT_TITLES[view]);
+  setText('lobby-name', state.profile.name);
+  setText('lobby-rank', `Lv.${state.level} · ${tierName(state.tier)}`);
+  dialog.querySelectorAll('[data-portrait-view]').forEach(button => {
+    button.setAttribute('aria-pressed', String(button.dataset.portraitView === view));
+  });
+  dialog.querySelectorAll('[data-portrait-panel]').forEach(panel => {
+    panel.hidden = panel.dataset.portraitPanel !== view;
+  });
+  if (!dialog.open) dialog.showModal();
+}
+
 function showProfileEditor() {
   if (state.profile) {
     updateClock();
@@ -1539,6 +1556,13 @@ function start() {
   });
   $('nickname').addEventListener('input', () => { $('profile-error').hidden = true; });
   $('profile-button').addEventListener('click', showProfileEditor);
+  document.querySelectorAll('[data-open-portrait]').forEach(button => button.addEventListener('click', () => {
+    $('settings-dialog').close();
+    openPortrait(button.dataset.openPortrait);
+  }));
+  document.querySelectorAll('[data-portrait-view]').forEach(button => button.addEventListener('click', () => {
+    openPortrait(button.dataset.portraitView);
+  }));
   $('cancel-profile').addEventListener('click', enterGame);
   document.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => selectView(button.dataset.view)));
   bindMetaUI();

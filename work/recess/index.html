@@ -74,8 +74,8 @@
       <fieldset>
         <legend>주인공 선택</legend>
         <div class="character-options">
-          <label class="character-option"><input type="radio" name="gender" value="boy" required><span class="character-card"><span class="character-preview sprite" data-sprite="boy" aria-hidden="true"></span><b>남학생</b></span></label>
-          <label class="character-option"><input type="radio" name="gender" value="girl" required><span class="character-card"><span class="character-preview sprite" data-sprite="girl" aria-hidden="true"></span><b>여학생</b></span></label>
+          <label class="character-option"><input type="radio" name="gender" value="boy" required><span class="character-card"><span class="character-preview portrait-figure" data-portrait="boy" aria-hidden="true"></span><b>남학생</b></span></label>
+          <label class="character-option"><input type="radio" name="gender" value="girl" required><span class="character-card"><span class="character-preview portrait-figure" data-portrait="girl" aria-hidden="true"></span><b>여학생</b></span></label>
         </div>
       </fieldset>
       <label for="nickname" class="field-label">닉네임</label>
@@ -87,7 +87,7 @@
   </section>
 
   <div class="game" id="game" hidden>
-    <section class="arena" id="arena" data-map="1" aria-label="대결 화면">
+    <section class="arena" id="arena" data-map="a01" aria-label="대결 화면">
       <div class="arena-art" aria-hidden="true"></div>
 
       <header class="hud">
@@ -109,7 +109,7 @@
       <div class="stage-row">
         <div class="stage-title">
           <div class="stage-meta"><p class="eyebrow" id="stage-number">해솔 아카데미 1학년 · 1-1</p><span id="battle-status" class="live">자동 대결 중</span></div>
-          <h2 id="battle-title">신발장 입구</h2>
+          <h2 id="battle-title">아카데미 정문</h2>
         </div>
         <div class="hud-buttons">
           <button class="round-button" id="map-button" type="button" aria-label="대결 지도"><svg aria-hidden="true"><use href="#i-map"/></svg></button>
@@ -225,6 +225,7 @@
 
       <section class="view" id="view-shop" aria-labelledby="shop-title" hidden>
         <div class="section-head"><div><h2 id="shop-title">아카데미 상점</h2><p>보석으로 뽑기권·모집권·열쇠를 살 수 있어요.</p></div><span class="pill gem-pill"><i class="cur gem" aria-hidden="true"></i>보석 <b id="shop-gems">0</b></span></div>
+        <button type="button" class="setting-row" data-open-portrait="skins"><svg aria-hidden="true"><use href="#i-shirt"/></svg><span>스킨 미리보기</span><b aria-hidden="true">›</b></button>
         <div class="shop-grid" id="shop-list"></div>
         <div class="section-head sub"><div><h3 class="subhead">특별 상품</h3><p>결제 기능은 준비 중이에요.</p></div></div>
         <div class="stack" id="cash-list"></div>
@@ -249,10 +250,10 @@
           <button type="button" role="tab" data-sub="recruit" aria-selected="false">동료 모집<i class="notification" id="recruit-dot" hidden></i></button>
         </div>
         <div class="subpanel" data-panel="stickers">
-        <div class="section-head"><div><h2 id="gacha-title">문방구 스티커 뽑기</h2><p>모은 스티커는 갖고만 있어도 능력치가 올라요.</p></div><span class="pill ticket-pill"><i class="cur ticket" aria-hidden="true"></i>뽑기권 <b id="ticket-count">0</b>장</span></div>
+        <div class="section-head"><div><h2 id="gacha-title">아카데미 굿즈 뽑기</h2><p>모은 스티커는 갖고만 있어도 능력치가 올라요.</p></div><span class="pill ticket-pill"><i class="cur ticket" aria-hidden="true"></i>뽑기권 <b id="ticket-count">0</b>장</span></div>
         <div class="gacha-banner">
-          <div class="gacha-copy"><small>문방구 신상 입고!</small><b>황금 샤프 <em>전설</em></b><p>10회 뽑기는 희귀 이상 1장 확정</p></div>
-          <div class="gacha-art" aria-hidden="true"><span class="sticker legend"><svg><use href="#st-goldpen"/></svg></span></div>
+          <div class="gacha-copy"><small>굿즈 신상 입고!</small><b>황금 글러브 <em>전설</em></b><p>10회 뽑기는 희귀 이상 1장 확정</p></div>
+          <div class="gacha-art" aria-hidden="true"><span class="sticker legend" data-sticker="goldpen"></span></div>
         </div>
         <div class="gacha-buttons" id="gacha-buttons"></div>
         <p class="gacha-rates" id="gacha-rates"></p>
@@ -312,7 +313,7 @@
     <div class="dialog-actions"><form method="dialog"><button class="confirm ghost-light">다음에</button></form><form method="dialog"><button class="confirm gold" id="transfer-confirm">재입학하기</button></form></div>
   </dialog>
   <dialog id="school-dialog" class="school-dialog" aria-labelledby="school-title">
-    <div class="school-art" aria-hidden="true"><span class="sprite" id="school-sprite" data-sprite="boy-middle"></span></div><h2 id="school-title">아카데미 졸업!</h2><p id="school-text"></p>
+    <div class="school-art" aria-hidden="true"><span class="portrait-figure" id="school-sprite" data-portrait="boy"></span></div><h2 id="school-title">아카데미 졸업!</h2><p id="school-text"></p>
     <form method="dialog"><button class="confirm gold">좋아요</button></form>
   </dialog>
   <dialog id="attend-dialog" aria-labelledby="attend-dialog-title">
@@ -325,9 +326,33 @@
     <div class="settings-list">
       <button class="setting-row sound-button" id="sound" type="button" aria-label="대결 효과음" aria-pressed="true"><svg aria-hidden="true"><use href="#i-note"/></svg><span>대결 효과음</span><b class="switch"></b></button>
       <button class="setting-row" id="profile-button" type="button" aria-label="캐릭터 설정"><svg aria-hidden="true"><use href="#i-user"/></svg><span>캐릭터·닉네임 바꾸기</span><b>›</b></button>
+      <button class="setting-row" type="button" data-open-portrait="lobby"><svg aria-hidden="true"><use href="#i-user"/></svg><span>선수 로비</span><b aria-hidden="true">›</b></button>
       <button class="setting-row" id="help" type="button" aria-label="게임 도움말"><svg aria-hidden="true"><use href="#i-help"/></svg><span>게임 도움말</span><b>›</b></button>
     </div>
     <form method="dialog"><button class="confirm">닫기</button></form>
+  </dialog>
+  <dialog id="portrait-dialog" class="portrait-dialog" aria-labelledby="portrait-title">
+    <header class="portrait-header">
+      <h2 id="portrait-title">선수 로비</h2>
+      <form method="dialog"><button class="portrait-close" aria-label="선수 로비 닫기">×</button></form>
+    </header>
+    <div class="portrait-stage">
+      <span class="portrait-figure" id="lobby-figure" data-portrait="boy" aria-hidden="true"></span>
+    </div>
+    <div class="portrait-tabs" aria-label="선수 메뉴">
+      <button type="button" data-portrait-view="lobby" aria-pressed="true" aria-controls="portrait-lobby">로비</button>
+      <button type="button" data-portrait-view="skins" aria-pressed="false" aria-controls="portrait-skins">스킨</button>
+      <button type="button" data-portrait-view="chat" aria-pressed="false" aria-controls="portrait-chat">대화</button>
+    </div>
+    <section class="portrait-info" id="portrait-lobby" data-portrait-panel="lobby">
+      <h3 id="lobby-name"></h3><p id="lobby-rank"></p>
+    </section>
+    <section class="portrait-info" id="portrait-skins" data-portrait-panel="skins" hidden>
+      <h3>아카데미 트레이닝복</h3><p>기본 스킨 · 장착 중</p>
+    </section>
+    <section class="portrait-info" id="portrait-chat" data-portrait-panel="chat" hidden>
+      <h3>AI 대화</h3><p>대화 기능 준비 중</p>
+    </section>
   </dialog>
   <dialog id="mail-dialog" aria-labelledby="mail-title">
     <div class="dialog-icon" aria-hidden="true"><svg><use href="#i-mail"/></svg></div><h2 id="mail-title">우편함</h2><p id="mail-note"></p>
