@@ -72,7 +72,8 @@ function dps(crowd = false) {
     if (skill?.power) uptime *= 1 + skill.power * skill.dur / skill.cd;
     if (skill?.crit) uptime *= 1 + skill.crit * (g.CRIT_BASE - 1) * skill.dur / skill.cd;
   }
-  return (player + allies + pencil + mates) * cheer * uptime;
+  // 팀 시너지(타격 계열 팀 피해)는 모든 피해에 곱해진다. 받는 피해·코인·쿨타임·크리티컬 쪽은 game.js 공식에 이미 들어 있다
+  return (player + allies + pencil + mates) * cheer * uptime * (1 + (g.teamSynergy ? g.teamSynergy(state).power : 0));
 }
 function effectiveHp(ttk = 0) { return g.maxHp(state) * ((state.tier >= 3 ? 1.35 : 1) + g.regenRate(state) * ttk); }
 

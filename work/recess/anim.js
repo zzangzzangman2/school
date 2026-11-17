@@ -10,7 +10,7 @@
 const ANIM_CELL = { w: 280, h: 255 };
 const ANIM_CLIPS = ['idle', 'run', 'punch', 'hit', 'down', 'victory', 'kick', 'knee', 'throw', 'hold', 'guard', 'rush', 'counter', 'combo', 'cheer', 'drink', 'step', 'attack', 'skill'];
 // 타격 칸(0부터). 이 칸이 엔진의 타격 순간(impact)에 보이도록 앞은 준비, 뒤는 마무리로 나눈다
-const ANIM_IMPACT = { punch: 2, kick: 2, knee: 2, throw: 3, hold: 1, rush: 2, counter: 2, combo: 2, step: 2 };
+const ANIM_IMPACT = { punch: 2, kick: 2, knee: 2, throw: 3, hold: 3, rush: 2, counter: 2, combo: 2, step: 2 };
 // 종목 동작(arena data-motion) → 주인공 공격 띠. 태권도(spar)는 보호구 정지 그림을 쓰므로 띠 없음
 const HERO_CONTEST_CLIP = { strike: 'punch', kick: 'kick', knee: 'knee', throw: 'throw', hold: 'hold' };
 const HERO_SKILL_CLIP = { rush: 'rush', counter: 'counter', combo: 'combo', step: 'step', cheer: 'cheer', drink: 'drink' };
@@ -82,6 +82,19 @@ function animPlan(id, pose, prev, timed, motion) {
   if (/^thug/.test(id)) return thugPlan(pose);
   if (/^mate\d+$/.test(id)) return matePlan(pose);
   return null;
+}
+
+// 띠 보기(테스트 모드)용: 그 띠에서 엔진의 타격 순간에 보이는 칸(없으면 -1)과 게임에서 반복·한 번 재생할 때의 초당 칸 수
+function animImpactFrame(id, clip) {
+  if (id === 'boy') return ANIM_IMPACT[clip] ?? -1;
+  if (/^thug/.test(id)) return clip === 'attack' ? 1 : -1;
+  if (/^mate\d+$/.test(id)) return clip === 'attack' ? 2 : clip === 'skill' ? 3 : -1;
+  return -1;
+}
+function animClipFps(id, clip) {
+  const pose = { idle: 'ready', run: 'run', victory: 'victory', down: 'down', guard: 'guard' }[clip];
+  const plan = pose && (id === 'boy' ? heroPlan(pose, null, false, '') : /^thug/.test(id) ? thugPlan(pose) : /^mate\d+$/.test(id) ? matePlan(pose) : null);
+  return plan?.[4] || 10;
 }
 
 // ── 띠 주소(CSS 변수)와 그림 읽기 ──

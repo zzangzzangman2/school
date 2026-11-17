@@ -476,7 +476,7 @@ function transfer(state) {
 }
 function critPower(state) { return CRIT_BASE + 0.05 * (state.training.critDmg || 0) + mateBuff(state, 'critDmg'); }
 function regenRate(state) { return 0.001 * (state.training.recover || 0); }
-function critChance(state) { return Math.min(0.6, (state.training.focus || 0) * 0.01 + stickerBonus(state, 'crit')) + mateBuff(state, 'crit'); }
+function critChance(state) { return Math.min(0.6, (state.training.focus || 0) * 0.01 + stickerBonus(state, 'crit')) + mateBuff(state, 'crit') + teamSynergy(state).crit; }
 function coinUnit(state) { return Math.round((8 + 6 * gradeIndex(state.map) + 2 * (state.map % MAPS_PER_GRADE)) * cycleScale(state, 'coin')); }
 function pullCost(state) { return Math.round(30 * 1.22 ** clearedCount(state) * cycleScale(state, 'coin')); }
 function statBonus(state, stat) {
@@ -499,14 +499,14 @@ function enemyHit(state) {
     ? atProgress(dungeonReach(state), 'hit') * dungeonInfo(state.dungeon.id).hit
     : MAPS[state.map].hit[state.wave] * GRADE_SCALING[gradeIndex(state.map)].attack * cycleScale(state, 'hit');
   const rule = ruleId(state);
-  return base * (state.front?.hit ?? 1) * (1 + GANG_UP * aliveBehind(state)) * (1 - mateBuff(state, 'weaken')) * ((rule && RULES[rule].hit) || 1);
+  return base * (state.front?.hit ?? 1) * (1 + GANG_UP * aliveBehind(state)) * (1 - mateBuff(state, 'weaken')) * (1 - teamSynergy(state).weaken) * ((rule && RULES[rule].hit) || 1);
 }
 function winCoins(state, firstBoss) {
   const grade = gradeIndex(state.map);
   const boss = state.wave === BOSS_WAVE;
   const baseCoins = (8 + 6 * grade + 2 * (state.map % MAPS_PER_GRADE) + 2 * state.wave) * (boss ? 2 : 1);
   const coinBonus = state.classId === 'math' ? 1.25 : 1;
-  const extra = statBonus(state, 'coin') * (1 + snackBonus(state, 'coin')) * (1 + mateBuff(state, 'coin'));
+  const extra = statBonus(state, 'coin') * (1 + snackBonus(state, 'coin')) * (1 + mateBuff(state, 'coin')) * (1 + teamSynergy(state).coin);
   return Math.round((baseCoins + (firstBoss ? 15 + 5 * grade : 0)) * coinBonus * extra * cycleScale(state, 'coin'));
 }
 function winXp(state) {
@@ -1384,7 +1384,54 @@ function ruleBonus(state) {
   return Math.min(3, state.party.slice(0, partySlots(state)).filter(id => id && ruleFit(id, rule)).length) * RULE_BONUS;
 }
 function ruleHp(state, leader) { const rule = ruleId(state); return rule ? (leader ? RULES[rule].leader : RULES[rule].minion) || 1 : 1; }
-function buffMult(state) { return (state.buffs?.cheer > 0 ? cheerMult(state) : 1) * (1 + mateBuff(state, 'power')) * (1 + ruleBonus(state)); }
+function buffMult(state) { return (state.buffs?.cheer > 0 ? cheerMult(state) : 1) * (1 + mateBuff(state, 'power')) * (1 + ruleBonus(state)) * (1 + teamSynergy(state).power); }
+
+// ── 팀 시너지: 출전 칸에 있는 동료의 무술 계열 조합 ──
+// 같은 계열 2·3·4명이면 그 계열 효과(steps[명수]), 서로 다른 계열이 3개 이상이면 '균형'(크리티컬 확률). 두 가지는 함께 붙는다.
+// power = 팀 피해(나·동료 모두), weaken = 받는 피해 감소, cdr = 동료 스킬 쿨타임 감소(비율), coin = 승리 코인
+const MATE_FAMILIES = {
+  strike: { name: '타격', mates: ['mate1', 'mate2', 'mate3', 'mate4', 'mate5'], stat: 'power', steps: [0, 0, 0.06, 0.12, 0.2], text: '팀 피해 +' },
+  grapple: { name: '잡기', mates: ['mate6', 'mate7', 'mate8', 'mate9'], stat: 'weaken', steps: [0, 0, 0.06, 0.12, 0.18], text: '받는 피해 −' },
+  special: { name: '기공', mates: ['mate10', 'mate11', 'mate12', 'mate13', 'mate14'], stat: 'cdr', steps: [0, 0, 0.08, 0.15, 0.22], text: '동료 쿨타임 −' },
+  farm: { name: '파밍', mates: ['mate15', 'mate16'], stat: 'coin', steps: [0, 0, 0.2], text: '코인 +' },
+};
+const FAMILY_ORDER = Object.keys(MATE_FAMILIES);
+const BALANCE_SYNERGY = { 3: 0.04, 4: 0.07 }; // 서로 다른 계열 수 → 크리티컬 확률
+function mateFamily(id) { return FAMILY_ORDER.find(family => MATE_FAMILIES[family].mates.includes(id)) || null; }
+let synergyMemo = { key: '', value: null };
+function teamSynergy(state) {
+  const ids = (state.party || []).slice(0, partySlots(state)).filter(Boolean);
+  const key = ids.join(',');
+  if (synergyMemo.key === key && synergyMemo.value) return synergyMemo.value;
+  const counts = {};
+  for (const id of ids) {
+    const family = mateFamily(id);
+    if (family) counts[family] = (counts[family] || 0) + 1;
+  }
+  const value = { power: 0, weaken: 0, cdr: 0, coin: 0, crit: 0, counts, active: [] };
+  for (const family of FAMILY_ORDER) {
+    const info = MATE_FAMILIES[family];
+    const count = counts[family] || 0;
+    const amount = info.steps[Math.min(count, info.steps.length - 1)] || 0;
+    if (!amount) continue;
+    value[info.stat] += amount;
+    value.active.push({ family, count, amount, text: `${info.name} ${count}명 · ${info.text}${Math.round(amount * 100)}%` });
+  }
+  const kinds = Object.keys(counts).length;
+  if (BALANCE_SYNERGY[Math.min(kinds, 4)]) {
+    value.crit = BALANCE_SYNERGY[Math.min(kinds, 4)];
+    value.active.push({ family: 'balance', count: kinds, amount: value.crit, text: `균형 ${kinds}계열 · 크리티컬 +${Math.round(value.crit * 100)}%` });
+  }
+  synergyMemo = { key, value };
+  return value;
+}
+// 다음 단계 안내: 이 계열을 한 명 더 넣으면 어떻게 되는지
+function synergyNext(family, count) {
+  const info = MATE_FAMILIES[family];
+  const now = info.steps[Math.min(count, info.steps.length - 1)] || 0;
+  const more = info.steps.findIndex((amount, need) => need > count && amount > now);
+  return more > 0 ? `${more}명이면 ${info.text}${Math.round(info.steps[more] * 100)}%` : '최대';
+}
 
 // 앞 상대가 쓰러지면 다음 상대로, 넘친 피해는 이어서(관통). 무리가 다 쓰러지면 승리.
 function resolveKills(state, overflow, emit) {
@@ -1441,12 +1488,14 @@ function swapParty(state, a, b) {
   [state.allyTimers[a], state.allyTimers[b]] = [state.allyTimers[b] ?? ALLY_INTERVAL, state.allyTimers[a] ?? ALLY_INTERVAL];
   return true;
 }
+// 동료 스킬 쿨타임(초): 기공 계열 시너지만큼 짧아진다
+function mateCooldown(state, id) { return COMPANIONS[id].skill.cd * (1 - teamSynergy(state).cdr); }
 function mateBuff(state, key) { const buff = state.mateBuffs?.[key]; return buff && buff.t > 0 ? buff.v : 0; }
 function castMate(state, slot, emit) {
   const id = state.party[slot];
   const skill = COMPANIONS[id].skill;
   if (skill.kind === 'heal' && state.hp > maxHp(state) * 0.75) return false;
-  state.cooldowns[`mate${slot}`] = skill.cd;
+  state.cooldowns[`mate${slot}`] = mateCooldown(state, id);
   const event = { slot, id, amount: 0, heal: 0, hits: skill.hits || 1, crit: Boolean(skill.sure) };
   let overflow = 0;
   let damage = 0;
@@ -1501,7 +1550,7 @@ function mateSkillDps(state, crowd = false) {
     if (!skill) continue;
     const mult = skill.randMax ? (skill.randMin + skill.randMax) / 2 : skill.mult || 0;
     const hit = mult * (skill.sure ? critPower(state) : 1) * (skill.kind === 'aoe' && crowd ? 3 : 1) * (skill.boss && !crowd ? skill.boss : 1);
-    total += (hit + (skill.bleed || 0)) * mateScale(state, id) / skill.cd;
+    total += (hit + (skill.bleed || 0)) * mateScale(state, id) / mateCooldown(state, id);
   }
   return total;
 }
@@ -1856,6 +1905,7 @@ function restore(snapshot) {
 
 if (typeof module !== 'undefined') {
   module.exports = {
+    MATE_FAMILIES, FAMILY_ORDER, BALANCE_SYNERGY, mateFamily, teamSynergy, synergyNext, mateCooldown,
     castMate, useMate, swapParty, RECORD, recordTier, recordTierHp, recordReward, recordKeys, enterRecord, sweepRecord, RUSH_SPEED, rushEnd, rushing, RULES, RULE_ORDER, RULE_BONUS, ruleId, ruleFit, ruleMates, ruleBonus, leaveDungeon, dungeonKeys, mateScale, mateBuff, mateSkillDps, PARTY_MAX, PARTY_UNLOCKS, PARTY_UNLOCK_TEXT, LEGACY_MATES, BOSS_SPRITES, REGION_ROUNDS, REGION_START, regionIndex, regionRound, lastRound, roundTag, stageLabel, skillPower, skillUnlocked, venueMap, stagePlace, stageNames, stageArt, regionConquered, REGIONS, ZONES, ACADEMY, autoTrain, critPower, regenRate, allyTrainLevel, allyTrainCap, allyTrainCost, trainAlly, skillLevel, skillCost, cheerMult, sprintMult, lunchHeal, trainSkill, ALLY_TRAIN, CRIT_BASE,
     CONTESTS, schoolName, gradeLabel, placeLabel, contestId, contest,
     newGame, simulate, restore, trainingCost, maxHp, attack, enemyMaxHp, openFight, activateSkill, gearStats, nextMission, MAPS, GEAR, SLOTS, MAP_REWARDS, BOSS_REWARDS, TRAINING, SKILLS, makeProfile,

@@ -494,6 +494,7 @@ function renderParty() {
     box.append(card);
     return box;
   }));
+  renderSynergyPanel();
   $('mate-grid').replaceChildren(...Object.keys(COMPANIONS).map(id => {
     const mate = COMPANIONS[id];
     const level = companionLevel(state, id);
@@ -537,7 +538,11 @@ function renderParty() {
     });
     const skillLine = document.createElement('p');
     skillLine.className = 'mate-skill';
-    skillLine.textContent = level ? `${mate.skill.name} · ${mate.skill.desc}` : `${mate.style} · ${mate.skill.name}`;
+    const family = mateFamily(id);
+    const familyTag = document.createElement('span');
+    familyTag.className = `syn-tag fam-${family}`;
+    familyTag.textContent = MATE_FAMILIES[family].name;
+    skillLine.append(familyTag, level ? `${mate.skill.name} · ${mate.skill.desc}` : `${mate.style} · ${mate.skill.name}`);
     card.append(meter, info, skillLine, star, button);
     return card;
   }));
@@ -806,6 +811,11 @@ function partyCard(slot, open) {
   card.type = 'button';
   card.dataset.slot = slot;
   card.className = `party-card ${slot < 2 ? 'front' : 'back'}${slot >= open ? ' locked' : id ? ' filled' : ' empty'}${formationPick === slot ? ' picked' : ''}`;
+  if (id && slot < open) {
+    const family = mateFamily(id);
+    card.classList.add(`fam-${family}`);
+    if ((teamSynergy(state).counts[family] || 0) >= 2) card.classList.add('fam-on');
+  }
   const tag = document.createElement('small');
   tag.className = 'pc-tag';
   tag.textContent = `${slot + 1}${row[0]}`;
@@ -849,6 +859,57 @@ function partyCard(slot, open) {
   return card;
 }
 
+// 대결 화면 출전 카드 아래 한 줄: 지금 붙은 시너지(출전 칸이 2칸 이상 열렸을 때만)
+function renderSynergyLine() {
+  const line = $('party-synergy');
+  const open = partySlots(state);
+  line.hidden = open < 2;
+  if (open < 2) return;
+  const { active } = teamSynergy(state);
+  line.replaceChildren(...(active.length ? active.map(({ family, text }) => {
+    const chip = document.createElement('span');
+    chip.className = `syn-chip fam-${family}`;
+    chip.textContent = text;
+    return chip;
+  }) : [Object.assign(document.createElement('span'), { className: 'syn-hint', textContent: '시너지 없음 · 같은 계열 2명이나 서로 다른 계열 3개를 출전시키면 효과가 붙어요' })]));
+}
+
+// 동료 탭: 계열마다 출전 인원과 지금 효과, 한 명 더 넣으면 어떻게 되는지
+function renderSynergyPanel() {
+  const synergy = teamSynergy(state);
+  const chips = FAMILY_ORDER.map(family => {
+    const info = MATE_FAMILIES[family];
+    const count = synergy.counts[family] || 0;
+    const now = info.steps[Math.min(count, info.steps.length - 1)] || 0;
+    const chip = document.createElement('div');
+    chip.className = `syn-card fam-${family}${now ? ' on' : ''}`;
+    const title = document.createElement('b');
+    title.textContent = `${info.name} ${count}명`;
+    const effect = document.createElement('small');
+    effect.textContent = now ? `${info.text}${Math.round(now * 100)}%` : `${info.text.replace(/[+−]$/, '').trim()} 효과 없음`;
+    const next = document.createElement('small');
+    next.className = 'syn-next';
+    next.textContent = synergyNext(family, count);
+    const who = document.createElement('small');
+    who.className = 'syn-who';
+    who.textContent = info.mates.map(id => COMPANIONS[id].style).join('·');
+    chip.append(title, effect, next, who);
+    return chip;
+  });
+  const kinds = Object.keys(synergy.counts).length;
+  const balance = document.createElement('div');
+  balance.className = `syn-card fam-balance${synergy.crit ? ' on' : ''}`;
+  const title = document.createElement('b');
+  title.textContent = `균형 ${kinds}계열`;
+  const effect = document.createElement('small');
+  effect.textContent = synergy.crit ? `크리티컬 +${Math.round(synergy.crit * 100)}%` : '크리티컬 효과 없음';
+  const next = document.createElement('small');
+  next.className = 'syn-next';
+  next.textContent = kinds < 3 ? `서로 다른 계열 3개면 +${Math.round(BALANCE_SYNERGY[3] * 100)}%` : kinds < 4 ? `4계열이면 +${Math.round(BALANCE_SYNERGY[4] * 100)}%` : '최대';
+  balance.append(title, effect, next);
+  $('synergy-panel').replaceChildren(...chips, balance);
+}
+
 function renderPartyBar() {
   const box = $('party-bar-slots');
   const open = partySlots(state);
@@ -861,6 +922,7 @@ function renderPartyBar() {
     $('mate-auto').setAttribute('aria-checked', String(auto));
     $('party-arrange').textContent = formationMode ? '완료' : '편성';
     $('party-arrange').setAttribute('aria-pressed', String(formationMode));
+    renderSynergyLine();
   }
   for (const card of box.children) {
     const slot = Number(card.dataset.slot);
@@ -868,7 +930,7 @@ function renderPartyBar() {
     if (!id || slot >= open) continue;
     const left = Math.max(0, state.cooldowns[`mate${slot}`] || 0);
     const ready = left <= 0;
-    card.style.setProperty('--cd', `${clamp(left / COMPANIONS[id].skill.cd, 0, 1) * 360}deg`);
+    card.style.setProperty('--cd', `${clamp(left / mateCooldown(state, id), 0, 1) * 360}deg`);
     card.classList.toggle('ready', ready);
     const status = ready ? (auto ? '스킬 준비' : '눌러 발동') : COMPANIONS[id].skill.name; // 남은 초는 얼굴 위 숫자
     const label = card.querySelector('.pc-status');
@@ -920,7 +982,7 @@ function fillMateDialog(slot) {
   const mate = COMPANIONS[id];
   const left = Math.max(0, state.cooldowns[`mate${slot}`] || 0);
   $('mate-dialog-art').dataset.portrait = mate.portrait || mate.sprite;
-  setText('mate-dialog-meta', `${slot + 1}번 · ${slot < 2 ? '전열' : '후열'} · ${GRADES[mate.grade].name} · ${mate.style}`);
+  setText('mate-dialog-meta', `${slot + 1}번 · ${slot < 2 ? '전열' : '후열'} · ${GRADES[mate.grade].name} · ${mate.style} · ${MATE_FAMILIES[mateFamily(id)].name} 계열`);
   setText('mate-dialog-name', mate.name);
   const star = starLine(id);
   setText('mate-dialog-stars', `${star.textContent} · Lv.${allyTrainLevel(state, id)} · 내 파워의 ${fmt(Math.round(allyPower(state, id) * 100))}%`);
@@ -928,7 +990,7 @@ function fillMateDialog(slot) {
   setText('mate-dialog-desc', mate.skill.desc);
   const rule = ruleId(state);
   setText('mate-dialog-rule', rule ? (ruleFit(id, rule) ? `이번 경기(${RULES[rule].name}) 추천 · 팀 피해 +${Math.round(RULE_BONUS * 100)}%` : `이번 경기(${RULES[rule].name}) 추천: ${RULES[rule].tip}`) : '');
-  setText('mate-dialog-cd', `쿨타임 ${mate.skill.cd}초 · ${left > 0 ? `${Math.ceil(left)}초 남음` : '준비됨'}${state.autoMates === false ? '' : ' · 자동 사용 중'}`);
+  setText('mate-dialog-cd', `쿨타임 ${+mateCooldown(state, id).toFixed(1)}초${mateCooldown(state, id) < mate.skill.cd ? `(기공 시너지 −${Math.round(teamSynergy(state).cdr * 100)}%)` : ''} · ${left > 0 ? `${Math.ceil(left)}초 남음` : '준비됨'}${state.autoMates === false ? '' : ' · 자동 사용 중'}`);
   const use = $('mate-dialog-use');
   use.hidden = state.autoMates !== false;
   use.disabled = left > 0;
@@ -1077,8 +1139,25 @@ function openLab() {
   $('ml-target').replaceChildren(...labTargets().map(([value, label]) => new Option(label, value)));
   renderLabActions();
   $('motion-lab').hidden = false;
+  labMode('fight');
   clearInterval(labTimer);
-  labTimer = setInterval(labNote, 90);
+  labTimer = setInterval(labTick, 40);
+}
+
+function labTick() {
+  if (viewer.open) viewerTick();
+  else labNote();
+}
+
+// 대결에서 / 띠 보기 전환. 띠 보기는 대결과 상관없이 29명 아무나, 동작 띠 아무거나 골라 한 칸씩 본다
+function labMode(mode) {
+  const strip = mode === 'strip';
+  $('ml-mode-fight').setAttribute('aria-selected', String(!strip));
+  $('ml-mode-strip').setAttribute('aria-selected', String(strip));
+  $('ml-fight').hidden = strip;
+  $('ml-strip').hidden = !strip;
+  viewer.open = strip;
+  if (strip) viewerOpen();
 }
 
 function closeLab() {
@@ -1089,6 +1168,7 @@ function closeLab() {
   state.test = { ...state.test, contest: labContest };
   renderedContest = '';
   $('motion-lab').hidden = true;
+  viewer.open = false;
   clearInterval(labTimer);
   commit();
 }
@@ -1149,7 +1229,239 @@ function labPlay(target, action) {
   else allyRun(slot, T([['skill-a', 180], ['skill-b', 500]]), { dash: !labSlow, hitAt: 180 * k, skill: true });
 }
 
+// ── 띠 보기 ──
+// 숨겨 둔 탐침(data-sprite만 붙인 빈 칸)으로 CSS 변수(--anim-동작)를 읽어 띠 주소를 얻는다(한 파일 묶음에서도 같은 길).
+// 큰 칸: 발판선(세로 249, 빨강)과 발 기준 가운데(가로 140), '앞 칸 겹쳐 보기'는 바로 앞 칸을 흐리게 겹친다.
+// 아래 줄: 띠의 모든 칸(타격 칸 표시). 칸마다 그림의 맨 아래(발)·키를 재서 알려 준다
+const viewer = { open: false, who: '', clip: '', frame: 0, playing: true, last: 0, guide: true, onion: false, drawn: '', filmKey: '', probe: null };
+const viewerMetrics = new Map();
+const THUG_BOSS_NAMES = ['동네 건달 두목', '시장 건달 두목', '번화가 큰형님', '지역 보스'];
+
+function viewerWhoList() {
+  return [
+    ['boy', '주인공 · 지금 장비'], ['boy:plain', '주인공 · 기본 옷'],
+    ...Object.keys(COMPANIONS).map(id => [id, `동료 · ${COMPANIONS[id].name}(${COMPANIONS[id].style})`]),
+    ...MOB_SPRITES.map((id, index) => [id, `건달 ${index + 1}`]),
+    ...THUG_BOSSES.map((id, index) => [id, `건달 두목 ${index + 1} · ${THUG_BOSS_NAMES[index]}`]),
+  ];
+}
+
+function viewerId() { return viewer.who.split(':')[0]; }
+
+function viewerProbe(id) {
+  if (!viewer.probe) {
+    viewer.probe = document.createElement('span');
+    viewer.probe.hidden = true;
+    viewer.probe.setAttribute('aria-hidden', 'true');
+    document.body.append(viewer.probe);
+  }
+  viewer.probe.dataset.sprite = id;
+  return viewer.probe;
+}
+
+function viewerClips(id) {
+  const probe = viewerProbe(id);
+  return ANIM_CLIPS.filter(clip => animUrl(probe, id, clip));
+}
+
+function viewerOpen() {
+  const who = $('mv-who');
+  if (!who.options.length) who.replaceChildren(...viewerWhoList().map(([value, label]) => new Option(label, value)));
+  if (!$('mv-fps').options.length) $('mv-fps').replaceChildren(...[2, 4, 6, 8, 10, 12, 15, 20].map(fps => new Option(String(fps), String(fps))));
+  viewerPick(who.value || 'boy', viewer.clip);
+}
+
+function viewerPick(who, clip) {
+  viewer.who = who;
+  $('mv-who').value = who;
+  const id = viewerId();
+  const clips = viewerClips(id);
+  $('mv-clip').replaceChildren(...clips.map(name => new Option(name, name)));
+  viewer.clip = clips.includes(clip) ? clip : clips[0] || '';
+  $('mv-clip').value = viewer.clip;
+  viewerClip(viewer.clip);
+}
+
+function viewerClip(clip) {
+  viewer.clip = clip;
+  viewer.frame = 0;
+  viewer.last = performance.now();
+  viewer.drawn = '';
+  const fps = animClipFps(viewerId(), clip);
+  const select = $('mv-fps');
+  if (![...select.options].some(option => option.value === String(fps))) select.append(new Option(String(fps), String(fps)));
+  select.value = String(fps);
+  viewer.filmKey = '';
+  $('mv-film').replaceChildren();
+}
+
+// 지금 보는 띠의 그림(주인공 '지금 장비'는 장비 색을 칠한 띠). 준비 전이면 null
+function viewerSource() {
+  const id = viewerId();
+  const probe = viewerProbe(id);
+  const url = animUrl(probe, id, viewer.clip);
+  if (!url) return null;
+  const outfit = viewer.who === 'boy' ? $('player-sprite').dataset.outfit || '' : '';
+  if (outfit) {
+    const tinted = tintedStrip(probe, id, viewer.clip, url, outfit);
+    if (tinted.failed) return { failed: true };
+    return tinted.ready ? { source: tinted.canvas, frames: tinted.frames, key: `${url}|${outfit}`, width: tinted.canvas.width, height: tinted.canvas.height } : null;
+  }
+  const strip = animImage(url);
+  if (strip.failed) return { failed: true };
+  return strip.ready ? { source: strip.img, frames: strip.frames, key: url, width: strip.img.naturalWidth, height: strip.img.naturalHeight } : null;
+}
+
+// 칸마다 그림이 있는 맨 위·맨 아래 줄(알파 24 넘는 픽셀). '발'은 맨 아래 줄의 아래 경계(규격 발판선 249와 같은 기준)
+function viewerMeasure(strip) {
+  let metrics = viewerMetrics.get(strip.key);
+  if (metrics) return metrics;
+  metrics = [];
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = strip.width;
+    canvas.height = strip.height;
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    context.drawImage(strip.source, 0, 0);
+    const { data } = context.getImageData(0, 0, strip.width, strip.height);
+    for (let frame = 0; frame < strip.frames; frame++) {
+      let top = -1;
+      let bottom = -1;
+      const left = frame * ANIM_CELL.w;
+      const right = Math.min(strip.width, left + ANIM_CELL.w);
+      for (let y = 0; y < strip.height; y++) {
+        const row = y * strip.width * 4;
+        for (let x = left; x < right; x++) {
+          if (data[row + x * 4 + 3] > 24) {
+            if (top < 0) top = y;
+            bottom = y;
+            break;
+          }
+        }
+      }
+      metrics.push({ top, bottom });
+    }
+  } catch { metrics = []; }
+  viewerMetrics.set(strip.key, metrics);
+  return metrics;
+}
+
+function viewerFilm(strip) {
+  const film = $('mv-film');
+  if (viewer.filmKey === strip.key && film.children.length === strip.frames) return;
+  viewer.filmKey = strip.key; // 한 파일 묶음에서는 주소가 data: URI라 길어서 DOM 속성 대신 여기에 둔다
+  const impact = animImpactFrame(viewerId(), viewer.clip);
+  film.replaceChildren(...Array.from({ length: strip.frames }, (_, frame) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `mv-thumb${frame === impact ? ' mv-hit' : ''}`;
+    button.dataset.frame = frame;
+    button.ariaLabel = `${frame + 1}번째 칸${frame === impact ? ', 타격 칸' : ''}`;
+    const canvas = document.createElement('canvas');
+    canvas.width = 70;
+    canvas.height = 64;
+    canvas.getContext('2d').drawImage(strip.source, frame * ANIM_CELL.w, 0, ANIM_CELL.w, ANIM_CELL.h, 0, 0, 70, 64);
+    const label = document.createElement('small');
+    label.textContent = frame === impact ? `${frame + 1} 타격` : String(frame + 1);
+    button.append(canvas, label);
+    return button;
+  }));
+}
+
+function viewerDraw(strip) {
+  const canvas = $('mv-canvas');
+  const context = canvas.getContext('2d');
+  const { w, h } = ANIM_CELL;
+  context.clearRect(0, 0, w, h);
+  context.fillStyle = '#2b2142';
+  context.fillRect(0, 0, w, h);
+  if (viewer.guide) {
+    context.fillStyle = 'rgba(255, 255, 255, .12)';
+    context.fillRect(139, 0, 2, h);
+  }
+  if (viewer.onion && strip.frames > 1) {
+    context.globalAlpha = 0.3;
+    const prev = (viewer.frame - 1 + strip.frames) % strip.frames;
+    context.drawImage(strip.source, prev * w, 0, w, h, 0, 0, w, h);
+    context.globalAlpha = 1;
+  }
+  context.drawImage(strip.source, viewer.frame * w, 0, w, h, 0, 0, w, h);
+  if (viewer.guide) {
+    context.fillStyle = 'rgba(255, 80, 96, .9)';
+    context.fillRect(0, 249, w, 1);
+  }
+  canvas.dataset.frame = `${viewerId()}:${viewer.clip}:${viewer.frame}`;
+  for (const thumb of $('mv-film').children) thumb.classList.toggle('current', Number(thumb.dataset.frame) === viewer.frame);
+}
+
+function viewerTick() {
+  const strip = viewerSource();
+  const who = $('mv-who').selectedOptions[0]?.textContent || '';
+  if (!strip) {
+    setText('mv-note', `${who} · ${viewer.clip} · 띠 불러오는 중`);
+    return;
+  }
+  if (strip.failed) {
+    setText('mv-note', `${who} · ${viewer.clip} 띠를 읽지 못했어요`);
+    return;
+  }
+  const now = performance.now();
+  const fps = Number($('mv-fps').value) * (labSlow ? 0.25 : 1);
+  if (viewer.playing && now - viewer.last >= 1000 / fps) {
+    viewer.frame = (viewer.frame + 1) % strip.frames;
+    viewer.last = now;
+  }
+  viewer.frame = Math.min(viewer.frame, strip.frames - 1);
+  viewerFilm(strip);
+  const key = `${strip.key}|${viewer.frame}|${viewer.guide}|${viewer.onion}`;
+  if (viewer.drawn !== key) {
+    viewer.drawn = key;
+    viewerDraw(strip);
+  }
+  const metric = viewerMeasure(strip)[viewer.frame];
+  const warn = [strip.width % ANIM_CELL.w ? '폭이 280의 배수가 아님' : '', strip.height !== ANIM_CELL.h ? `높이 ${strip.height}(255여야 함)` : ''].filter(Boolean);
+  const body = metric && metric.bottom >= 0 ? ` · 발 ${metric.bottom + 1}px · 키 ${metric.bottom - metric.top + 1}px${metric.top <= 2 ? ' · 머리가 위 끝에 닿음' : ''}` : '';
+  const impact = animImpactFrame(viewerId(), viewer.clip);
+  setText('mv-note', `${viewer.clip} ${viewer.frame + 1}/${strip.frames}칸${viewer.frame === impact ? ' · 타격 칸' : ''}${body} · 띠 ${strip.width}×${strip.height}${warn.length ? ` · ⚠ ${warn.join(', ')}` : ''}${labSlow ? ' · 느리게' : ''}`);
+}
+
+function viewerStep(delta) {
+  const strip = viewerSource();
+  if (!strip || strip.failed) return;
+  viewer.playing = false;
+  $('mv-play').setAttribute('aria-pressed', 'false');
+  $('mv-play').textContent = '재생';
+  viewer.frame = (viewer.frame + delta + strip.frames) % strip.frames;
+}
+
 function bindLab() {
+  $('ml-mode-fight').addEventListener('click', () => labMode('fight'));
+  $('ml-mode-strip').addEventListener('click', () => labMode('strip'));
+  $('mv-who').addEventListener('change', () => viewerPick($('mv-who').value, viewer.clip));
+  $('mv-clip').addEventListener('change', () => viewerClip($('mv-clip').value));
+  $('mv-prev').addEventListener('click', () => viewerStep(-1));
+  $('mv-next').addEventListener('click', () => viewerStep(1));
+  $('mv-play').addEventListener('click', () => {
+    viewer.playing = !viewer.playing;
+    viewer.last = performance.now();
+    $('mv-play').setAttribute('aria-pressed', String(viewer.playing));
+    $('mv-play').textContent = viewer.playing ? '멈춤' : '재생';
+  });
+  $('mv-guide').addEventListener('click', () => {
+    viewer.guide = !viewer.guide;
+    $('mv-guide').setAttribute('aria-pressed', String(viewer.guide));
+  });
+  $('mv-onion').addEventListener('click', () => {
+    viewer.onion = !viewer.onion;
+    $('mv-onion').setAttribute('aria-pressed', String(viewer.onion));
+  });
+  $('mv-film').addEventListener('click', event => {
+    const thumb = event.target.closest('.mv-thumb');
+    if (!thumb) return;
+    viewerStep(0);
+    viewer.frame = Number(thumb.dataset.frame);
+  });
+
   $('ml-target').addEventListener('change', renderLabActions);
   $('ml-actions').addEventListener('click', event => {
     const button = event.target.closest('[data-action]');

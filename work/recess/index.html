@@ -163,6 +163,7 @@
         <button type="button" class="pb-toggle" id="mate-auto" role="switch" aria-checked="true" aria-label="동료 스킬 자동 사용">자동</button>
         <button type="button" class="pb-toggle" id="party-arrange" aria-pressed="false" aria-label="출전 자리 편성">편성</button>
       </div>
+      <p class="party-synergy" id="party-synergy" aria-live="polite" hidden></p>
     </div>
 
     <div class="quest-bar">
@@ -228,6 +229,7 @@
       <section class="view" id="view-party" aria-labelledby="party-title" hidden>
         <div class="section-head"><div><h2 id="party-title">동료</h2><p>출전한 동기가 함께 대결해요. 갖고만 있어도 파워가 올라요.</p></div><span class="pill" id="party-owned"></span></div>
         <div class="party-slots" id="party-slots"></div>
+        <div class="synergy-panel" id="synergy-panel" role="group" aria-label="팀 시너지"></div>
         <div class="section-head sub"><div><h3 class="subhead">아카데미 동기들</h3><p id="party-summary"></p></div><button type="button" class="pill-button" id="go-recruit">동료 모집</button></div>
         <div class="mate-grid" id="mate-grid"></div>
       </section>
@@ -346,12 +348,39 @@
   <button class="test-badge" id="test-badge" type="button" hidden>TEST</button>
   <div class="motion-lab" id="motion-lab" role="group" aria-label="동작 확인" hidden>
     <div class="ml-row">
-      <select id="ml-target" aria-label="동작을 볼 대상"></select>
+      <div class="ml-modes" role="tablist" aria-label="보는 방식">
+        <button type="button" role="tab" id="ml-mode-fight" aria-selected="true" aria-controls="ml-fight">대결에서</button>
+        <button type="button" role="tab" id="ml-mode-strip" aria-selected="false" aria-controls="ml-strip">띠 보기</button>
+      </div>
       <button type="button" id="ml-speed" aria-pressed="false">느리게</button>
       <button type="button" id="ml-close">끝내기</button>
     </div>
-    <div class="ml-actions" id="ml-actions"></div>
-    <p class="ml-note" id="ml-note" role="status"></p>
+    <div id="ml-fight" role="tabpanel" aria-labelledby="ml-mode-fight">
+      <div class="ml-row"><select id="ml-target" aria-label="동작을 볼 대상"></select></div>
+      <div class="ml-actions" id="ml-actions"></div>
+      <p class="ml-note" id="ml-note" role="status"></p>
+    </div>
+    <div class="ml-strip" id="ml-strip" role="tabpanel" aria-labelledby="ml-mode-strip" hidden>
+      <div class="ml-row">
+        <select id="mv-who" aria-label="그림 주인"></select>
+        <select id="mv-clip" aria-label="동작 띠"></select>
+      </div>
+      <div class="mv-body">
+        <canvas id="mv-canvas" width="280" height="255" role="img" aria-label="띠 한 칸 크게 보기"></canvas>
+        <div class="mv-side">
+          <div class="mv-step">
+            <button type="button" id="mv-prev" aria-label="이전 칸">◀</button>
+            <button type="button" id="mv-play" aria-pressed="true">멈춤</button>
+            <button type="button" id="mv-next" aria-label="다음 칸">▶</button>
+          </div>
+          <label class="mv-fps">초당 <select id="mv-fps" aria-label="초당 칸 수"></select> 칸</label>
+          <button type="button" id="mv-guide" aria-pressed="true">발판선</button>
+          <button type="button" id="mv-onion" aria-pressed="false">앞 칸 겹쳐 보기</button>
+        </div>
+      </div>
+      <div class="mv-film" id="mv-film" aria-label="띠 전체 칸"></div>
+      <p class="ml-note" id="mv-note" role="status"></p>
+    </div>
   </div>
   <dialog id="test-dialog" class="test-dialog" aria-labelledby="test-title">
     <h2 id="test-title">테스트 도구</h2>

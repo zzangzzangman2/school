@@ -142,6 +142,39 @@ with sync_playwright() as playwright:
       return out;
     }''')
     assert travel == {'forward': ['forward', True, '36%'], 'frozen': [True, '36%'], 'exit': ['exit', True, '8%'], 'ghost': 1, 'moved': True, 'cut': ['cut', True, '8%']}, travel
+    # 팀 시너지: 같은 계열 2·3·4명이면 계열 효과, 서로 다른 계열 3개 이상이면 균형(크리티컬). 피해·받는 피해·코인·쿨타임에 실제로 붙는다
+    synergy = page.evaluate('''() => {
+      const backup = structuredClone(state);
+      state.test = { slots: true };
+      for (const id of Object.keys(COMPANIONS)) state.companions[id] = state.companions[id] || 1;
+      const look = party => { state.party = party; const s = teamSynergy(state); return [s.power, s.weaken, s.cdr, s.coin, s.crit]; };
+      const out = {};
+      out.strike3 = look(['mate1', 'mate2', 'mate3', null]);
+      out.special2 = look(['mate10', 'mate11', null, null]);
+      out.cd = +mateCooldown(state, 'mate10').toFixed(2);
+      out.mixed = look(['mate1', 'mate6', 'mate10', 'mate15']);
+      out.farm2 = look(['mate15', 'mate16', 'mate6', null]);
+      state.cycle = 0; state.dungeon = null; // 경기 규칙(추천 동료 보너스)이 없는 곳에서 비교
+      state.party = [null, null, null, null]; const base = [buffMult(state), enemyHit(state), winCoins(state, false)];
+      state.party = ['mate1', 'mate2', 'mate6', 'mate7']; const both = [buffMult(state), enemyHit(state)];
+      state.party = ['mate15', 'mate16', null, null]; const coin = winCoins(state, false);
+      out.applied = [Math.round(both[0] / base[0] * 100), Math.round(both[1] / base[1] * 100), coin > base[2]];
+      Object.assign(state, backup); state.test = { slots: true };
+      state.party = ['mate1', 'mate2', 'mate6', 'mate10']; commit(); renderParty();
+      out.line = document.getElementById('party-synergy').textContent;
+      out.on = document.querySelectorAll('#party-bar .party-card.fam-on').length;
+      out.cards = [...document.querySelectorAll('#synergy-panel .syn-card')].map(card => card.querySelector('b').textContent);
+      out.tag = document.querySelector('#mate-grid .syn-tag')?.textContent;
+      Object.assign(state, backup); commit();
+      return out;
+    }''')
+    assert synergy['strike3'] == [0.12, 0, 0, 0, 0], synergy
+    assert synergy['special2'] == [0, 0, 0.08, 0, 0] and synergy['cd'] == 12.88, synergy
+    assert synergy['mixed'] == [0, 0, 0, 0, 0.07], synergy
+    assert synergy['farm2'] == [0, 0, 0, 0.2, 0], synergy
+    assert synergy['applied'] == [106, 94, True], synergy
+    assert '타격 2명 · 팀 피해 +6%' in synergy['line'] and '균형 3계열 · 크리티컬 +4%' in synergy['line'], synergy
+    assert synergy['on'] == 2 and synergy['cards'] == ['타격 2명', '잡기 1명', '기공 1명', '파밍 0명', '균형 3계열'] and synergy['tag'] == '타격', synergy
     page.evaluate("delete state.test; state.party = ['mate1', null, null, null]; state.allyTimers = [1.1, 1.5, 1.9, 2.3]; state.cooldowns = {}; commit()")
 
     # 퀘스트: 힘 훈련 Lv.3 → 받기 → 보석
@@ -205,4 +238,4 @@ with sync_playwright() as playwright:
     assert not issues, issues
     chrome.close()
 
-print('Mail, recruit/party/allies, party slot unlocks, 16 companion skills, quest reward, daily shop, promotion trial, pass + premium grant, and offline double verified.')
+print('Mail, recruit/party/allies, party slot unlocks, team synergy, 16 companion skills, quest reward, daily shop, promotion trial, pass + premium grant, and offline double verified.')

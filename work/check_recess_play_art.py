@@ -46,7 +46,7 @@ for id in [f'thug{n}' for n in range(1, 9)] + [f'thug-boss{n}' for n in range(1,
         assert Image.open(assets / f'motion-{id}-{pose}.webp').size == (280, 255)
 # 7차 모션 띠: 한 칸 280×255, 칸 수 = 띠 폭 ÷ 280(타격 칸 뒤에 마무리 칸이 남을 만큼). 주인공 띠는 같은 크기의 장비 마스크 띠가 있다
 STRIP_MIN = {
-    'boy': {'idle': 2, 'run': 2, 'punch': 4, 'hit': 2, 'down': 2, 'victory': 2, 'kick': 4, 'knee': 4, 'throw': 5, 'hold': 3, 'guard': 2,
+    'boy': {'idle': 2, 'run': 2, 'punch': 4, 'hit': 2, 'down': 2, 'victory': 2, 'kick': 4, 'knee': 4, 'throw': 5, 'hold': 5, 'guard': 2,
             'rush': 4, 'counter': 4, 'combo': 4, 'cheer': 2, 'drink': 2, 'step': 4},
     'thug': {'idle': 2, 'attack': 4, 'hit': 2, 'down': 2},
     'mate': {'idle': 2, 'run': 2, 'attack': 5, 'skill': 4},
@@ -106,7 +106,7 @@ with sync_playwright() as playwright:
             expect(page.locator('#player-sprite canvas:not(.anim)')).to_have_attribute('data-frame', re.compile(f':{motion}$'))
             # 7차 모션 띠: 타격 상태에서는 그 종목 띠의 타격 칸(주먹·발차기·무릎 3번째, 메치기 4번째, 굳히기 2번째)을 장비 색으로 그린다
             clip = 'punch' if motion == 'strike' else motion
-            impact = {'punch': 2, 'kick': 2, 'knee': 2, 'throw': 3, 'hold': 1}[clip]
+            impact = {'punch': 2, 'kick': 2, 'knee': 2, 'throw': 3, 'hold': 3}[clip]
             expect(page.locator('#player-sprite')).to_have_class(re.compile('(^| )anim-on( |$)'))
             expect(page.locator('#player-sprite canvas.anim')).to_have_attribute('data-frame', f'boy:{clip}:{impact}')
             # 잡기 종목: 맞는 쪽은 메쳐져 뜨거나(throw) 눌린다(hold). 그 그림이 있는 상대(아카데미 선수)만
@@ -155,10 +155,33 @@ with sync_playwright() as playwright:
     wins = lab.evaluate('state.wins')
     lab.wait_for_timeout(1500)
     assert lab.evaluate('state.wins') == wins
+    # 띠 보기: 대결과 상관없이 아무 띠나 골라 한 칸씩 넘기고, 타격 칸과 발 위치를 본다
+    lab.get_by_role('tab', name='띠 보기').click()
+    expect(lab.locator('#ml-strip')).to_be_visible()
+    expect(lab.locator('#ml-fight')).to_be_hidden()
+    assert lab.locator('#mv-who option').count() == 2 + 16 + 8 + 4
+    lab.locator('#mv-who').select_option('mate1')
+    lab.locator('#mv-clip').select_option('run')
+    expect(lab.locator('#mv-film .mv-thumb')).to_have_count(4)
+    lab.get_by_role('button', name='다음 칸').click()
+    expect(lab.locator('#mv-play')).to_have_text('재생')
+    frame = lab.locator('#mv-canvas').get_attribute('data-frame')
+    lab.get_by_role('button', name='다음 칸').click()
+    expect(lab.locator('#mv-canvas')).not_to_have_attribute('data-frame', frame)
+    expect(lab.locator('#mv-note')).to_contain_text(re.compile(r'run [1-4]/4칸 · 발 24[4-9]px'))
+    lab.locator('#mv-who').select_option('boy:plain')
+    lab.locator('#mv-clip').select_option('hold')
+    expect(lab.locator('#mv-film .mv-thumb')).to_have_count(7)
+    expect(lab.locator('#mv-film .mv-thumb.mv-hit')).to_have_text('4 타격')
+    lab.locator('#mv-film .mv-thumb.mv-hit').click()
+    expect(lab.locator('#mv-canvas')).to_have_attribute('data-frame', 'boy:hold:3')
+    expect(lab.locator('#mv-note')).to_contain_text('hold 4/7칸 · 타격 칸 · 발 249px')
+    lab.get_by_role('tab', name='대결에서').click()
+    expect(lab.locator('#ml-actions')).to_be_visible()
     lab.get_by_role('button', name='끝내기').click()
     expect(lab.locator('#motion-lab')).to_be_hidden()
     lab.close()
     assert not failures, failures
     browser.close()
 
-print('Cover, pose families, fighting-contest mapping (strike/grapple), protective rivals, six-frame effects, motion strips (hero/thugs/mates, tinted hero), motion lab and art assets verified.')
+print('Cover, pose families, fighting-contest mapping (strike/grapple), protective rivals, six-frame effects, motion strips (hero/thugs/mates, tinted hero), motion lab with strip viewer and art assets verified.')
