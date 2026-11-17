@@ -416,7 +416,7 @@ function renderBattle() {
   const map = MAPS[state.map];
   const gradeNumber = gradeIndex(state.map) + 1;
   const dungeon = state.dungeon ? dungeonInfo(state.dungeon.id) : null;
-  setText('stage-number', dungeon ? (state.dungeon.id === 'trial' ? `승급 시험 · ${tierName(state.dungeon.level)}` : `던전 · Lv.${state.dungeon.level}`) : `${schoolName(state.cycle)} ${gradeLabel(state.cycle, state.map)} · ${mapCode(state.map)}`);
+  setText('stage-number', dungeon ? (state.dungeon.id === 'trial' ? `승급 심사 · ${tierName(state.dungeon.level)}` : `던전 · Lv.${state.dungeon.level}`) : stageLabel(state.cycle || 0, state.map));
   setText('battle-title', dungeon ? dungeon.name : stagePlace(state.cycle || 0, state.map));
   $('arena').dataset.map = dungeon ? (dungeon.background || dungeon.map + 1) : venueMap(state) || state.map + 1;
   $('arena').classList.toggle('dungeon-round', Boolean(dungeon));
@@ -980,9 +980,9 @@ function renderRegions() {
   setText('region-count', `${done} / ${REGIONS.length}`);
   $('region-list').replaceChildren(...REGIONS.map((name, index) => {
     const item = document.createElement('li');
-    const now = state.cycle === index + 1;
+    const now = regionIndex(state.cycle) === index;
     item.className = `region${regionConquered(state, index) ? ' done' : ''}${now ? ' now' : ''}`;
-    item.textContent = name;
+    item.textContent = now && roundTag(state.cycle) ? `${name} ${roundTag(state.cycle)}` : name;
     if (now) item.setAttribute('aria-current', 'step');
     return item;
   }));
@@ -1201,7 +1201,7 @@ function showSchool() {
   $('school-sprite').dataset.portrait = state.profile.gender;
   const cycle = state.cycle;
   setText('school-title', cycle === 1 ? '아카데미 졸업!' : `${schoolName(cycle - 1)} 제패!`);
-  const conquered = Math.min(cycle - 1, REGIONS.length);
+  const conquered = Math.min(regionIndex(cycle), REGIONS.length);
   setText('school-text', cycle === 1
     ? `4학년 과정을 마쳤어요. 이제 ${schoolName(1)}부터 한국 곳곳의 격투 대회를 제패해요.`
     : `${schoolName(cycle - 1)} 챔피언이 됐어요. 전국 제패 ${conquered}/${REGIONS.length} · 다음 목표는 ${schoolName(cycle)}. 상대도 상금도 커져요.`);
@@ -1302,7 +1302,7 @@ function renderObjective() {
   $('objective-label').textContent = next < 0 ? '18개 맵 완료' : '다음 목표';
   $('objective-title').textContent = next < 0 ? '쉬는 시간의 왕 등극!' : `${mapCode(next)} · ${stageNames(state.cycle || 0, next)[BOSS_WAVE]}`;
   $('objective-reward').textContent = next < 0 ? '지도에서 어떤 맵이든 다시 대결할 수 있어요.'
-    : next === MAPS.length - 1 ? (state.cycle ? `첫 승리 시 ${schoolName(state.cycle)} 제패` : '첫 승리 시 아카데미 졸업') : isGradeFinal(next) ? `첫 승리 장비 · ${GEAR[BOSS_REWARDS[gradeIndex(next)]].name}` : `첫 승리 시 ${MAPS[next + 1].place} 해금`;
+    : next === MAPS.length - 1 ? (!state.cycle ? '첫 승리 시 아카데미 졸업' : lastRound(state.cycle) ? `첫 승리 시 ${schoolName(state.cycle)} 제패` : `첫 승리 시 ${roundTag(state.cycle)} 바퀴 완료`) : isGradeFinal(next) ? `첫 승리 장비 · ${GEAR[BOSS_REWARDS[gradeIndex(next)]].name}` : `첫 승리 시 ${MAPS[next + 1].place} 해금`;
 }
 
 function setText(id, text) {
@@ -1342,7 +1342,7 @@ function render() {
   $('speed').classList.toggle('fast', state.speed === 2);
   $('speed').setAttribute('aria-pressed', String(state.speed === 2));
   if (lastLevel !== null && state.level > lastLevel) showLevelUp(lastLevel, state.level);
-  if (lastCycle !== null && state.cycle > lastCycle) showSchool();
+  if (lastCycle !== null && state.cycle > lastCycle && (state.cycle === 1 || lastRound(state.cycle - 1))) showSchool();
   lastCycle = state.cycle;
   lastLevel = state.level;
   renderSnacks();
@@ -1621,7 +1621,7 @@ function start() {
     '보스를 이기면 다음 장소가 열려요. 자동 진격을 끄면 같은 장소에서 코인을 모아요.',
     '졌을 때는 같은 맵에서 반복 수련을 시작해요. 수련에서 3승을 하면 자동으로 다시 도전해요.',
     `게임을 닫아도 최대 ${offlineLimit(state) / 3600}시간 동안 대결과 보상이 쌓여요. 진행 상황은 이 브라우저에 저장돼요.`,
-    '4-3 보스를 이기면 아카데미를 졸업하고, 정선 산골 마을부터 서울 강남까지 지역 격투 대회를 하나씩 제패해요. 지역마다 동네 도장 → 상가 체육관 → 시민 체육관 → 챔피언전 순서예요. 막히면 지도 탭에서 재입학하고, 명예 배지로 명예 코칭을 받아 영구 능력치를 올리세요.',
+    '4-3 보스를 이기면 아카데미를 졸업하고, 정선 산골 마을부터 서울 강남까지 지역 격투 대회를 하나씩 제패해요. 지역마다 동네 도장 → 상가 체육관 → 시민 체육관 → 챔피언전(1-1~4-3)을 시골은 3바퀴, 지방 도시는 2바퀴, 광역시는 1바퀴, 서울은 2바퀴 돌면 제패예요. 막히면 지도 탭에서 재입학하고, 명예 배지로 명예 코칭을 받아 영구 능력치를 올리세요.',
   ], '?'));
   document.addEventListener('visibilitychange', () => {
     if (editingProfile || !state.profile) return;

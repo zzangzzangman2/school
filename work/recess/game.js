@@ -166,6 +166,10 @@ const REGIONS = [
   '제주', '전주', '포항', '청주', '창원', '천안', '광주광역시', '대전광역시',
   '울산광역시', '대구광역시', '인천광역시', '부산광역시', '수원', '성남', '서울 강북', '서울 강남',
 ];
+// 지역마다 1-1~4-3을 몇 바퀴 돌아야 제패하는지. 시골은 길게(3), 지방 도시 2, 광역시 1, 서울은 마지막이라 2.
+// 바퀴마다 회차(cycle)가 하나씩 늘어 상대·보상이 계속 커진다. 시뮬 기준 시골 1주, 지방 도시 3달, 서울 2년.
+const REGION_ROUNDS = REGIONS.map((_, index) => (index < 8 ? 3 : index < 14 ? 2 : index < 22 ? 1 : 2));
+const REGION_START = REGION_ROUNDS.reduce((starts, rounds, index) => [...starts, starts[index] + rounds], [1]);
 const ZONES = ['동네 도장', '상가 체육관', '시민 체육관', '지역 챔피언전'];
 const ZONE_PLACES = [
   ['마을 회관 앞', '장터 공터', '동네 도장'],
@@ -542,9 +546,32 @@ function atProgress(reached, kind) {
   return baseValue(map, kind) * cycleScale({ cycle: Math.floor(reached / MAPS.length), map }, kind);
 }
 function dungeonProgress(level) { return 3 * level - 1; }
+function regionIndex(cycle) {
+  if (!cycle) return -1;
+  const index = REGION_START.findIndex(start => start > cycle) - 1;
+  return index < 0 ? REGIONS.length : index;
+}
+function regionRound(cycle) {
+  const index = regionIndex(cycle);
+  return index >= 0 && index < REGIONS.length ? cycle - REGION_START[index] : 0;
+}
+function lastRound(cycle) {
+  const index = regionIndex(cycle);
+  return index >= REGIONS.length || (index >= 0 && regionRound(cycle) === REGION_ROUNDS[index] - 1);
+}
+function roundTag(cycle) {
+  const index = regionIndex(cycle);
+  return index >= 0 && index < REGIONS.length && REGION_ROUNDS[index] > 1 ? `${regionRound(cycle) + 1}/${REGION_ROUNDS[index]}` : '';
+}
 function schoolName(cycle) {
   if (!cycle) return ACADEMY.short;
-  return cycle <= REGIONS.length ? REGIONS[cycle - 1] : `전국 챔피언 방어전 ${cycle - REGIONS.length}시즌`;
+  const index = regionIndex(cycle);
+  return index < REGIONS.length ? REGIONS[index] : `전국 챔피언 방어전 ${cycle - REGION_START[REGIONS.length] + 1}시즌`;
+}
+function stageLabel(cycle, map) {
+  const tag = roundTag(cycle);
+  // 지역은 큰 제목(장소)이 구역을 말해 주므로 지역 이름·바퀴·번호만 쓴다(위쪽 버튼과 겹치지 않게)
+  return cycle ? `${schoolName(cycle)}${tag ? ` ${tag}` : ''} · ${mapCode(map)}` : `${schoolName(cycle)} ${gradeLabel(cycle, map)} · ${mapCode(map)}`;
 }
 function gradeLabel(cycle, map) {
   const block = gradeIndex(map);
@@ -556,7 +583,7 @@ function stageNames(cycle, map) {
   const block = gradeIndex(map);
   const pick = k => FIGHTERS[(cycle * 31 + map * 7 + k * 13) % FIGHTERS.length];
   const region = schoolName(cycle).split(' ')[0];
-  const title = !isGradeFinal(map) ? ZONE_LEADERS[block] : block === GRADE_COUNT - 1 ? `${region} 챔피언` : `${region} ${ZONE_BOSSES[block]}`;
+  const title = !isGradeFinal(map) ? ZONE_LEADERS[block] : block < GRADE_COUNT - 1 ? `${region} ${ZONE_BOSSES[block]}` : lastRound(cycle) ? `${region} 챔피언` : `${region} 상위 랭커`;
   return [pick(0), pick(1), pick(2), `${title} ${pick(3)}`];
 }
 function placeLabel(reached) {
@@ -578,7 +605,7 @@ const ZONE_ART = {
 };
 function stageArt(cycle, map) {
   if (!cycle) return ACADEMY_ART[map];
-  return ZONE_ART[cycle <= 8 ? 'rural' : 'city'][gradeIndex(map)];
+  return ZONE_ART[regionIndex(cycle) < 8 ? 'rural' : 'city'][gradeIndex(map)];
 }
 function venueMap(state) {
   if (state.dungeon) return null;
@@ -586,7 +613,7 @@ function venueMap(state) {
   if (cycle && contestId(state) === 'ssireum') return 'a09';
   return stageArt(cycle, state.map);
 }
-function regionConquered(state, index) { return bestProgress(state) >= (index + 2) * MAPS.length; }
+function regionConquered(state, index) { return bestProgress(state) >= REGION_START[index + 1] * MAPS.length; }
 function dungeonInfo(id) { return id === 'trial' ? TRIAL : DUNGEONS[id]; }
 function dungeonReach(state) { return state.dungeon.id === 'trial' ? tierReq(state.dungeon.level) : dungeonProgress(state.dungeon.level); }
 function dungeonUnlocked(state, id) {
@@ -814,7 +841,10 @@ function win(state, emit) {
     state.cycle = (state.cycle || 0) + 1;
     state.cleared = MAPS.map(() => false);
     state.hp = maxHp(state);
-    record(state, state.cycle === 1 ? `아카데미 졸업! 이제 ${schoolName(1)}부터 지역을 제패하러 가요.` : `${schoolName(state.cycle - 1)} 제패! 다음 목표는 ${schoolName(state.cycle)}.`);
+    const done = state.cycle - 1;
+    record(state, !done ? `아카데미 졸업! 이제 ${schoolName(1)}부터 지역을 제패하러 가요.`
+      : lastRound(done) ? `${schoolName(done)} 제패! 다음 목표는 ${schoolName(state.cycle)}.`
+      : `${schoolName(done)} ${roundTag(done)} 바퀴 완료! 다음 바퀴는 상대가 더 강해져요.`);
     finishRound(state, 'win', 0, 0, 1.6, emit, reward);
     return;
   }
@@ -1452,7 +1482,7 @@ function restore(snapshot) {
 
 if (typeof module !== 'undefined') {
   module.exports = {
-    skillPower, skillUnlocked, venueMap, stagePlace, stageNames, stageArt, regionConquered, REGIONS, ZONES, ACADEMY, autoTrain, critPower, regenRate, allyTrainLevel, allyTrainCap, allyTrainCost, trainAlly, skillLevel, skillCost, cheerMult, sprintMult, lunchHeal, trainSkill, ALLY_TRAIN, CRIT_BASE,
+    REGION_ROUNDS, REGION_START, regionIndex, regionRound, lastRound, roundTag, stageLabel, skillPower, skillUnlocked, venueMap, stagePlace, stageNames, stageArt, regionConquered, REGIONS, ZONES, ACADEMY, autoTrain, critPower, regenRate, allyTrainLevel, allyTrainCap, allyTrainCost, trainAlly, skillLevel, skillCost, cheerMult, sprintMult, lunchHeal, trainSkill, ALLY_TRAIN, CRIT_BASE,
     CONTESTS, schoolName, gradeLabel, placeLabel, contestId, contest,
     newGame, simulate, restore, trainingCost, maxHp, attack, enemyMaxHp, openFight, activateSkill, gearStats, nextMission, MAPS, GEAR, SLOTS, MAP_REWARDS, BOSS_REWARDS, TRAINING, SKILLS, makeProfile,
     trainingCostAt, enemyHit, winCoins, winXp, interval, critChance, prestigeGain, transfer, perkCost, PERKS, pullStickers, pullCost, progress, xpTarget,
