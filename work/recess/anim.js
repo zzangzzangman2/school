@@ -13,6 +13,12 @@ const ANIM_CLIPS = ['idle', 'run', 'punch', 'hit', 'down', 'victory', 'kick', 'k
 const ANIM_IMPACT = { punch: 2, kick: 2, knee: 2, throw: 3, hold: 3, rush: 2, counter: 2, combo: 2, step: 2 };
 // 종목 동작(arena data-motion) → 주인공 공격 띠. 태권도(spar)는 보호구 정지 그림을 쓰므로 띠 없음
 const HERO_CONTEST_CLIP = { strike: 'punch', kick: 'kick', knee: 'knee', throw: 'throw', hold: 'hold' };
+// 매끄러운 띠(주인공부터): 원래 칸 사이마다 SMOOTH_K칸을 광학 흐름으로 끼운 띠(--animsmooth-동작, work/tools/smooth_strip.py).
+// 원래 i번째 칸 = 매끄러운 띠의 i*(SMOOTH_K+1)번째 칸이라 동작 계획(칸 번호)은 그대로 쓰고 여기서 옮긴다.
+// 반복 띠(대기·달리기)는 마지막 칸 → 첫 칸 사이도 메웠다. animSmooth[id]를 끄면 원래 띠로 돈다.
+const SMOOTH_K = 3;
+const SMOOTH_LOOPS = ['idle', 'run'];
+const animSmooth = { boy: true };
 const HERO_SKILL_CLIP = { rush: 'rush', counter: 'counter', combo: 'combo', step: 'step', cheer: 'cheer', drink: 'drink' };
 
 // 동작 계획 = [띠, 첫 칸, 끝 칸(-1 = 마지막), 방식, 초당 칸]
@@ -99,7 +105,7 @@ function animClipFps(id, clip) {
 
 // ── 띠 주소(CSS 변수)와 그림 읽기 ──
 const animUrls = new Map();
-function animUrl(sprite, id, clip, mask = false) {
+function animUrl(sprite, id, clip, mask = false, smooth = false) {
   let urls = animUrls.get(id);
   if (!urls) {
     const css = getComputedStyle(sprite);
@@ -107,10 +113,16 @@ function animUrl(sprite, id, clip, mask = false) {
     for (const name of ANIM_CLIPS) {
       urls[name] = urlValue(css.getPropertyValue(`--anim-${name}`));
       urls[`mask:${name}`] = urlValue(css.getPropertyValue(`--animmask-${name}`));
+      urls[`smooth:${name}`] = urlValue(css.getPropertyValue(`--animsmooth-${name}`));
+      urls[`smooth:mask:${name}`] = urlValue(css.getPropertyValue(`--animsmoothmask-${name}`));
     }
     animUrls.set(id, urls);
   }
-  return urls[mask ? `mask:${clip}` : clip];
+  return urls[`${smooth ? 'smooth:' : ''}${mask ? 'mask:' : ''}${clip}`];
+}
+// 이 스프라이트에 매끄러운 띠를 쓸지(켜져 있고 그림과 마스크가 다 있을 때)
+function smoothOn(sprite, id, clip) {
+  return Boolean(animSmooth[id] && animUrl(sprite, id, clip, false, true) && (id !== 'boy' || animUrl(sprite, id, clip, true, true)));
 }
 
 const animImages = new Map();
@@ -152,14 +164,14 @@ function animPixels(img) {
 
 // 주인공은 입은 장비 색으로 띠 전체를 한 번 칠해 두고(마스크 띠: 빨강 상의·초록 하의·파랑 태그·노랑 신발) 그 띠에서 칸을 꺼낸다
 const animTinted = new Map();
-function tintedStrip(sprite, id, clip, url, outfit) {
+function tintedStrip(sprite, id, clip, url, outfit, smooth = false) {
   const key = `${url}|${outfit}`;
   let entry = animTinted.get(key);
   if (entry) return entry;
-  const maskUrl = animUrl(sprite, id, clip, true);
+  const maskUrl = animUrl(sprite, id, clip, true, smooth);
   entry = { ready: false, failed: !maskUrl, canvas: null, frames: 0 };
   animTinted.set(key, entry);
-  if (animTinted.size > 20) animTinted.delete(animTinted.keys().next().value);
+  if (animTinted.size > 24) animTinted.delete(animTinted.keys().next().value);
   if (!maskUrl) return entry;
   const base = animImage(url);
   const mask = animImage(maskUrl);
@@ -185,9 +197,10 @@ function warmHero(sprite, outfit) {
   warmedOutfit = outfit;
   HERO_WARM.forEach((clip, index) => setTimeout(() => {
     if (warmedOutfit !== outfit) return;
-    const url = animUrl(sprite, 'boy', clip);
+    const smooth = smoothOn(sprite, 'boy', clip);
+    const url = animUrl(sprite, 'boy', clip, false, smooth);
     if (!url) return;
-    if (outfit) tintedStrip(sprite, 'boy', clip, url, outfit);
+    if (outfit) tintedStrip(sprite, 'boy', clip, url, outfit, smooth);
     else animImage(url);
   }, index * 40));
 }
@@ -230,14 +243,27 @@ function animOff(sprite, s) {
   sprite.classList.remove('anim-on');
 }
 
-function animFrame(s, now, frames) {
+// smoothClip = 매끄러운 띠의 동작 이름(원래 띠면 null). 계획의 칸 번호는 원래 띠 기준이라 매끄러운 띠의 칸으로 옮긴다:
+//   여러 칸 구간은 끝 칸 뒤의 사이 칸까지(다음 상태로 끊기지 않게), 타격 칸 하나는 그 칸 그대로(타격 순간 고정),
+//   타격 칸 바로 뒤에서 시작하는 마무리는 타격 칸 뒤 사이 칸부터, 반복은 마지막 → 첫 칸 사이 칸까지 돈다.
+function animFrame(s, now, frames, smoothClip = null) {
   const [, first, end, mode, fps = 10] = s.plan;
-  const last = end < 0 ? frames + end : Math.min(end, frames - 1);
-  const start = Math.min(first, last);
+  const step = smoothClip ? SMOOTH_K + 1 : 1;
+  const loopStrip = Boolean(smoothClip) && SMOOTH_LOOPS.includes(smoothClip);
+  const base = step > 1 ? Math.round(loopStrip ? frames / step : (frames - 1) / step + 1) : frames;
+  const lastBase = end < 0 ? base + end : Math.min(end, base - 1);
+  const startBase = Math.min(first, lastBase);
+  let start = startBase * step;
+  let last = lastBase * step;
+  if (step > 1) {
+    if (lastBase === base - 1) last = loopStrip && mode === 'loop' ? frames - 1 : lastBase * step;
+    else if (lastBase > startBase) last = lastBase * step + SMOOTH_K;
+    if (mode === 'span' && startBase > 0 && startBase - 1 === ANIM_IMPACT[smoothClip]) start = startBase * step - SMOOTH_K;
+  }
   const count = last - start + 1;
   const rate = (typeof motionRate === 'function' ? motionRate() : 1) * animTimeScale;
-  if (mode === 'loop') return reducedMotion.matches ? start : start + Math.floor(now / 1000 * fps * Math.min(rate, 2) + s.phase) % count;
-  if (mode === 'once') return start + Math.min(count - 1, Math.max(0, Math.floor((now - s.from) / 1000 * fps * rate)));
+  if (mode === 'loop') return reducedMotion.matches ? start : start + Math.floor(now / 1000 * fps * step * Math.min(rate, 2) + s.phase * step) % count;
+  if (mode === 'once') return start + Math.min(count - 1, Math.max(0, Math.floor((now - s.from) / 1000 * fps * step * rate)));
   if (!(s.until > s.from)) return last;
   const progress = Math.min(0.999, Math.max(0, (now - s.from) / (s.until - s.from)));
   return start + Math.floor(progress * count);
@@ -246,14 +272,15 @@ function animFrame(s, now, frames) {
 function drawAnim(sprite, s, now) {
   if (!s.plan) return animOff(sprite, s);
   const clip = s.plan[0];
-  const url = animUrl(sprite, s.id, clip);
+  const smooth = smoothOn(sprite, s.id, clip);
+  const url = animUrl(sprite, s.id, clip, false, smooth);
   if (!url) return animOff(sprite, s);
   const outfit = s.id === 'boy' ? sprite.dataset.outfit || '' : '';
   let source;
   let frames;
   if (outfit) {
     warmHero(sprite, outfit);
-    const tinted = tintedStrip(sprite, s.id, clip, url, outfit);
+    const tinted = tintedStrip(sprite, s.id, clip, url, outfit, smooth);
     if (!tinted.ready) return animOff(sprite, s);
     source = tinted.canvas;
     frames = tinted.frames;
@@ -264,7 +291,7 @@ function drawAnim(sprite, s, now) {
     source = strip.img;
     frames = strip.frames;
   }
-  const frame = animFrame(s, now, frames);
+  const frame = animFrame(s, now, frames, smooth ? clip : null);
   const key = `${url}|${outfit}|${frame}`;
   if (s.drawn !== key) {
     if (!s.canvas || !s.canvas.isConnected) {
@@ -281,7 +308,11 @@ function drawAnim(sprite, s, now) {
     s.drawn = key;
     s.frame = frame;
     s.frames = frames;
-    s.canvas.dataset.frame = `${s.id}:${clip}:${frame}`;
+    // 칸 번호는 원래 띠 기준으로 알린다(매끄러운 띠의 사이 칸은 2.25처럼 소수)
+    const step = smooth ? SMOOTH_K + 1 : 1;
+    const label = frame / step;
+    s.canvas.dataset.frame = `${s.id}:${clip}:${Number.isInteger(label) ? label : label.toFixed(2)}`;
+    s.canvas.dataset.smooth = smooth ? '1' : '';
   }
   if (!s.on) {
     s.on = true;

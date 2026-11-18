@@ -1070,6 +1070,8 @@ function testAct(action) {
   const ids = Object.keys(COMPANIONS);
   const acts = {
     mates: () => { for (const id of ids) state.companions[id] = Math.max(1, companionLevel(state, id)); return '동료 16명을 모두 받았어요'; },
+    // 주인공 모션: 매끄러운 띠(칸 사이 3칸 보간)와 원래 띠를 바로 견줘 보기
+    smooth: () => { animSmooth.boy = !animSmooth.boy; return animSmooth.boy ? '주인공: 매끄러운 띠(칸 사이 3칸 보간)' : '주인공: 원래 띠'; },
     shards: () => { for (const id of ids) addShards(state, id, 100); return '모든 동료 조각 +100'; },
     stars: () => { for (const id of ids) state.companions[id] = GRADES[COMPANIONS[id].grade].maxStar; return '모든 동료 최대 별'; },
     slots: () => { state.test = { ...state.test, slots: !state.test?.slots }; return state.test.slots ? '출전 4칸 열림' : '출전 칸을 진행도 기준으로 되돌렸어요'; },
