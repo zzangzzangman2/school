@@ -1318,3 +1318,12 @@ p, small, .item-body p, .muted { font-weight: 400; }
 @keyframes hero-trail { to { opacity: 0; translate: -10px 0; } }
 @media (prefers-reduced-motion: reduce) { .hero-trail { display: none; } }
 
+/* 상대 크기: 열 폭을 꽉 채우고 가로만 줄이던 것(scaleX)을 주인공·동료와 같은 칸(--unit) 기준으로 위아래 함께.
+   --size(ui.js) = 대장 1 · 졸개 0.9 · 보스 1.12, 학년마다 조금씩. 대장 키가 주인공과 같다 */
+.fighter.rival .sprite { flex: 0 0 auto; width: calc(var(--unit) * var(--size, 1)); max-width: none; transform: translate(calc(var(--side) * var(--shift)), var(--rise)) rotate(calc(var(--side) * var(--tilt))) scaleX(var(--side)); }
+.fighter.rival.minion .sprite { max-height: none; }
+
+/* 후열 동료: 앞줄 뒤에 서 있는 느낌(조금 어둡게). 주인공·앞줄보다 뒤에 그린다 */
+.ally.back { z-index: 0 !important; }
+.ally.back .sprite { filter: brightness(.88) saturate(.92) drop-shadow(0 3px 2px rgba(30, 16, 50, .45)); }
+

@@ -8,15 +8,20 @@
 // 그리기는 화면 주사율(requestAnimationFrame, 보통 초당 60번)로 돈다. 엔진·보상 계산은 건드리지 않는다.
 
 const ANIM_CELL = { w: 280, h: 255 };
-const ANIM_CLIPS = ['idle', 'run', 'punch', 'hit', 'down', 'victory', 'kick', 'knee', 'throw', 'hold', 'guard', 'rush', 'counter', 'combo', 'cheer', 'drink', 'step', 'attack', 'skill'];
+const ANIM_CLIPS = ['idle', 'run', 'punch', 'hit', 'down', 'victory', 'kick', 'knee', 'throw', 'hold', 'guard', 'rush', 'counter', 'combo', 'cheer', 'drink', 'step', 'getup', 'attack', 'skill'];
 // 타격 칸(0부터). 이 칸이 엔진의 타격 순간(impact)에 보이도록 앞은 준비, 뒤는 마무리로 나눈다
-const ANIM_IMPACT = { punch: 2, kick: 2, knee: 2, throw: 3, hold: 3, rush: 2, counter: 2, combo: 2, step: 2 };
+// Codex 9차(work/codex-motion-handoff-9.md)에서 중간 칸이 들어가 발차기·무릎·반격·연타 4번째, 메치기·돌진 5번째, 굳히기 6번째로 밀렸다
+const ANIM_IMPACT = { punch: 2, kick: 3, knee: 3, throw: 4, hold: 5, rush: 4, counter: 3, combo: 3, step: 2 };
 // 종목 동작(arena data-motion) → 주인공 공격 띠. 태권도(spar)는 보호구 정지 그림을 쓰므로 띠 없음
 const HERO_CONTEST_CLIP = { strike: 'punch', kick: 'kick', knee: 'knee', throw: 'throw', hold: 'hold' };
 // 매끄러운 띠(주인공부터): 원래 칸 사이마다 SMOOTH_K칸을 광학 흐름으로 끼운 띠(--animsmooth-동작, work/tools/smooth_strip.py).
-// 원래 i번째 칸 = 매끄러운 띠의 i*(SMOOTH_K+1)번째 칸이라 동작 계획(칸 번호)은 그대로 쓰고 여기서 옮긴다.
+// 원래 i번째 칸 = 매끄러운 띠의 i*(k+1)번째 칸이라 동작 계획(칸 번호)은 그대로 쓰고 여기서 옮긴다.
+// k는 기본 5칸. 원래 칸이 7~8개면 4칸, 9개면 3칸(칸 사이가 이미 좁고, 띠 폭을 36칸 안으로 묶어 장비 색 띠 메모리를 줄임).
+// 띠를 다시 만들 때 같은 k를 써야 한다(README 참고).
 // 반복 띠(대기·달리기)는 마지막 칸 → 첫 칸 사이도 메웠다. animSmooth[id]를 끄면 원래 띠로 돈다.
 const SMOOTH_K = 5;
+const SMOOTH_K_CLIP = { combo: 4, counter: 4, kick: 4, knee: 4, hold: 3, rush: 3, throw: 3 };
+function smoothK(clip) { return SMOOTH_K_CLIP[clip] ?? SMOOTH_K; }
 const SMOOTH_LOOPS = ['idle', 'run'];
 const animSmooth = { boy: true };
 // 동작이 바뀌는 순간(대기 → 공격, 공격 → 대기, 맞음 → 대기): 앞 동작의 마지막 그림을 잠깐 겹쳐 지워 툭 바뀌지 않게 한다.
@@ -56,6 +61,8 @@ function heroPlan(pose, prev, timed, motion) {
     case 'guard': return ['guard', 0, -1, timed ? 'span' : 'once', 10];
     case 'victory': return ['victory', 0, -1, 'once', 9];
     case 'lose': case 'down': return ['down', 0, -1, 'once', 9];
+    // 지고 나서 다시 설 때 한 번(쓰러짐 끝 칸 → 손 짚고 → 무릎 → 대기 첫 자세)
+    case 'getup': return ['getup', 0, -1, 'once', 9];
   }
   return null;
 }
@@ -194,7 +201,7 @@ function tintedStrip(sprite, id, clip, url, outfit, smooth = false) {
 }
 
 // 주인공 장비가 바뀌면 자주 쓰는 띠를 미리 칠해 둔다(처음 쓰는 순간 정지 그림이 끼지 않게)
-const HERO_WARM = ['idle', 'run', 'hit', 'victory', 'down', 'punch', 'kick', 'knee', 'throw', 'hold'];
+const HERO_WARM = ['idle', 'run', 'hit', 'victory', 'down', 'getup', 'punch', 'kick', 'knee', 'throw', 'hold'];
 let warmedOutfit = null;
 function warmHero(sprite, outfit) {
   if (warmedOutfit === outfit) return;
@@ -253,7 +260,8 @@ function animOff(sprite, s) {
 //   타격 칸 바로 뒤에서 시작하는 마무리는 타격 칸 뒤 사이 칸부터, 반복은 마지막 → 첫 칸 사이 칸까지 돈다.
 function animFrame(s, now, frames, smoothClip = null) {
   const [, first, end, mode, fps = 10] = s.plan;
-  const step = smoothClip ? SMOOTH_K + 1 : 1;
+  const k = smoothClip ? smoothK(smoothClip) : 0;
+  const step = k + 1;
   const loopStrip = Boolean(smoothClip) && SMOOTH_LOOPS.includes(smoothClip);
   const base = step > 1 ? Math.round(loopStrip ? frames / step : (frames - 1) / step + 1) : frames;
   const lastBase = end < 0 ? base + end : Math.min(end, base - 1);
@@ -262,8 +270,8 @@ function animFrame(s, now, frames, smoothClip = null) {
   let last = lastBase * step;
   if (step > 1) {
     if (lastBase === base - 1) last = loopStrip && mode === 'loop' ? frames - 1 : lastBase * step;
-    else if (lastBase > startBase) last = lastBase * step + SMOOTH_K;
-    if (mode === 'span' && startBase > 0 && startBase - 1 === ANIM_IMPACT[smoothClip]) start = startBase * step - SMOOTH_K;
+    else if (lastBase > startBase) last = lastBase * step + k;
+    if (mode === 'span' && startBase > 0 && startBase - 1 === ANIM_IMPACT[smoothClip]) start = startBase * step - k;
   }
   const count = last - start + 1;
   const rate = (typeof motionRate === 'function' ? motionRate() : 1) * animTimeScale;
@@ -337,7 +345,7 @@ function drawAnim(sprite, s, now) {
     s.frame = frame;
     s.frames = frames;
     // 칸 번호는 원래 띠 기준으로 알린다(매끄러운 띠의 사이 칸은 2.25처럼 소수)
-    const step = smooth ? SMOOTH_K + 1 : 1;
+    const step = smooth ? smoothK(clip) + 1 : 1;
     const label = frame / step;
     s.canvas.dataset.frame = `${s.id}:${clip}:${Number.isInteger(label) ? label : label.toFixed(2)}`;
     s.canvas.dataset.smooth = smooth ? '1' : '';

@@ -106,7 +106,7 @@ with sync_playwright() as playwright:
             expect(page.locator('#player-sprite canvas:not(.anim)')).to_have_attribute('data-frame', re.compile(f':{motion}$'))
             # 7차 모션 띠: 타격 상태에서는 그 종목 띠의 타격 칸(주먹·발차기·무릎 3번째, 메치기 4번째, 굳히기 2번째)을 장비 색으로 그린다
             clip = 'punch' if motion == 'strike' else motion
-            impact = {'punch': 2, 'kick': 2, 'knee': 2, 'throw': 3, 'hold': 3}[clip]
+            impact = {'punch': 2, 'kick': 3, 'knee': 3, 'throw': 4, 'hold': 5}[clip]  # Codex 9차 중간 칸 반영
             expect(page.locator('#player-sprite')).to_have_class(re.compile('(^| )anim-on( |$)'))
             expect(page.locator('#player-sprite canvas.anim')).to_have_attribute('data-frame', f'boy:{clip}:{impact}')
             # 잡기 종목: 맞는 쪽은 메쳐져 뜨거나(throw) 눌린다(hold). 그 그림이 있는 상대(아카데미 선수)만
@@ -171,11 +171,14 @@ with sync_playwright() as playwright:
     expect(lab.locator('#mv-note')).to_contain_text(re.compile(r'run [1-4]/4칸 · 발 24[4-9]px'))
     lab.locator('#mv-who').select_option('boy:plain')
     lab.locator('#mv-clip').select_option('hold')
-    expect(lab.locator('#mv-film .mv-thumb')).to_have_count(7)
-    expect(lab.locator('#mv-film .mv-thumb.mv-hit')).to_have_text('4 타격')
+    expect(lab.locator('#mv-film .mv-thumb')).to_have_count(9)
+    expect(lab.locator('#mv-film .mv-thumb.mv-hit')).to_have_text('6 타격')
     lab.locator('#mv-film .mv-thumb.mv-hit').click()
-    expect(lab.locator('#mv-canvas')).to_have_attribute('data-frame', 'boy:hold:3')
-    expect(lab.locator('#mv-note')).to_contain_text('hold 4/7칸 · 타격 칸 · 발 249px')
+    expect(lab.locator('#mv-canvas')).to_have_attribute('data-frame', 'boy:hold:5')
+    expect(lab.locator('#mv-note')).to_contain_text(re.compile(r'hold 6/9칸 · 타격 칸 · 발 24[89]px'))
+    # 일어나기(Codex 9차): 띠 보기에 나오고 5칸
+    lab.locator('#mv-clip').select_option('getup')
+    expect(lab.locator('#mv-film .mv-thumb')).to_have_count(5)
     lab.get_by_role('tab', name='대결에서').click()
     expect(lab.locator('#ml-actions')).to_be_visible()
     lab.get_by_role('button', name='끝내기').click()

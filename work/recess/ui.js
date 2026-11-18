@@ -231,6 +231,9 @@ function flyCoins(count) {
   }
 }
 
+const GETUP_MS = 560;
+let heroWasDown = false;
+let heroGetupUntil = 0;
 function renderMotion() {
   const now = performance.now();
   const phase = isDaon(state) ? state.bossPhase : '';
@@ -250,6 +253,13 @@ function renderMotion() {
     let next = action || resting;
     // 띠 그림이 있으면 대기 숨 고르기는 띠가 맡는다(정지 그림 두 장을 0.7초마다 바꾸던 깜빡임 없음)
     if (next === 'ready' && side === 'player' && $('arena').dataset.motion !== 'spar' && !sprite.classList.contains('anim-on') && Math.floor(now / 700) % 2) next = 'ready-b';
+    if (side === 'player') {
+      // 지고 쓰러진(lose) 뒤 다시 설 때 일어나기 띠를 한 번(약 0.56초) 재생한다. 그 사이 공격·맞음이 오면 그쪽이 먼저
+      const down = next === 'lose';
+      if (heroWasDown && !down && !action && sprite.classList.contains('anim-on') && $('arena').dataset.motion !== 'spar') heroGetupUntil = now + GETUP_MS / motionRate();
+      heroWasDown = down;
+      if (now < heroGetupUntil && !action && !down) next = 'getup';
+    }
     if (side === 'player' && /(^|-)strike$/.test(next) && !/(^|-)strike$/.test(sprite.dataset.pose || '')) heroTrail(sprite);
     if (sprite.dataset.pose !== next) sprite.dataset.pose = next;
     animate(sprite, next, action ? timed : null);
@@ -675,7 +685,8 @@ function renderBattle() {
     renderedFront = frontKey;
     const front = state.front;
     const leader = front?.leader;
-    const size = (0.87 + (gradeNumber - 1) * 0.026) * (boss || (dungeon && leader) ? 1.1 : leader ? 1 : 0.88);
+    // 상대 크기 = 주인공·동료 한 칸(--unit) 배수: 대장 1 · 졸개 0.9 · 보스 1.12, 학년마다 2%씩 커진다(style.css .fighter.rival .sprite)
+    const size = (1 + (gradeNumber - 1) * 0.02) * (boss || (dungeon && leader) ? 1.12 : leader ? 1 : 0.9);
     const sprite = $('rival-sprite');
     sprite.dataset.sprite = front?.sprite || rivalSprite(state.map, state.wave, state.cycle || 0);
     sprite.dataset.spar = protectiveSprite(sprite.dataset.sprite);

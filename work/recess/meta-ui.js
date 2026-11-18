@@ -141,8 +141,10 @@ function onActive(event) {
 
 // ── 동료 표시: 주인공과 같은 크기(--unit)로 2줄 대형, 몸이 서로 겹치지 않게 ──
 // d = 주인공 몸 중심에서 왼쪽으로 떨어진 거리, y = 바닥에서 띄운 높이(둘 다 --unit 배수), s = 크기
-// 출전 번호가 곧 자리: 1·2번 = 전열(주인공 옆), 3·4번 = 후열(앞줄 머리 높이 0.8에서 사이사이). 빈 번호는 자리를 비워 둔다
-const ALLY_SLOTS = [{ d: 0.52, y: 0, s: 1 }, { d: 1.04, y: 0, s: 1 }, { d: 0.26, y: 0.8, s: 0.85 }, { d: 0.78, y: 0.8, s: 0.85 }];
+// 출전 번호가 곧 자리: 1·2번 = 전열(주인공 옆), 3·4번 = 후열. 빈 번호는 자리를 비워 둔다
+// 후열은 땅을 딛고 앞줄 사이 뒤쪽에 조금 작게 선다(바닥 0.14칸 위 = 멀리 선 자리, 0.86배, 앞줄보다 뒤). 예전처럼 머리 높이에 띄우면
+// 배경의 창문·벽 위에 올라선 것처럼 보였다
+const ALLY_SLOTS = [{ d: 0.52, y: 0, s: 1 }, { d: 1.04, y: 0, s: 1 }, { d: 0.26, y: 0.14, s: 0.86, back: true }, { d: 0.78, y: 0.14, s: 0.86, back: true }];
 
 function renderAllies() {
   const entries = state.party.slice(0, partySlots(state)).map((id, slot) => [slot, id]).filter(([, id]) => id);
@@ -153,7 +155,7 @@ function renderAllies() {
     box.replaceChildren(...entries.map(([slot, id]) => {
       const place = ALLY_SLOTS[slot];
       const ally = document.createElement('span');
-      ally.className = 'ally';
+      ally.className = `ally${place.back ? ' back' : ''}`;
       ally.dataset.slot = slot;
       ally.style.setProperty('--d', place.d);
       ally.style.setProperty('--y', place.y);
