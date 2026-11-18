@@ -17,6 +17,10 @@ dungeons = {
 }
 
 
+# 아카데미 길이(학년이 오를수록 상대 체력 배율, ACADEMY_PACE)는 check_recess_longterm.py에서 확인한다.
+# 이 검사는 초반 화면 흐름만 보므로 예전 체력(배율 1)으로 돌린다. 새 게임이면 첫 무리도 다시 만든다.
+EASY_ACADEMY = "ACADEMY_PACE.knots.fill(1); if (!state.profile && !state.dungeon) openFight(state, state.map, state.wave, 0)"
+
 def check_character(id, poses):
     files = [assets / f'{id}.webp', *(assets / f'motion-{id}-{pose}.webp' for pose in poses)]
     assert len({sha256(path.read_bytes()).hexdigest() for path in files[1:]}) == len(poses), id
@@ -50,6 +54,7 @@ with sync_playwright() as playwright:
     phone.on('requestfailed', lambda request: failures.append(request.url))
     phone.clock.install()
     phone.goto(url)
+    phone.evaluate(EASY_ACADEMY)
     phone.get_by_role('radio', name='남학생').check()
     phone.get_by_role('textbox', name='닉네임').fill('하루')
     phone.get_by_role('button', name='입학하기').click()

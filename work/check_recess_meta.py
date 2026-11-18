@@ -235,6 +235,34 @@ with sync_playwright() as playwright:
     coins, gems = page.evaluate('[state.coins, state.gems]')
     page.locator('#offline-double').click()
     assert page.evaluate('state.gems') == gems - 50 and page.evaluate('state.coins') > coins
+    assert page.evaluate('[offlineLimit(state) / 3600, offlineDoubleCost(9 * 3600)]') == [12, 150]
+
+    # 빠른 휴식(대결 탭 맨 위): 2시간 동안의 대결을 바로 받기. 하루 4번, 첫 번 무료 → 보석 50·100·150
+    page.locator('#dialog').get_by_role('button', name='좋아요').click()
+    page.evaluate("document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close()); state.dungeon = null; state.roundEnd = null; selectView('battle'); commit()")
+    rest = page.locator('#rest-card')
+    expect(rest.locator('.lv')).to_have_text('오늘 0/4번')
+    expect(rest).to_have_class(re.compile('free'))
+    wins, gems = page.evaluate('[state.wins, state.gems]')
+    rest.locator('.rest-go').click()
+    expect(page.get_by_role('heading', name='빠른 휴식 보상')).to_be_visible()
+    expect(page.locator('#dialog-content')).to_contain_text('2시간 동안')
+    expect(page.locator('#offline-double')).to_be_hidden()
+    rested = page.evaluate('[state.wins, state.daily.rest]')
+    assert rested[0] - wins > 300 and rested[1] == 1, (wins, rested)
+    page.locator('#dialog').get_by_role('button', name='좋아요').click()
+    page.evaluate('state.gems = 60; commit()')
+    expect(rest.locator('.rest-go')).to_have_text('보석 50으로 쉬기')
+    rest.locator('.rest-go').click()
+    expect(page.locator('#dialog-content')).to_contain_text('보석 50개를 썼어요.')
+    assert page.evaluate('state.daily.rest') == 2
+    page.locator('#dialog').get_by_role('button', name='좋아요').click()
+    page.evaluate('state.gems = Math.min(state.gems, 99); commit()')
+    expect(rest.locator('.rest-go')).to_have_text('보석 100으로 쉬기')
+    expect(rest.locator('.rest-go')).to_be_disabled()
+    page.evaluate('state.gems = 1000; state.daily.rest = 4; commit()')
+    expect(rest.locator('.rest-go')).to_have_text('내일 다시')
+    expect(rest.locator('.rest-go')).to_be_disabled()
 
     # ── 운영 날짜(KST)·오늘 화면 ──
     # 한국 시간 2026-12-01 00:30. 전날 22:30에 닫고 2시간 방치 → 0시 이후 30분 몫(1/4)의 승리만 오늘 목표에 들어간다
@@ -275,6 +303,7 @@ with sync_playwright() as playwright:
     today.clock.run_for(400)  # 다음 창은 0.16초 뒤에 열린다(시계 멈춤 상태)
     # 방치 보상 창 다음에 오늘 화면: 출석 3일째, 오늘 목표 3개 + 모두 완료, 한 번에 받기
     expect(today.locator('#today-dialog')).to_be_visible()
+    expect(today.locator('#today-links [data-link="rest"]')).to_have_text('빠른 휴식 · 2시간치 무료로 받기')
     expect(today.locator('#today-attend .today-day.today')).to_have_text('3')
     expect(today.locator('#today-goals .today-goal')).to_have_count(4)
     expect(today.locator('#today-goals .today-goal[data-goal="wins"]')).to_have_class(re.compile('ready'))
@@ -344,4 +373,4 @@ with sync_playwright() as playwright:
     assert not issues, issues
     chrome.close()
 
-print('Mail, recruit/party/allies, party slot unlocks, team synergy, 16 companion skills, quest reward, daily shop, promotion trial, pass + premium grant, offline double, KST day rollover (midnight offline split, rollback, monthly catch-up, big badges), today screen and weekly tournament (rules, tiers, shard picks, champion ladder, rollover mail) verified.')
+print('Mail, recruit/party/allies, party slot unlocks, team synergy, 16 companion skills, quest reward, daily shop, promotion trial, pass + premium grant, offline double, KST day rollover (midnight offline split, rollback, monthly catch-up, big badges), today screen, weekly tournament (rules, tiers, shard picks, champion ladder, rollover mail), 12-hour offline cap and quick rest verified.')

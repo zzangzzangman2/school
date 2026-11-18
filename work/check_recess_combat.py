@@ -9,6 +9,10 @@ workspace = Path(__file__).resolve().parent.parent
 url = (workspace / 'outputs' / 'recess-king.html').as_uri()
 
 
+# 아카데미 길이(학년이 오를수록 상대 체력 배율, ACADEMY_PACE)는 check_recess_longterm.py에서 확인한다.
+# 이 검사는 초반 화면 흐름만 보므로 예전 체력(배율 1)으로 돌린다. 새 게임이면 첫 무리도 다시 만든다.
+EASY_ACADEMY = "ACADEMY_PACE.knots.fill(1); if (!state.profile && !state.dungeon) openFight(state, state.map, state.wave, 0)"
+
 def run_until(page, condition, max_ms=15000):
     for _ in range(max_ms // 70):
         if page.evaluate(condition):
@@ -26,6 +30,7 @@ with sync_playwright() as playwright:
     phone.on('pageerror', lambda error: errors.append(str(error)))
     phone.clock.install()
     phone.goto(url)
+    phone.evaluate(EASY_ACADEMY)
     # 실제 시간이 흐르지 않게 멈추고, 게임 시간은 run_for로만 넘긴다(스크린숏·대기 중에 무리가 지나가지 않게)
     phone.clock.pause_at(datetime.now() + timedelta(seconds=1))
     phone.get_by_role('radio', name='남학생').check()
@@ -77,6 +82,7 @@ with sync_playwright() as playwright:
     phone.get_by_role('button', name='대결 효과음').click()
     expect(phone.get_by_role('button', name='대결 효과음')).to_have_attribute('aria-pressed', 'false')
     phone.reload()
+    phone.evaluate(EASY_ACADEMY)
     expect(phone.locator('#skill-name')).to_have_text('공 울림 카운터')
     assert phone.evaluate("JSON.parse(localStorage.getItem('haesol-recess-king-v1')).state.equipped.accessory === 'wristband'")
     seed = phone.evaluate("localStorage.getItem('haesol-recess-king-v1')")
@@ -85,6 +91,7 @@ with sync_playwright() as playwright:
     duel.on('pageerror', lambda error: errors.append(str(error)))
     duel.clock.install()
     duel.goto(url)
+    duel.evaluate(EASY_ACADEMY)
     duel.add_init_script('''(() => {
       const saved = sessionStorage.getItem('combat-qa');
       if (saved) localStorage.setItem('haesol-recess-king-v1', saved);
@@ -101,6 +108,7 @@ with sync_playwright() as playwright:
           sessionStorage.setItem('combat-qa', JSON.stringify(snapshot));
         }''', [seed, skill])
         duel.reload()
+        duel.evaluate(EASY_ACADEMY)
         run_until(duel, "document.querySelector('#pattern').dataset.phase === 'guard' && document.querySelector('#rival-sprite').dataset.pose === 'guard'")
         expect(duel.locator('#pattern-title')).to_have_text('방어 자세')
         if skill == 'bell':

@@ -349,7 +349,13 @@ const CASH = {
   gems1: { name: '보석 주머니', price: '₩3,300', desc: '보석 330', reward: { gems: 330 } },
   gems2: { name: '보석 상자', price: '₩33,000', desc: '보석 3,800', reward: { gems: 3800 } },
 };
+// 쉬는 시간 보상 코인 2배: 방치 4시간마다 보석 50(4시간까지 50 · 8시간까지 100 · 12시간까지 150 …)
 const OFFLINE_DOUBLE_GEMS = 50;
+const OFFLINE_DOUBLE_HOURS = 4;
+function offlineDoubleCost(seconds) { return OFFLINE_DOUBLE_GEMS * Math.max(1, Math.ceil(seconds / (OFFLINE_DOUBLE_HOURS * 3600) - 1e-9)); }
+// 빠른 휴식: 2시간 동안의 대결(코인·경험치·장비·진행)을 지금 바로 받는다. 하루 4번, 첫 번은 무료, 다음은 보석 50·100·150.
+// 한국 시간 0시에 다시 채워진다(daily.rest = 오늘 쓴 횟수). 특별 대회 중에는 못 쓴다.
+const QUICK_REST = { seconds: 2 * 3600, costs: [0, 50, 100, 150] };
 const PASS_STEP = 3;
 const QUEST_VALUE = {
   best: state => Math.max(state.prestige.best, progress(state)),
@@ -394,7 +400,8 @@ const BOSS_PHASES = {
 };
 
 const STEP = 0.05;
-const OFFLINE_LIMIT = 4 * 3600;
+// 브라우저를 닫은 동안의 대결은 기본 12시간까지 계산한다(명예 코칭 '숙소 휴식'으로 1시간씩 최대 16시간)
+const OFFLINE_LIMIT = 12 * 3600;
 // 주소 끝에 ?test를 붙이면 테스트 모드: 저장을 따로 쓰고 테스트 도구가 열린다(진짜 저장은 그대로)
 const TEST_MODE = typeof location !== 'undefined' && /(^|[?&#])test\b/.test(`${location.search}${location.hash}`);
 const SAVE_KEY = TEST_MODE ? 'haesol-recess-king-test' : 'haesol-recess-king-v1';
@@ -687,7 +694,7 @@ function enterCup(state) {
 function refreshDay(state, today, carriedWins = 0) {
   refreshWeek(state, today);
   if (state.daily && state.daily.date >= today) return; // 같은 날이거나 기기 시계를 되돌림: 확정한 날짜의 기록을 그대로 둔다
-  state.daily = { date: today, baseWins: state.wins - Math.max(0, Math.min(carriedWins, state.wins)), trains: 0, pulls: 0, snacks: 0, dungeons: 0, claimed: [], shop: {},
+  state.daily = { date: today, baseWins: state.wins - Math.max(0, Math.min(carriedWins, state.wins)), trains: 0, pulls: 0, snacks: 0, dungeons: 0, rest: 0, claimed: [], shop: {},
     keys: { ...Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, DUNGEON_KEYS])), record: DUNGEON_KEYS, cup: cupKeysFor(today) } };
   state.daily.picks = pickDaily(state, today);
   settleMonthly(state, today);
@@ -775,9 +782,25 @@ function pullStickers(state, count, rng = Math.random) {
   }
   return results;
 }
+// ── 아카데미 길이: 학년이 오를수록 상대 체력을 크게 늘려 학년마다 보스에서 막히고, 반복 수련·훈련으로 넘어가게 한다 ──
+// knots = 1-1·2-1·3-1·4-1·4-3 자리의 체력 배율, 그 사이 맵은 같은 비율로 이어진다(앞 상대보다 갑자기 약해지지 않게).
+// 학년마다 걸리는 시간(자동 훈련 기준)이 1학년 → 4학년으로 갈수록 길어지게 맞춘 값이다.
+// 코인·경험치는 승리마다 주므로 졸업할 때 실력은 크게 달라지지 않는다.
+// 졸업 뒤 첫 지역(3바퀴·36맵)을 도는 동안 ×1로 서서히 돌아와, 갑자기 쉬워지지 않고 그 뒤 성장은 그대로다.
+const ACADEMY_PACE = { knots: [12, 14, 20, 14, 15], at: [0, 3, 6, 9, 11], fade: 36 };
+function paceMult(state) {
+  const index = (state.cycle || 0) * MAPS.length + state.map;
+  const { knots, at, fade } = ACADEMY_PACE;
+  const last = at[at.length - 1];
+  if (index > last) return knots[knots.length - 1] ** Math.max(0, 1 - (index - last) / fade);
+  for (let i = 1; i < at.length; i++) {
+    if (index <= at[i]) return knots[i - 1] * (knots[i] / knots[i - 1]) ** ((index - at[i - 1]) / (at[i] - at[i - 1]));
+  }
+  return knots[knots.length - 1];
+}
 function waveHp(state) {
   if (state.dungeon) return atProgress(dungeonReach(state), 'hp') * dungeonStats(state).hp;
-  const hp = MAPS[state.map].hp[state.wave] * GRADE_SCALING[gradeIndex(state.map)].hp * cycleScale(state, 'hp');
+  const hp = MAPS[state.map].hp[state.wave] * GRADE_SCALING[gradeIndex(state.map)].hp * cycleScale(state, 'hp') * paceMult(state);
   return hp * 0.64 ** (state.farm?.easy || 0);
 }
 function enemyMaxHp(state) { return state.front?.max ?? Math.max(1, Math.round(waveHp(state))); }
@@ -1471,6 +1494,34 @@ function simulate(state, seconds, emit) {
   }
 }
 
+// ── 빠른 휴식: 2시간 동안의 대결을 바로 받는다(오프라인 계산과 같은 방식, 보통 속도) ──
+function restUsed(state) { return state.daily?.rest || 0; }
+function restCost(state) {
+  const used = restUsed(state);
+  return used < QUICK_REST.costs.length ? QUICK_REST.costs[used] : null;
+}
+// 못 쓰는 이유: 'dungeon'(특별 대회 중) · 'used'(오늘 다 씀) · 'gems'(보석 부족) · ''(쓸 수 있음)
+function restBlocked(state) {
+  if (state.dungeon || state.roundEnd?.leaveDungeon) return 'dungeon';
+  const cost = restCost(state);
+  if (cost === null) return 'used';
+  return state.gems < cost ? 'gems' : '';
+}
+function quickRest(state, today = gameDay(state)) {
+  refreshDay(state, today);
+  if (restBlocked(state)) return null;
+  const cost = restCost(state);
+  const before = { wins: state.wins, coins: state.coins, level: state.level, bag: state.bag.length, tickets: state.tickets, progress: progress(state) };
+  state.gems -= cost;
+  state.daily.rest = restUsed(state) + 1;
+  const speed = state.speed;
+  state.speed = 1;
+  simulate(state, QUICK_REST.seconds, null);
+  state.speed = speed;
+  record(state, `빠른 휴식! 2시간 동안 ${fmt(state.wins - before.wins)}번 이겼어요.`);
+  return { cost, before, seconds: QUICK_REST.seconds };
+}
+
 // ── 승급 ──
 function tierName(tier) { return tier < TIERS.length ? TIERS[tier] : `${TIERS[TIERS.length - 1]} ${tier - TIERS.length + 2}성`; }
 function tierReq(tier) { return tier <= 6 ? Math.round(8 * 1.7 ** (tier - 1)) : 114 + 40 * (tier - 6); }
@@ -1992,6 +2043,7 @@ function migrateFeatures(s) {
   if (!validDaily) s.daily = null;
   if (s.daily) {
     if (!count(s.daily.dungeons)) s.daily.dungeons = 0;
+    s.daily.rest = count(s.daily.rest) ? Math.min(s.daily.rest, QUICK_REST.costs.length) : 0;
     // 오늘 목표(3개) 이전 저장: 이미 받은 미션을 먼저 넣고 나머지를 채운다
     const picks = s.daily.picks;
     if (!(Array.isArray(picks) && picks.length && picks.every(id => id !== 'all' && Object.hasOwn(DAILY_MISSIONS, id)))) {
@@ -2170,6 +2222,7 @@ function restore(snapshot) {
 
 if (typeof module !== 'undefined') {
   module.exports = {
+    ACADEMY_PACE, paceMult, QUICK_REST, OFFLINE_LIMIT, offlineLimit, offlineDoubleCost, restUsed, restCost, restBlocked, quickRest,
     WEEKLY, CUP, CUP_RULES, weekKey, weekendDay, weekLabel, cupRule, refreshWeek, addWeekly, weeklyTier, weeklyReward, claimWeekly, claimWeeklyAll, useShardPicks, cupKeys, cupKeysFor, cupUnlocked, cupReach, cupStep, cupInfo, enterCup, dungeonStats, weeklyFamilyCount,
     todayKey, gameDay, dayStart, daysBetween, settleMonthly, claimAttendance, claimDaily, claimToday, dailyReadyIds, dailyPicks, pickDaily, DAILY_PICKS, DAILY_MISSIONS, ATTENDANCE,
     MATE_FAMILIES, FAMILY_ORDER, BALANCE_SYNERGY, mateFamily, teamSynergy, synergyNext, mateCooldown,

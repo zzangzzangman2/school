@@ -20,6 +20,14 @@ with sync_playwright() as playwright:
     page.get_by_role('button', name='입학하기').click()
     page.clock.run_for(3000)
 
+    # 아카데미 길이: 학년이 오를수록 상대 체력 배율(1-1 ×12 → 3-1 ×20 → 4-3 ×15), 졸업 뒤 첫 지역 3바퀴(36맵) 동안 ×1로 돌아온다
+    pace = page.evaluate('''() => {
+      const at = (cycle, map) => Math.round(paceMult({ cycle, map }) * 100) / 100;
+      const first = { ...state, cycle: 0, map: 0, wave: 0, farm: null, dungeon: null };
+      return [at(0, 0), at(0, 3), at(0, 6), at(0, 9), at(0, 11), at(1, 0) < 15 && at(1, 0) > 13, at(3, 11), at(5, 0), Math.round(waveHp(first))];
+    }''')
+    assert pace == [12, 14, 20, 14, 15, True, 1, 1, 24 * 12], pace
+
     # 아카데미 4-3 보스 직전 상태로 만들고 이기면 졸업해 첫 지역(정선)으로 넘어가는지
     page.evaluate('''() => {
       const save = JSON.parse(localStorage.getItem('haesol-recess-king-v1'));
@@ -107,4 +115,4 @@ with sync_playwright() as playwright:
     assert not issues, issues
     chrome.close()
 
-print('Academy graduation after 4-3 into the first region, coin dungeon clear/sweep/keys, transfer (prestige) with badges, perk purchase, and Korean big-number format verified.')
+print('Academy pacing multipliers, graduation after 4-3 into the first region, coin dungeon clear/sweep/keys, transfer (prestige) with badges, perk purchase, and Korean big-number format verified.')

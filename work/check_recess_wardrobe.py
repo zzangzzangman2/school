@@ -10,6 +10,10 @@ root = Path(__file__).resolve().parent.parent
 entry = (root / 'outputs' / 'recess-king.html').as_uri()
 
 
+# 아카데미 길이(학년이 오를수록 상대 체력 배율, ACADEMY_PACE)는 check_recess_longterm.py에서 확인한다.
+# 이 검사는 초반 화면 흐름만 보므로 예전 체력(배율 1)으로 돌린다. 새 게임이면 첫 무리도 다시 만든다.
+EASY_ACADEMY = "ACADEMY_PACE.knots.fill(1); if (!state.profile && !state.dungeon) openFight(state, state.map, state.wave, 0)"
+
 def until(page, predicate, seconds=18):
     for _ in range(seconds * 10):
         if page.evaluate(predicate):
@@ -25,6 +29,7 @@ with sync_playwright() as playwright:
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.clock.install()
     page.goto(entry)
+    page.evaluate(EASY_ACADEMY)
     page.get_by_role('radio', name='남학생').check()
     page.get_by_role('textbox', name='닉네임').fill('새봄')
     page.get_by_role('button', name='입학하기').click()
@@ -49,6 +54,7 @@ with sync_playwright() as playwright:
       sessionStorage.setItem('wardrobe-test', JSON.stringify(snapshot));
     }''')
     page.reload()
+    page.evaluate(EASY_ACADEMY)
     page.get_by_role('button', name='가방', exact=True).click()
     for label in ['기숙사 트레이닝 바지', '새싹 짐가방', '귤빛 운동화']:
         page.get_by_role('button', name=f'{label} 장착').click()
@@ -74,6 +80,7 @@ with sync_playwright() as playwright:
       return JSON.stringify(snapshot);
     }''')
     page.reload()
+    page.evaluate(EASY_ACADEMY)
     until(page, 'state.farm !== null && state.wave === 0')
     expect(page.locator('#farm-title')).to_have_text('1-3 반복 수련')
     initial = page.evaluate('state.coins')
@@ -93,6 +100,7 @@ with sync_playwright() as playwright:
     source_page = chrome.new_page(viewport={'width': 320, 'height': 568}, is_mobile=True, has_touch=True)
     source_page.add_init_script(f"localStorage.setItem('haesol-recess-king-v1', {json.dumps(snapshot)});")
     source_page.goto((folder / 'recess-king' / 'index.html').as_uri())
+    source_page.evaluate(EASY_ACADEMY)
     # 원본 묶음(file://)에서도 주인공 7차 모션 띠가 장비 색으로 칠해져 보인다(정지 그림 캔버스 대신 띠 캔버스)
     expect(source_page.locator('#player-sprite canvas.anim')).to_be_visible()
     assert source_page.evaluate('document.documentElement.scrollWidth === innerWidth')

@@ -289,9 +289,19 @@ function displayOffline(seconds) {
   return seconds >= 60 ? `${fmt(seconds / 60)}분` : `${fmt(seconds)}초`;
 }
 
+// 쉬는 시간 보상·빠른 휴식 결과 줄: 이긴 횟수, 코인, 레벨, 뽑기권, 새 장비, 나아간 곳
+function restLines(before, label) {
+  const lines = [`${label} 동안 ${fmt(state.wins - before.wins)}번 이겼어요.`, `코인 +${fmt(state.coins - before.coins)}`];
+  if (state.level > before.level) lines.push(`레벨 ${before.level} → ${state.level}`);
+  if (state.tickets > before.tickets) lines.push(`뽑기권 +${state.tickets - before.tickets}`);
+  if (state.bag.length > before.bag) lines.push(`새 장비 ${state.bag.length - before.bag}개가 가방에 있어요.`);
+  if (before.progress !== undefined && progress(state) > before.progress) lines.push(`${placeLabel(progress(state))}까지 나아갔어요.`);
+  return lines;
+}
+
 function catchUp(seconds) {
   const adjusted = Math.min(seconds, offlineLimit(state));
-  const before = { wins: state.wins, coins: state.coins, level: state.level, bag: state.bag.length, tickets: state.tickets };
+  const before = { wins: state.wins, coins: state.coins, level: state.level, bag: state.bag.length, tickets: state.tickets, progress: progress(state) };
   const speed = state.speed;
   const dayBefore = state.daily?.date;
   state.speed = 1;
@@ -306,16 +316,90 @@ function catchUp(seconds) {
     refreshDay(state, today, Math.round(wins * share));
   }
   if (wins === 0 || adjusted < 15) return;
-  const details = [`${displayOffline(adjusted)} 동안 ${fmt(wins)}번 이겼어요.`, `코인 +${fmt(state.coins - before.coins)}`];
-  if (state.level > before.level) details.push(`레벨 ${before.level} → ${state.level}`);
-  if (state.tickets > before.tickets) details.push(`뽑기권 +${state.tickets - before.tickets}`);
-  if (state.bag.length > before.bag) details.push(`새 장비 ${state.bag.length - before.bag}개가 가방에 있어요.`);
+  const details = restLines(before, displayOffline(adjusted));
   const gained = state.coins - before.coins;
   queuePopup(() => {
     showDialog('쉬는 시간 보상', details, '#i-gift');
     $('dialog-content').classList.add('reward-lines');
-    offerOfflineDouble(gained);
+    offerOfflineDouble(gained, adjusted);
   });
+}
+
+// 빠른 휴식(대결 탭 카드·오늘 화면 바로 가기): 2시간 동안의 대결을 바로 받고 결과 창을 띄운다
+function onQuickRest() {
+  const result = quickRest(state, gameDay(state));
+  if (!result) return;
+  showDialog('빠른 휴식 보상', [...restLines(result.before, '2시간'), result.cost ? `보석 ${result.cost}개를 썼어요.` : '오늘 무료 휴식을 썼어요.'], '#i-moon');
+  $('dialog-content').classList.add('reward-lines');
+  flyCoins(6);
+  commit();
+}
+
+function helpButton(title, lines) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'help-btn';
+  button.textContent = '?';
+  button.ariaLabel = `${title} 도움말`;
+  button.addEventListener('click', event => {
+    event.stopPropagation();
+    showDialog(title, typeof lines === 'function' ? lines() : lines, '#i-help');
+  });
+  return button;
+}
+
+// 제목 옆 '?': 제목 아래 설명 줄(.keep 제외)은 숨기고 누르면 그때 내용을 보여 준다
+function bindSectionHelp() {
+  document.querySelectorAll('.section-head > div > p:not(.keep)').forEach(note => {
+    const heading = note.parentElement.querySelector('h2, h3');
+    if (!heading || heading.nextElementSibling?.classList.contains('help-btn')) return;
+    note.classList.add('help-note');
+    heading.after(helpButton(heading.textContent.trim(), () => [note.textContent.trim()].filter(Boolean)));
+  });
+}
+
+function restCard() {
+  refreshDay(state, gameDay(state));
+  const used = restUsed(state);
+  const total = QUICK_REST.costs.length;
+  const cost = restCost(state);
+  const blocked = restBlocked(state);
+  const card = document.createElement('article');
+  card.className = `rest-card${cost === 0 && !blocked ? ' free' : ''}`;
+  card.id = 'rest-card';
+  const icon = document.createElement('span');
+  icon.className = 'item-icon';
+  icon.dataset.tone = 'blue';
+  setIcon(icon, '#i-moon');
+  const body = document.createElement('div');
+  body.className = 'rest-body';
+  const title = document.createElement('b');
+  title.append(Object.assign(document.createElement('span'), { className: 'item-name', textContent: '빠른 휴식' }),
+    Object.assign(document.createElement('em'), { className: 'lv', textContent: `오늘 ${used}/${total}번` }));
+  title.append(helpButton('빠른 휴식', ['2시간 동안의 대결(코인·경험치·장비·진행)을 바로 받아요.', `하루 ${total}번 · 첫 번 무료, 다음은 보석 ${QUICK_REST.costs.slice(1).join('·')} · 한국 시간 0시에 다시 채워져요.`]));
+  const pips = document.createElement('span');
+  pips.className = 'rest-pips';
+  pips.ariaLabel = `오늘 ${total - used}번 남음`;
+  for (let index = 0; index < total; index++) pips.append(Object.assign(document.createElement('i'), { className: index < used ? '' : 'on' }));
+  const time = Object.assign(document.createElement('small'), { className: 'rest-time', textContent: '⏱ 2시간' });
+  const meta = document.createElement('div');
+  meta.className = 'rest-meta';
+  meta.append(time, pips);
+  body.append(title, meta);
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'rest-go';
+  button.textContent = blocked === 'used' ? '내일 다시' : blocked === 'dungeon' ? '대회 끝나고' : cost === 0 ? '무료로 쉬기' : `보석 ${cost}으로 쉬기`;
+  button.ariaLabel = cost === null ? '빠른 휴식 오늘 다 씀' : `빠른 휴식 2시간 받기, ${cost ? `보석 ${cost}` : '무료'}`;
+  button.disabled = Boolean(blocked);
+  button.addEventListener('click', onQuickRest);
+  card.append(icon, body, button);
+  return card;
+}
+// 오늘 무료 휴식이 남았는지(날짜가 바뀌었으면 아직 안 쓴 것으로 본다) · 대결 탭 빨간 점, 오늘 화면 바로 가기
+function freeRestReady() {
+  if (state.dungeon || state.roundEnd?.leaveDungeon) return false;
+  return !state.daily || state.daily.date < gameDay(state) || restUsed(state) === 0;
 }
 
 function updateClock(animate = true) {
@@ -828,8 +912,8 @@ function renderTraining() {
     const capped = level >= info.cap;
     const { count, total } = trainingPlan(id);
     const single = buyMode === 1;
-    const milestone = info.milestone ? ` · ${MILESTONE}레벨마다 ×2 (다음까지 ${MILESTONE - level % MILESTONE})` : '';
-    const article = row(ICONS.training[id] || info.glyph, info.name, capped ? `최대 레벨 달성 · ${info.bonus}` : `레벨마다 ${info.bonus}${milestone}`, capped ? '최대' : single ? '강화' : `+${count}`, () => train(id), {
+    const milestone = info.milestone ? ` · ×2까지 ${MILESTONE - level % MILESTONE}` : '';
+    const article = row(ICONS.training[id] || info.glyph, info.name, capped ? `최대 · ${info.bonus}` : `${info.bonus}${milestone}`, capped ? '최대' : single ? '강화' : `+${count}`, () => train(id), {
       level: info.cap < 99 ? `Lv.${level}/${info.cap}` : `Lv.${level}`,
       tone: TRAINING_TONES[id],
       cost: capped ? null : { currency: 'coin', amount: fmt(total), short: state.coins < total },
@@ -1029,6 +1113,7 @@ function dailyReady() {
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 function todayLinks() {
   const links = [];
+  if (freeRestReady()) links.push(['rest', `빠른 휴식 · 2시간치 무료로 받기`]);
   if (state.farm && !state.roundEnd && !state.dungeon) {
     links.push(['retry', `막힌 보스 재도전 · ${mapCode(state.map)}`]);
   }
@@ -1108,6 +1193,7 @@ function onTodayLink(kind) {
   $('today-dialog').close();
   selectView('battle');
   if (kind === 'retry') $('retry-map').click();
+  else if (kind === 'rest') onQuickRest();
   else document.querySelector(kind === 'record' ? '#dungeon-list .dungeon-card.record' : kind === 'weekly' ? '#weekly-card' : '#dungeon-list')?.scrollIntoView({ block: 'center', behavior: reducedMotion.matches ? 'auto' : 'smooth' });
 }
 
@@ -1132,7 +1218,7 @@ function renderMissions() {
     const allDone = target > maximum;
     const value = mission.value(state);
     const ready = value >= target;
-    const reward = `${mission.hint} 보상 · 코인 ${fmt(coins)} · 천 조각 ${patches}`;
+    const reward = `코인 ${fmt(coins)} · 천 조각 ${patches}`;
     return row(ICONS.missions[id] || mission.glyph, mission.name, allDone ? '모든 목표 완료' : reward, allDone ? '완료' : ready ? '보상 받기' : '진행 중', () => {
       if (mission.value(state) < nextMission(state, id).target) return;
       state.missions[id]++;
@@ -1342,7 +1428,7 @@ function renderGacha() {
   const totals = Object.keys(STICKER_STATS).map(stat => [stat, stickerBonus(state, stat)]).filter(([, value]) => value > 0);
   $('sticker-summary').textContent = totals.length
     ? `도감 효과 · ${totals.map(([stat, value]) => `${STICKER_STATS[stat]} +${stat === 'crit' ? (value * 100).toFixed(1) + '%p' : Math.round(value * 100) + '%'}`).join(' · ')}`
-    : '같은 스티커를 또 뽑으면 레벨이 올라 효과가 커져요.';
+    : '';
   $('sticker-grid').replaceChildren(...Object.keys(STICKERS).map(id => stickerCard(id)));
 }
 
@@ -1439,6 +1525,8 @@ let lastCycle = null;
 function showSchool() {
   const dialog = $('school-dialog');
   if (!dialog || dialog.open) return;
+  // 쉬는 시간 보상·빠른 휴식 결과 창이 열려 있으면 닫지 않고, 그 창을 닫은 다음에 축하 창을 띄운다
+  if (anyDialogOpen()) { popupQueue.push(showSchool); return; }
   $('school-sprite').dataset.portrait = state.profile.gender === 'boy' ? 'boy-win' : state.profile.gender;
   const cycle = state.cycle;
   setText('school-title', cycle === 1 ? '아카데미 졸업!' : `${schoolName(cycle - 1)} 제패!`);
@@ -1541,7 +1629,7 @@ function renderDungeons() {
     card.append(icon, body, actions);
     return card;
   }).flatMap(card => (card.classList.contains('coin') ? [card, recordCard()] : [card])));
-  $('dungeon-list').prepend(weeklyCard());
+  $('dungeon-list').prepend(restCard(), weeklyCard());
 }
 
 // ── 주간 전국대회 카드(대결 탭 '오늘의 특별 대회' 맨 위) ──
@@ -1564,11 +1652,14 @@ function weeklyCard() {
   const score = document.createElement('em');
   score.className = 'weekly-score';
   score.textContent = `${fmt(weekly.points)} / ${maxPoints}점`;
-  head.append(title, score);
+  const left = Math.max(1, 7 - daysBetween(weekly.week, gameDay(state)));
+  const dday = Object.assign(document.createElement('small'), { className: 'weekly-dday', textContent: `D-${left}` });
+  head.append(title, dday, score);
   const ruleLine = document.createElement('p');
   ruleLine.className = `weekly-rule fam-${rule.family}`;
   ruleLine.append(Object.assign(document.createElement('strong'), { textContent: `이번 주 ${rule.name}` }),
-    ` ${rule.champion} · ${rule.desc}. 추천 ${family.name} 계열(${family.mates.map(id => COMPANIONS[id].style).join('·')}) 1명당 주간 점수 +${Math.round(WEEKLY.familyPoint * 100)}%·챔피언전 피해 +${Math.round(WEEKLY.familyDamage * 100)}% · 지금 ${deployed}명`);
+    Object.assign(document.createElement('span'), { className: 'weekly-fam', textContent: `추천 ${family.name} ${deployed}명` }),
+    Object.assign(document.createElement('small'), { textContent: `+${Math.round(WEEKLY.familyPoint * 100)}%/명` }));
   const bar = document.createElement('div');
   bar.className = 'weekly-bar';
   bar.ariaLabel = `주간 점수 ${weekly.points}점, ${reached}구간 도달`;
@@ -1631,7 +1722,11 @@ function weeklyCard() {
   period.className = 'weekly-period';
   const last = state.weeklyLog?.[0];
   period.textContent = `달성 기간 ${weekLabel(weekly.week).replace(' 주간', '')}(월) 0시 ~ ${weekEndLabel(weekly.week)} 24시 · 받지 않은 구간은 다음 주 첫 접속 때 우편으로${last ? ` · 지난주 ${fmt(last.points)}점 ${last.tiers}구간` : ''}${state.titles?.[0] ? ` · 칭호 ${state.titles[0]}` : ''}`;
-  card.append(head, ruleLine, bar, tiers, actions, how, period);
+  title.after(helpButton('주간 전국대회', [
+    `이번 주 ${rule.name}: ${rule.champion} · ${rule.desc}.`,
+    `추천 ${family.name} 계열(${family.mates.map(id => COMPANIONS[id].style).join('·')}) 1명당 주간 점수 +${Math.round(WEEKLY.familyPoint * 100)}% · 챔피언전 피해 +${Math.round(WEEKLY.familyDamage * 100)}%.`,
+    how.textContent, period.textContent]));
+  card.append(head, ruleLine, bar, tiers, actions);
   return card;
 }
 
@@ -1660,7 +1755,7 @@ function recordCard() {
   title.append(name, level);
   const info = document.createElement('p');
   info.textContent = !open ? '1-3 1학년 대표를 이기면 열려요'
-    : best ? `보상 구간 ${reach.tier} · 다음 구간까지 피해 ${fmt(reach.next)} · 동료·장비를 바꾸면 기록이 달라져요` : '30초 동안 준 피해만큼 보상 구간을 올려요. 주인공과 출전 동료의 피해를 모두 더해요.';
+    : best ? `${reach.tier}구간 · 다음까지 ${fmt(reach.next)}` : '30초 피해량으로 보상';
   const keyRow = document.createElement('span');
   keyRow.className = 'dungeon-keys';
   keyRow.ariaLabel = `오늘 입장권 ${keys}장 남음`;
@@ -1805,7 +1900,7 @@ function render() {
   $('training-dot').hidden = currentView === 'training' || !(trainingReady() || tierReady(state) || academyReady());
   $('gacha-dot').hidden = state.tickets < 1;
   refreshDay(state, gameDay(state));
-  $('battle-dot').hidden = currentView === 'battle' || !Object.keys(DUNGEONS).some(id => dungeonUnlocked(state, id) && dungeonKeys(state, id) > 0);
+  $('battle-dot').hidden = currentView === 'battle' || !(freeRestReady() || Object.keys(DUNGEONS).some(id => dungeonUnlocked(state, id) && dungeonKeys(state, id) > 0));
   // 처음 그릴 때 이미 있던 결과(지난번 것)는 다시 띄우지 않고, 그 뒤에 생긴 결과부터 보여 준다
   if (shownDungeonResult === null) shownDungeonResult = state.dungeonResult?.serial ?? 0;
   if (state.dungeonResult && state.dungeonResult.serial !== shownDungeonResult) {
@@ -1836,7 +1931,7 @@ function render() {
   renderPartyBar();
   renderRule();
   const viewModels = {
-    battle: [state.log, state.dungeons, state.daily?.keys, Boolean(state.dungeon), state.totalClears, state.prestige.count, state.prestige.perks, state.stickers, state.weekly, state.party, state.weeklyLog?.[0], state.titles?.[0]],
+    battle: [state.log, state.dungeons, state.daily?.keys, state.daily?.date, state.daily?.rest, state.gems >= (restCost(state) ?? Infinity), Boolean(state.roundEnd?.leaveDungeon), Boolean(state.dungeon), state.totalClears, state.prestige.count, state.prestige.perks, state.stickers, state.weekly, state.party, state.weeklyLog?.[0], state.titles?.[0]],
     training: [growthTab, Object.keys(TRAINING).map(id => { const plan = trainingPlan(id); return [plan.count, plan.total, state.coins >= plan.total]; }), state.training, firstGradeWon(state), state.classId, buyMode, state.tier, state.level, state.prestige, state.autoSkills, state.autoTrain, state.skillLv, Object.keys(ACTIVE).map(id => state.coins >= skillCost(state, id)), state.skillId, Boolean(state.dungeon), bestProgress(state)],
     party: [state.companions, state.party, state.tier, state.allyLv, state.party.map(id => (id ? state.coins >= allyTrainCost(state, id) : null)), state.shardPicks, state.mateShards],
     shop: [state.gems, state.daily?.shop, state.premium],
@@ -2048,6 +2143,7 @@ function start() {
   $('cancel-profile').addEventListener('click', enterGame);
   document.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => selectView(button.dataset.view)));
   bindMetaUI();
+  bindSectionHelp();
   $('skill').addEventListener('click', () => {
     if (!activateSkill(state, combatEvent)) return;
     commit();

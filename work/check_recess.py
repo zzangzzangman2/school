@@ -7,6 +7,10 @@ root = Path(__file__).resolve().parent.parent
 target = (root / 'outputs' / 'recess-king.html').as_uri()
 
 
+# 아카데미 길이(학년이 오를수록 상대 체력 배율, ACADEMY_PACE)는 check_recess_longterm.py에서 확인한다.
+# 이 검사는 초반 화면 흐름만 보므로 예전 체력(배율 1)으로 돌린다. 새 게임이면 첫 무리도 다시 만든다.
+EASY_ACADEMY = "ACADEMY_PACE.knots.fill(1); if (!state.profile && !state.dungeon) openFight(state, state.map, state.wave, 0)"
+
 def choose(page, gender, name):
     page.get_by_role('radio', name=gender).check()
     page.get_by_role('textbox', name='닉네임').fill(name)
@@ -23,6 +27,7 @@ with sync_playwright() as playwright:
     phone.on('requestfailed', lambda req: issues.append(req.url))
     phone.clock.install()
     phone.goto(target)
+    phone.evaluate(EASY_ACADEMY)
     expect(phone.get_by_role('heading', name='해솔 격투 아카데미 입학')).to_be_visible()
     assert phone.evaluate('document.documentElement.scrollWidth === innerWidth')
     assert phone.locator('.enrollment').bounding_box()['width'] == 390
@@ -83,6 +88,7 @@ with sync_playwright() as playwright:
     expect(phone.locator('#player-name')).to_have_text('봄달')
     expect(phone.locator('#player-sprite')).to_have_attribute('data-sprite', 'boy')
     phone.reload()
+    phone.evaluate(EASY_ACADEMY)
     expect(phone.locator('#player-name')).to_have_text('봄달')
     expect(phone.locator('#player-sprite')).to_have_attribute('data-sprite', 'boy')
     expect(phone.get_by_role('switch', name='자동 진격')).to_have_attribute('aria-checked', 'false')
@@ -93,12 +99,14 @@ with sync_playwright() as playwright:
       localStorage.setItem(key, JSON.stringify(save));
     })()''')
     phone.reload()
+    phone.evaluate(EASY_ACADEMY)
     expect(phone.get_by_role('heading', name='쉬는 시간 보상')).to_be_visible()
     phone.get_by_role('button', name='좋아요').click()
     assert not issues, issues
 
     desktop = chrome.new_page(viewport={'width': 1440, 'height': 900})
     desktop.goto(target)
+    desktop.evaluate(EASY_ACADEMY)
     choose(desktop, '남학생', '솔')
     box = desktop.locator('.game').bounding_box()
     assert box['width'] == 484 and box['x'] > 400, box
@@ -106,6 +114,7 @@ with sync_playwright() as playwright:
 
     seeded = chrome.new_page(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True)
     seeded.goto(target)
+    seeded.evaluate(EASY_ACADEMY)
     seeded.add_init_script('''(() => {
       const snapshot = sessionStorage.getItem('qa-snapshot');
       if (snapshot) localStorage.setItem('haesol-recess-king-v1', snapshot);
@@ -120,6 +129,7 @@ with sync_playwright() as playwright:
           sessionStorage.setItem('qa-snapshot', JSON.stringify(game));
         }''', [seed, number])
         seeded.reload()
+        seeded.evaluate(EASY_ACADEMY)
         expect(seeded.locator('#rival-sprite')).to_have_attribute('data-sprite', ['boss2', 'boss4', 'boss5', 'boss6'][number - 1])
         assert seeded.locator('#rival-sprite').evaluate("e => getComputedStyle(e).backgroundImage.includes('data:image/webp')")
     seeded.evaluate('''seed => {
@@ -130,6 +140,7 @@ with sync_playwright() as playwright:
       sessionStorage.setItem('qa-snapshot', JSON.stringify(legacy));
     }''', seed)
     seeded.reload()
+    seeded.evaluate(EASY_ACADEMY)
     choose(seeded, '남학생', '복학생')
     expect(seeded.get_by_role('heading', name='레슬링 매트장')).to_be_visible()
     expect(seeded.locator('#level')).to_have_text('15')
@@ -137,6 +148,7 @@ with sync_playwright() as playwright:
 
     small = chrome.new_page(viewport={'width': 320, 'height': 568}, is_mobile=True, has_touch=True)
     small.goto(target)
+    small.evaluate(EASY_ACADEMY)
     assert small.evaluate('document.documentElement.scrollWidth === innerWidth')
     choose(small, '남학생', '봄달봄달봄달봄달봄달봄달')
     small.get_by_role('button', name='대결 지도', exact=True).click()

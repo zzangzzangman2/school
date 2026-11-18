@@ -5,6 +5,7 @@
 let growthTab = 'train';
 let gachaTab = 'stickers';
 let offlineGain = 0;
+let offlineDoubleGems = OFFLINE_DOUBLE_GEMS;
 let renderedAllies = '';
 const allyPoses = new Map();
 const ACTIVE_ICONS = { pencil: '#st-goldpen', cheer: '#i-megaphone', lunch: '#i-tray', sprint: '#i-run' };
@@ -439,7 +440,7 @@ function starLine(id) {
 function renderParty() {
   const slots = partySlots(state);
   setText('party-owned', `${Object.keys(state.companions).length} / ${Object.keys(COMPANIONS).length}명`);
-  setText('party-summary', `출전 ${partySlots(state)}/${PARTY_MAX}칸 · 보유 효과 파워 +${Math.round(companionOwned(state) * 100)}% · 출전한 동료는 함께 싸우고 자기 무술 스킬을 쿨타임마다 써요. 코인으로 레벨업하면 레벨마다 +5%.`);
+  setText('party-summary', `출전 ${partySlots(state)}/${PARTY_MAX}칸 · 보유 효과 파워 +${Math.round(companionOwned(state) * 100)}%`);
   $('party-slots').replaceChildren(...Array.from({ length: PARTY_MAX }, (_, slot) => slot).map(slot => {
     const box = document.createElement('div');
     const id = state.party[slot];
@@ -757,18 +758,19 @@ function renderPass() {
   $('pass-track').replaceChildren(...items);
 }
 
-// ── 오프라인 보상 2배 ──
-function offerOfflineDouble(coins) {
+// ── 오프라인 보상 2배: 방치 4시간마다 보석 50(상한이 12시간으로 늘어 시간에 맞춰 값이 오른다) ──
+function offerOfflineDouble(coins, seconds) {
   offlineGain = coins;
+  offlineDoubleGems = offlineDoubleCost(seconds);
   const button = $('offline-double');
   button.hidden = coins <= 0;
-  button.disabled = state.gems < OFFLINE_DOUBLE_GEMS;
-  button.textContent = `보석 ${OFFLINE_DOUBLE_GEMS}으로 코인 2배 (+${fmt(coins)})`;
+  button.disabled = state.gems < offlineDoubleGems;
+  button.textContent = `보석 ${offlineDoubleGems}으로 코인 2배 (+${fmt(coins)})`;
 }
 
 function takeOfflineDouble() {
-  if (!offlineGain || state.gems < OFFLINE_DOUBLE_GEMS) return;
-  state.gems -= OFFLINE_DOUBLE_GEMS;
+  if (!offlineGain || state.gems < offlineDoubleGems) return;
+  state.gems -= offlineDoubleGems;
   state.coins += offlineGain;
   message(`코인 2배! +${fmt(offlineGain)}`);
   offlineGain = 0;
@@ -890,7 +892,7 @@ function renderSynergyLine() {
     chip.className = `syn-chip fam-${family}`;
     chip.textContent = text;
     return chip;
-  }) : [Object.assign(document.createElement('span'), { className: 'syn-hint', textContent: '시너지 없음 · 같은 계열 2명이나 서로 다른 계열 3개를 출전시키면 효과가 붙어요' })]));
+  }) : [Object.assign(document.createElement('span'), { className: 'syn-hint', textContent: '시너지 없음', title: '같은 계열 2명이나 서로 다른 계열 3개를 출전시키면 효과가 붙어요' })]));
 }
 
 // 동료 탭: 계열마다 출전 인원과 지금 효과, 한 명 더 넣으면 어떻게 되는지
