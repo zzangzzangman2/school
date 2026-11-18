@@ -250,9 +250,30 @@ function renderMotion() {
     let next = action || resting;
     // 띠 그림이 있으면 대기 숨 고르기는 띠가 맡는다(정지 그림 두 장을 0.7초마다 바꾸던 깜빡임 없음)
     if (next === 'ready' && side === 'player' && $('arena').dataset.motion !== 'spar' && !sprite.classList.contains('anim-on') && Math.floor(now / 700) % 2) next = 'ready-b';
+    if (side === 'player' && /(^|-)strike$/.test(next) && !/(^|-)strike$/.test(sprite.dataset.pose || '')) heroTrail(sprite);
     if (sprite.dataset.pose !== next) sprite.dataset.pose = next;
     animate(sprite, next, action ? timed : null);
   }
+}
+
+// 주인공 잔상: 타격 순간에 바로 앞 자세(아직 캔버스에 남은 그림)를 반투명하게 남겨 앞으로 확 뻗는 느낌을 준다(0.18초)
+function heroTrail(sprite) {
+  if (reducedMotion.matches || !sprite.classList.contains('anim-on') || $('arena').dataset.motion === 'spar') return;
+  const source = sprite.querySelector('canvas.anim');
+  const fighter = sprite.parentElement;
+  if (!source || !fighter) return;
+  const box = source.getBoundingClientRect();
+  const base = fighter.getBoundingClientRect();
+  if (!box.width) return;
+  const ghost = document.createElement('canvas');
+  ghost.width = source.width;
+  ghost.height = source.height;
+  ghost.getContext('2d').drawImage(source, 0, 0);
+  ghost.className = 'hero-trail';
+  ghost.setAttribute('aria-hidden', 'true');
+  Object.assign(ghost.style, { left: `${box.left - base.left}px`, top: `${box.top - base.top}px`, width: `${box.width}px`, height: `${box.height}px` });
+  fighter.append(ghost);
+  setTimeout(() => ghost.remove(), 220);
 }
 
 // 필살기(돌진 스트레이트·공 울림 카운터)는 전용 포즈. 태권도(보호구)에서는 기본 동작

@@ -1305,3 +1305,16 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .weekly-rule { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .weekly-fam { padding: 1px 7px; border-radius: 999px; background: rgb(255 255 255 / .7); font-weight: 900; }
 
+/* 주인공 몸 이동(60프레임): 상태마다 가속·감속을 달리한다. 돌진은 빠르게 나갔다 부드럽게 멈추고, 타격은 짧게 꽂히며 살짝 눌리고,
+   맞으면 반대로 늘어나며 밀리고, 대기로 돌아올 때는 미끄러지듯 복귀한다. 다른 선수는 그대로 */
+.fighter.player .sprite { --sq-x: 1; --sq-y: 1; transform: translate(calc(var(--side) * var(--shift)), var(--rise)) rotate(calc(var(--side) * var(--tilt))) scaleX(var(--side)) scaleX(var(--size, 1)) scale(var(--sq-x), var(--sq-y)); transition: transform .2s cubic-bezier(.3, .7, .4, 1), filter .07s; }
+.fighter.player .sprite[data-pose='run'], .fighter.player .sprite[data-pose='launch'] { transition-duration: .16s; transition-timing-function: cubic-bezier(.2, .9, .3, 1); --sq-x: 1.02; --sq-y: .99; }
+.fighter.player .sprite[data-pose='windup'] { transition-duration: .12s; transition-timing-function: cubic-bezier(.45, 0, .55, 1); --sq-x: .98; --sq-y: 1.01; }
+.fighter.player .sprite[data-pose='strike'], .fighter.player .sprite[data-pose$='-strike'] { transition-duration: .05s; transition-timing-function: cubic-bezier(.1, .9, .2, 1); --sq-x: 1.04; --sq-y: .97; }
+.fighter.player .sprite[data-pose='follow'] { transition-duration: .16s; transition-timing-function: cubic-bezier(.25, .8, .35, 1); }
+.fighter.player .sprite[data-pose='hit'] { transition-duration: .05s; transition-timing-function: cubic-bezier(.1, .9, .2, 1); --sq-x: .96; --sq-y: 1.03; }
+.fighter.player .sprite[data-pose='ready'], .fighter.player .sprite[data-pose='step'] { transition-duration: .24s; }
+.hero-trail { position: absolute; z-index: 0; pointer-events: none; object-fit: contain; object-position: center bottom; opacity: .42; filter: brightness(1.35) saturate(.7); animation: hero-trail .2s ease-out forwards; }
+@keyframes hero-trail { to { opacity: 0; translate: -10px 0; } }
+@media (prefers-reduced-motion: reduce) { .hero-trail { display: none; } }
+

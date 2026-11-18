@@ -16,9 +16,13 @@ const HERO_CONTEST_CLIP = { strike: 'punch', kick: 'kick', knee: 'knee', throw: 
 // 매끄러운 띠(주인공부터): 원래 칸 사이마다 SMOOTH_K칸을 광학 흐름으로 끼운 띠(--animsmooth-동작, work/tools/smooth_strip.py).
 // 원래 i번째 칸 = 매끄러운 띠의 i*(SMOOTH_K+1)번째 칸이라 동작 계획(칸 번호)은 그대로 쓰고 여기서 옮긴다.
 // 반복 띠(대기·달리기)는 마지막 칸 → 첫 칸 사이도 메웠다. animSmooth[id]를 끄면 원래 띠로 돈다.
-const SMOOTH_K = 3;
+const SMOOTH_K = 5;
 const SMOOTH_LOOPS = ['idle', 'run'];
 const animSmooth = { boy: true };
+// 동작이 바뀌는 순간(대기 → 공격, 공격 → 대기, 맞음 → 대기): 앞 동작의 마지막 그림을 잠깐 겹쳐 지워 툭 바뀌지 않게 한다.
+// 맞는 순간(→ hit)은 타격감을 위해 바로 바꾼다. 매끄러운 띠를 쓰는 스프라이트만
+const ANIM_BLEND_MS = 70;
+const ANIM_BLEND_SKIP = ['hit'];
 const HERO_SKILL_CLIP = { rush: 'rush', counter: 'counter', combo: 'combo', step: 'step', cheer: 'cheer', drink: 'drink' };
 
 // 동작 계획 = [띠, 첫 칸, 끝 칸(-1 = 마지막), 방식, 초당 칸]
@@ -226,6 +230,7 @@ function animate(sprite, pose, timing = null) {
   const restart = !timing && s.segment.split('|').slice(0, 2).join('|') !== `${id}|${pose}`;
   s.segment = segment;
   s.id = id;
+  s.pose = pose;
   s.plan = animPlan(id, pose, timing?.prev ?? null, Boolean(timing), motion);
   if (timing) {
     s.from = timing.from;
@@ -292,7 +297,24 @@ function drawAnim(sprite, s, now) {
     frames = strip.frames;
   }
   const frame = animFrame(s, now, frames, smooth ? clip : null);
-  const key = `${url}|${outfit}|${frame}`;
+  if (smooth && s.lastClip && s.lastClip !== clip && s.canvas?.isConnected && !ANIM_BLEND_SKIP.includes(clip) && !reducedMotion.matches) {
+    if (!s.fadeCanvas) {
+      s.fadeCanvas = document.createElement('canvas');
+      s.fadeCanvas.width = ANIM_CELL.w;
+      s.fadeCanvas.height = ANIM_CELL.h;
+    }
+    const fade = s.fadeCanvas.getContext('2d');
+    fade.clearRect(0, 0, ANIM_CELL.w, ANIM_CELL.h);
+    fade.drawImage(s.canvas, 0, 0);
+    s.fadeFrom = now;
+  }
+  s.lastClip = clip;
+  // 타격 순간(strike)에는 겹쳐 지우기를 바로 끝낸다(공격 준비가 아주 짧을 때 타격 그림에 앞 동작이 겹쳐 보이지 않게)
+  if (/(^|-)strike$/.test(s.pose || '')) s.fadeFrom = 0;
+  const fadeAge = s.fadeFrom ? now - s.fadeFrom : Infinity;
+  const fading = fadeAge < ANIM_BLEND_MS;
+  if (!fading) s.fadeFrom = 0;
+  const key = `${url}|${outfit}|${frame}${fading ? `|f${Math.floor(fadeAge / 12)}` : ''}`;
   if (s.drawn !== key) {
     if (!s.canvas || !s.canvas.isConnected) {
       s.canvas = sprite.querySelector('canvas.anim') || document.createElement('canvas');
@@ -305,6 +327,12 @@ function drawAnim(sprite, s, now) {
     }
     s.context.clearRect(0, 0, ANIM_CELL.w, ANIM_CELL.h);
     s.context.drawImage(source, frame * ANIM_CELL.w, 0, ANIM_CELL.w, ANIM_CELL.h, 0, 0, ANIM_CELL.w, ANIM_CELL.h);
+    if (fading) {
+      const left = 1 - fadeAge / ANIM_BLEND_MS;
+      s.context.globalAlpha = left * left;
+      s.context.drawImage(s.fadeCanvas, 0, 0);
+      s.context.globalAlpha = 1;
+    }
     s.drawn = key;
     s.frame = frame;
     s.frames = frames;

@@ -52,12 +52,14 @@ def smooth_flow(flow):
     return cv2.GaussianBlur(flow, (0, 0), FLOW_BLUR)
 
 
-def warp(cell, flow, scale):
+def warp(cell, flow, scale, nearest=False):
+    # 마스크는 가장 가까운 점을 가져온다(부위 색이 섞이면 빨강+초록이 노랑=신발처럼 엉뚱한 부위로 읽힘)
     h, w = cell.shape[:2]
     gx, gy = np.meshgrid(np.arange(w, dtype=np.float32), np.arange(h, dtype=np.float32))
     mx = gx - flow[..., 0] * scale
     my = gy - flow[..., 1] * scale
-    return cv2.remap(cell, mx, my, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=0)
+    mode = cv2.INTER_NEAREST if nearest else cv2.INTER_LINEAR
+    return cv2.remap(cell, mx, my, interpolation=mode, borderMode=cv2.BORDER_CONSTANT, borderValue=0)
 
 
 def premul(cell):
@@ -89,9 +91,7 @@ def between(a, b, ab, ba, t, mode='near'):
 
 def between_mask(ma, mb, ab, ba, t):
     # 마스크는 섞지 않고 가까운 쪽을 고른다(칠할 부위 값이 섞이면 색이 틀어짐)
-    wa = warp(ma, ab, t)
-    wb = warp(mb, ba, 1 - t)
-    return wa if t < 0.5 else wb
+    return warp(ma, ab, t, nearest=True) if t < 0.5 else warp(mb, ba, 1 - t, nearest=True)
 
 
 def smooth(frames, k, loop, masks=None, mode='near'):
