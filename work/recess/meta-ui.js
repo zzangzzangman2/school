@@ -803,7 +803,7 @@ function bindMetaUI() {
   $('auto-train').addEventListener('click', () => {
     state.autoTrain = !state.autoTrain;
     message(state.autoTrain ? '자동 훈련을 켰어요. 코인이 모이면 알아서 올려요.' : '자동 훈련을 껐어요.');
-    if (state.autoTrain) runAutoTrain(true);
+    if (state.autoTrain) runAutoTrain();
     commit();
   });
   $('auto-actives').addEventListener('click', () => {

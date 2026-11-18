@@ -1126,6 +1126,42 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .dungeon-auto::before { content: ''; position: absolute; left: 6px; top: 50%; width: 10px; height: 10px; translate: 0 -50%; border-radius: 50%; background: #d8cfe4; }
 .dungeon-auto[aria-checked='true'] { border-color: #2fae66; color: #1f7a48; background: #effbf3; }
 .dungeon-auto[aria-checked='true']::before { background: #2fae66; }
+.live-stack { margin-top: 12px; }
+.live-card {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: 0 2px 0 var(--card-shadow);
+}
+.live-card h3 { margin: 0; font-size: 15px; font-weight: 900; }
+.live-card p, .live-history { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+#season-card { border-color: #c2b5df; }
+#tower-card { border-color: #9abbd9; }
+.live-card .live-rule { padding: 7px 9px; border-radius: 8px; background: #edf4fa; color: #244562; }
+.live-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.live-actions span { flex: 1; min-width: min(100%, 110px); font-size: 12px; font-weight: 700; }
+.live-actions button, .live-select {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+.live-actions button.primary:not(:disabled) { background: #285895; border-color: #234b7e; color: white; }
+.live-actions button:disabled { opacity: .55; }
+.live-select { max-width: 100%; }
+.live-progress { width: 100%; height: 12px; accent-color: #6952a5; }
+.live-tiers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; margin: 0; padding: 0; list-style: none; }
+.live-tiers li { display: grid; gap: 3px; min-width: 0; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; font-size: 11px; }
+.live-history summary { cursor: pointer; font-weight: 700; }
 .run-result { width: min(90vw, 340px); }
 .run-result h2 { margin: 0 0 10px; font-size: 18px; text-align: center; }
 .run-result-list { display: grid; gap: 6px; margin: 0 0 12px; }

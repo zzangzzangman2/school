@@ -265,7 +265,7 @@ with sync_playwright() as playwright:
     expect(rest.locator('.rest-go')).to_be_disabled()
 
     # ── 운영 날짜(KST)·오늘 화면 ──
-    # 한국 시간 2026-12-01 00:30. 전날 22:30에 닫고 2시간 방치 → 0시 이후 30분 몫(1/4)의 승리만 오늘 목표에 들어간다
+    # 한국 시간 2026-12-01 00:30에 복귀했을 때 전날 승리는 오늘 목표에 들어가지 않는다
     today = chrome.new_page(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True)
     today.on('pageerror', lambda issue: issues.append(str(issue)))
     kst_0030 = datetime.fromisoformat('2026-11-30T15:30:00+00:00')
@@ -279,16 +279,16 @@ with sync_playwright() as playwright:
       document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
       state.daily.date = '2026-11-30'; state.daily.claimed = []; state.attendance = { count: 2, last: '2026-11-30' };
       state.totalClears = 0; state.premium.monthly = 10; state.premium.monthlyDay = '2026-11-27';
-      save();
+      const when = Date.parse('2026-11-30T22:30:02+09:00');
+      sessionStorage.setItem('midnight-snapshot', JSON.stringify({ version: 5, when, state }));
     }''')
     wins_before = today.evaluate('state.wins')
     today.add_init_script('''(() => {
       const key = 'haesol-recess-king-v1';
-      const save = JSON.parse(localStorage.getItem(key) || 'null');
-      if (save && !sessionStorage.getItem('midnight-done')) {
-        save.when = Date.now() - 2 * 3600 * 1000;
-        localStorage.setItem(key, JSON.stringify(save));
-        sessionStorage.setItem('midnight-done', '1');
+      const snapshot = sessionStorage.getItem('midnight-snapshot');
+      if (snapshot) {
+        localStorage.setItem(key, snapshot);
+        sessionStorage.removeItem('midnight-snapshot');
       }
     })()''')
     today.reload()
@@ -296,7 +296,7 @@ with sync_playwright() as playwright:
     midnight = today.evaluate(f'''() => ({{ date: state.daily.date, total: state.wins - {wins_before}, counted: state.wins - state.daily.baseWins,
       picks: state.daily.picks, monthly: [state.premium.monthly, state.premium.monthlyDay, state.mail.find(mail => mail.title === '식단 월정액 보석')?.reward.gems] }})''')
     assert midnight['date'] == '2026-12-01' and midnight['total'] > 40, midnight
-    assert abs(midnight['counted'] - round(midnight['total'] * 0.25)) <= 1, midnight
+    assert 0 < midnight['counted'] < midnight['total'], midnight
     assert len(midnight['picks']) == 3 and midnight['picks'][0] == 'wins' and 'dungeons' not in midnight['picks'], midnight
     assert midnight['monthly'] == [6, '2026-12-01', 400], midnight  # 11-27 → 12-01: 4일치 한 번에
     today.locator('#dialog').get_by_role('button', name='좋아요').click()

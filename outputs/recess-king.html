@@ -1134,6 +1134,42 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .dungeon-auto::before { content: ''; position: absolute; left: 6px; top: 50%; width: 10px; height: 10px; translate: 0 -50%; border-radius: 50%; background: #d8cfe4; }
 .dungeon-auto[aria-checked='true'] { border-color: #2fae66; color: #1f7a48; background: #effbf3; }
 .dungeon-auto[aria-checked='true']::before { background: #2fae66; }
+.live-stack { margin-top: 12px; }
+.live-card {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: 0 2px 0 var(--card-shadow);
+}
+.live-card h3 { margin: 0; font-size: 15px; font-weight: 900; }
+.live-card p, .live-history { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+#season-card { border-color: #c2b5df; }
+#tower-card { border-color: #9abbd9; }
+.live-card .live-rule { padding: 7px 9px; border-radius: 8px; background: #edf4fa; color: #244562; }
+.live-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.live-actions span { flex: 1; min-width: min(100%, 110px); font-size: 12px; font-weight: 700; }
+.live-actions button, .live-select {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+.live-actions button.primary:not(:disabled) { background: #285895; border-color: #234b7e; color: white; }
+.live-actions button:disabled { opacity: .55; }
+.live-select { max-width: 100%; }
+.live-progress { width: 100%; height: 12px; accent-color: #6952a5; }
+.live-tiers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; margin: 0; padding: 0; list-style: none; }
+.live-tiers li { display: grid; gap: 3px; min-width: 0; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; font-size: 11px; }
+.live-history summary { cursor: pointer; font-weight: 700; }
 .run-result { width: min(90vw, 340px); }
 .run-result h2 { margin: 0 0 10px; font-size: 18px; text-align: center; }
 .run-result-list { display: grid; gap: 6px; margin: 0 0 12px; }
@@ -2439,6 +2475,7 @@ p, small, .item-body p, .muted { font-weight: 400; }
       <input class="nickname-input" id="nickname" name="nickname" type="text" placeholder="1~12자" maxlength="12" autocomplete="off" spellcheck="false" required aria-describedby="profile-error">
       <p id="profile-error" class="profile-error" role="alert" hidden></p>
       <button class="confirm enroll" type="submit" id="enroll-submit">입학하기 <span aria-hidden="true">→</span></button>
+      <button class="cancel-profile" type="button" id="enroll-import">저장 파일로 이어 하기</button>
       <button class="cancel-profile" type="button" id="cancel-profile" hidden>돌아가기</button>
     </form>
   </section>
@@ -2541,6 +2578,7 @@ p, small, .item-body p, .muted { font-weight: 400; }
       <section class="view" id="view-battle" aria-labelledby="roster-title">
         <div class="section-head"><div><h2 id="dungeon-title">오늘의 특별 대회</h2><p>매일 열쇠 2개 · 30초 안에 참가자와 던전 보스를 이기면 다음 단계가 열려요.</p></div></div>
         <div class="stack" id="dungeon-list"></div>
+        <div class="stack live-stack" id="challenge-list"></div>
         <div class="section-head sub"><div><h2 id="roster-title">이번 장소 상대</h2><p id="roster-note">상대 넷을 모두 이기면 다음 장소가 열려요.</p></div><span class="pill saved" id="saved">자동 저장</span></div>
         <ol class="roster" id="roster"></ol>
         <div class="section-head sub"><div><h3 class="subhead" id="log-title">대결 기록</h3><p>화면을 닫아도 대결이 쌓여요(기본 12시간, 숙소 휴식으로 최대 16시간).</p></div></div>
@@ -2588,6 +2626,7 @@ p, small, .item-body p, .muted { font-weight: 400; }
         <div class="party-slots" id="party-slots"></div>
         <div class="synergy-panel" id="synergy-panel" role="group" aria-label="팀 시너지"></div>
         <p class="shard-pick-note" id="shard-pick-note" hidden></p>
+        <div class="stack live-stack" id="roster-projects"></div>
         <div class="section-head sub"><div><h3 class="subhead">아카데미 동기들</h3><p id="party-summary" class="keep"></p></div><button type="button" class="pill-button" id="go-recruit">동료 모집</button></div>
         <div class="mate-grid" id="mate-grid"></div>
       </section>
@@ -2710,6 +2749,9 @@ p, small, .item-body p, .muted { font-weight: 400; }
       <button class="setting-row" id="profile-button" type="button" aria-label="캐릭터 설정"><svg aria-hidden="true"><use href="#i-user"/></svg><span>캐릭터·닉네임 바꾸기</span><b>›</b></button>
       <button class="setting-row" type="button" data-open-portrait="lobby"><svg aria-hidden="true"><use href="#i-user"/></svg><span>선수 로비</span><b aria-hidden="true">›</b></button>
       <button class="setting-row" id="help" type="button" aria-label="게임 도움말"><svg aria-hidden="true"><use href="#i-help"/></svg><span>게임 도움말</span><b>›</b></button>
+      <button class="setting-row" id="save-export" type="button"><svg aria-hidden="true"><use href="#i-gift"/></svg><span>저장 파일 내려받기</span><b aria-hidden="true">›</b></button>
+      <button class="setting-row" id="save-import" type="button"><svg aria-hidden="true"><use href="#i-gift"/></svg><span>저장 파일로 이어 하기</span><b aria-hidden="true">›</b></button>
+      <input type="file" id="save-file" accept=".json,application/json" hidden>
       <button class="setting-row" id="test-open" type="button" hidden><svg aria-hidden="true"><use href="#i-gear"/></svg><span>테스트 도구</span><b aria-hidden="true">›</b></button>
       <button class="setting-row" id="test-mode" type="button"><svg aria-hidden="true"><use href="#i-gear"/></svg><span id="test-mode-label">테스트 모드(진짜 저장과 따로)</span><b aria-hidden="true">›</b></button>
     </div>
@@ -2831,6 +2873,35 @@ p, small, .item-body p, .muted { font-weight: 400; }
     <form method="dialog"><button class="confirm">대결로 돌아가기</button></form>
   </dialog>
   <noscript>게임을 실행하려면 브라우저에서 JavaScript를 켜 주세요.</noscript>
+  <script>
+'use strict';
+
+const HAESOL_SEASON_CALENDAR = [
+  {
+    id: 'academy-open-2026', version: 1, name: '해솔 오픈 시즌',
+    starts: '2026-11-16', ends: '2026-12-14', claimUntil: '2026-12-21',
+    matches: ['guard', 'barrage', 'endure', 'guard'],
+    tiers: [
+      { points: 60, reward: { patches: 12 } },
+      { points: 150, reward: { shardPicks: 12 } },
+      { points: 300, reward: { recruits: 5 } },
+      { points: 480, reward: { shardPicks: 25, title: '해솔 오픈 챔피언' } },
+    ],
+  },
+  {
+    id: 'winter-classic-2026', version: 1, name: '겨울 도장 클래식',
+    starts: '2026-12-14', ends: '2027-01-11', claimUntil: '2027-01-18',
+    matches: ['endure', 'guard', 'barrage', 'endure'],
+    tiers: [
+      { points: 60, reward: { recruits: 3 } },
+      { points: 140, reward: { patches: 20 } },
+      { points: 260, reward: { shardPicks: 18 } },
+      { points: 430, reward: { shardPicks: 25, title: '겨울 도장 챔피언' } },
+    ],
+  },
+];
+
+</script>
   <script>
 'use strict';
 
@@ -3096,6 +3167,19 @@ const CUP_RULES = [
   { id: 'guard', name: '방어형', champion: '철벽의 챔피언', sprite: 'boss4', desc: '챔피언 쪽 체력 +50%', hp: 1.5, hit: 1, family: 'strike', tip: '팀 피해를 올리는 타격 계열로 뚫기' },
   { id: 'grapple', name: '잡기형', champion: '그래플링 챔피언', sprite: 'boss6', desc: '챔피언 쪽 체력·공격 +25%', hp: 1.25, hit: 1.25, family: 'special', tip: '쿨타임을 줄이는 기공 계열로 스킬 몰아치기' },
 ];
+const CHALLENGE_RULES = {
+  guard: { name: '철벽', tip: '공 울림 카운터로 방어를 푸세요.', sprite: 'boss4', time: 30 },
+  barrage: { name: '연타', tip: '보호막이나 회복 동료로 빠른 연타를 버티세요.', sprite: 'boss5', time: 30 },
+  endure: { name: '지구력', tip: '이기거나 제한 시간까지 버티면 통과해요.', sprite: 'boss6', time: 18 },
+};
+const TOWER = { name: '도장 도전층', boss: '도장 사범', hp: 1.8, hit: 0.7, background: 'd-exam', map: 9, floors: 30 };
+const SEASON_CUP = { name: '시즌 챔피언전', boss: '시즌 챔피언', hp: 2.2, hit: 0.85, background: 'd-badge', map: 11 };
+const CHALLENGE_INFO = { tower: TOWER, season: SEASON_CUP };
+const MAIN_FIGHT_FIELDS = [
+  'map', 'wave', 'farm', 'front', 'pack', 'hp', 'enemyHp', 'bossTime', 'nextAttack', 'nextEnemy', 'pause',
+  'playerMove', 'enemyMove', 'bossPhase', 'bossTimer', 'charge', 'party', 'allyTimers', 'cooldowns', 'buffs',
+  'mateBuffs', 'shield', 'skillId', 'bleed', 'roundEnd',
+];
 const TRIAL = { name: '승급 심사', minion: '심사 위원', reward: 'tier', hp: 2.6, hit: 1.15, background: 'd-exam', map: 9, solo: true };
 
 // ── 동료: 전원 여성 파이터(성인). 모집권으로 모집, 등급(S~F)별로 성급업, 보유 효과. 각자 고유 스킬을 쿨타임마다 알아서 쓴다 ──
@@ -3276,13 +3360,14 @@ function freshState() {
     cooldowns: {}, buffs: {}, autoSkills: true, quest: 0, stats: { pulls: 0, recruits: 0, dungeons: 0 },
     pass: { free: 0, premium: 0 }, premium: { pass: false, adFree: false, monthly: 0, bought: {} }, mail: [], mailSeq: 0,
     profile: null, level: 1, xp: 0, coins: 12, map: 0, wave: 0, wins: 0,
+    tower: { best: 0 }, bossFailure: null, presets: {}, dispatch: null, collection: [], seasons: {},
     cleared: MAPS.map(() => false), training: Object.fromEntries(Object.keys(TRAINING).map(id => [id, 0])), allyLv: {}, skillLv: {}, autoTrain: false,
     tickets: WELCOME_TICKETS, stickers: {}, snacks: { choco: 0, banana: 0, berry: 0 }, speed: 1,
     attendance: { count: 0, last: '' }, daily: null, weekly: null, weeklyLog: [], shardPicks: 0, titles: [], prestige: freshPrestige(), cycle: 0, totalClears: 0,
     bag: Object.values(STARTER_GEAR), equipped: { ...STARTER_GEAR }, ranks: {}, patches: 0,
     mapWins: MAPS.map(() => 0), missions: { wins: 0, clears: 0, closet: 0 }, farm: null,
     classId: null, autoNext: true, autoSkill: true, skillId: 'rush', sound: true, charge: 0, hp: 84, enemyHp: MAPS[0].hp[0],
-    nextAttack: 0.65, nextEnemy: 1.5, pause: 0.2, tickRemainder: 0,
+    nextAttack: 0.65, nextEnemy: 1.5, pause: 0.2, tickRemainder: 0, autoTrainTime: 0,
     playerMove: null, enemyMove: null, roundEnd: null, bossPhase: 'ready', bossTimer: BOSS_PHASES.ready.duration,
     log: ['격투 아카데미 입학 첫날. 정문에서 첫 스파링이 시작됐어요.'],
   };
@@ -3343,11 +3428,13 @@ function prestigeGain(state) {
 function transfer(state) {
   const gain = prestigeGain(state);
   if (!gain) return 0;
+  if (state.dungeon?.returnTo) exitChallenge(state);
   const reached = progress(state);
   const keep = {};
   for (const key of ['profile', 'wins', 'bag', 'equipped', 'ranks', 'patches', 'missions', 'classId', 'autoNext', 'autoSkill', 'skillId', 'sound',
     'tickets', 'stickers', 'snacks', 'speed', 'attendance', 'daily', 'weekly', 'weeklyLog', 'shardPicks', 'titles', 'totalClears', 'dungeons', 'dungeonResult',
-    'gems', 'recruits', 'companions', 'mateShards', 'mateGrade', 'autoMates', 'record', 'dungeonAuto', 'test', 'party', 'tier', 'autoSkills', 'quest', 'stats', 'pass', 'premium', 'mail', 'mailSeq', 'autoTrain']) keep[key] = state[key];
+    'gems', 'recruits', 'companions', 'mateShards', 'mateGrade', 'autoMates', 'record', 'dungeonAuto', 'test', 'party', 'tier', 'autoSkills', 'quest', 'stats', 'pass', 'premium', 'mail', 'mailSeq', 'autoTrain',
+    'tower', 'presets', 'dispatch', 'collection', 'seasons']) keep[key] = state[key];
   const before = state.prestige;
   Object.assign(state, newGame(), keep);
   state.prestige = { ...before, count: before.count + 1, badges: before.badges + gain, earned: before.earned + gain, best: Math.max(before.best, reached) };
@@ -3473,6 +3560,7 @@ function addWeekly(state, source, base) {
   const points = Math.round(base * (1 + WEEKLY.familyPoint * weeklyFamilyCount(state)));
   state.weekly.points += points;
   state.weekly.sources = { ...state.weekly.sources, [source]: (state.weekly.sources[source] || 0) + points };
+  if (source === 'goal' || source === 'cup' || source === 'cupTry') addSeasonPoints(state, Math.ceil(points / 2));
   return points;
 }
 function claimWeekly(state, index) {
@@ -3665,6 +3753,11 @@ function makeMobs(state) {
     const cup = cupInfo(state);
     return DUNGEON_PACK.map((slot, index) => make(slot, slot.leader ? cup.boss : `${CUP.minion} ${index + 1}`, slot.leader ? cup.sprite : CUP.minionSprites[index % CUP.minionSprites.length]));
   }
+  if (state.dungeon && Object.hasOwn(CHALLENGE_INFO, state.dungeon.id)) {
+    const info = CHALLENGE_INFO[state.dungeon.id];
+    const rule = challengeRule(state);
+    return [make({ share: 1, hit: 1, leader: true }, state.dungeon.opponent || info.boss, rule.sprite)];
+  }
   if (state.dungeon) {
     const dungeon = DUNGEONS[state.dungeon.id];
     return DUNGEON_PACK.map((slot, index) => make(slot, slot.leader ? dungeon.boss : `${dungeon.minion} ${index + 1}`, slot.leader ? dungeon.sprite : dungeon.minionSprites[index % dungeon.minionSprites.length]));
@@ -3753,10 +3846,152 @@ function venueMap(state) {
   return stageArt(cycle, state.map);
 }
 function regionConquered(state, index) { return bestProgress(state) >= REGION_START[index + 1] * MAPS.length; }
-function dungeonInfo(id) { return id === 'trial' ? TRIAL : id === 'record' ? RECORD : id === 'cup' ? CUP : DUNGEONS[id]; }
+function dungeonInfo(id) { return id === 'trial' ? TRIAL : id === 'record' ? RECORD : id === 'cup' ? CUP : CHALLENGE_INFO[id] || DUNGEONS[id]; }
 // 지금 던전의 체력·공격 배율(챔피언전은 이번 주 규칙까지)
 function dungeonStats(state) { return state.dungeon.id === 'cup' ? cupInfo(state) : dungeonInfo(state.dungeon.id); }
-function dungeonReach(state) { return state.dungeon.id === 'cup' ? state.dungeon.level : state.dungeon.id === 'trial' ? tierReq(state.dungeon.level) : state.dungeon.id === 'record' ? progress(state) : dungeonProgress(state.dungeon.level); }
+function dungeonReach(state) {
+  const { id, level, reach } = state.dungeon;
+  if (Object.hasOwn(CHALLENGE_INFO, id)) return reach;
+  if (id === 'cup') return level;
+  if (id === 'trial') return tierReq(level);
+  return id === 'record' ? progress(state) : dungeonProgress(level);
+}
+
+function challengeRule(state) { return CHALLENGE_RULES[state.dungeon?.rule] || null; }
+function towerUnlocked(state) { return bestProgress(state) >= MAPS_PER_GRADE || dungeonUnlocked(state, 'coin'); }
+function towerRule(floor) {
+  return floor % 5 === 0 ? ['guard', 'barrage', 'endure'][Math.floor((floor - 1) / 5) % 3]
+    : ['barrage', 'endure', 'barrage', 'guard'][(floor - 1) % 5];
+}
+function towerReward(floor) {
+  return floor % 5 === 0 ? { shardPicks: 5, patches: 4 } : { patches: 1 };
+}
+function enterTower(state, floor = Math.min(TOWER.floors, state.tower.best + 1)) {
+  if (!towerUnlocked(state) || !Number.isInteger(floor) || floor < 1 || floor > TOWER.floors || floor > state.tower.best + 1) return false;
+  const rule = towerRule(floor);
+  return enterChallenge(state, 'tower', floor, { reach: 2 + (floor - 1) * 3, rule, opponent: floor % 5 === 0 ? `${floor}층 ${CHALLENGE_RULES[rule].name} 사범` : `${floor}층 수련 상대` });
+}
+function enterChallenge(state, id, level, details) {
+  if (state.dungeon) return false;
+  const returnTo = Object.fromEntries(MAIN_FIGHT_FIELDS.map(key => [key, state[key] ?? null]));
+  state.dungeon = { id, level, time: CHALLENGE_RULES[details.rule]?.time ?? DUNGEON_TIME, ...details, returnTo };
+  state.cooldowns = {};
+  state.buffs = {};
+  state.mateBuffs = {};
+  state.allyTimers = [1.1, 1.5, 1.9, 2.3];
+  state.shield = 0;
+  state.charge = 0;
+  state.bleed = null;
+  if (state.presets.challenge) applyPartyPreset(state, 'challenge');
+  state.hp = maxHp(state);
+  openFight(state, state.map, state.wave, 0.6);
+  return true;
+}
+function finishChallenge(state, win, emit, reason) {
+  const { id, level, reach } = state.dungeon;
+  let text = '다시 도전할 수 있어요.';
+  if (win && id === 'tower') {
+    if (level > state.tower.best) {
+      state.tower.best = level;
+      text = `첫 승리 · ${giftLine(grantAny(state, towerReward(level)))}`;
+      addSeasonPoints(state, level % 5 === 0 ? 12 : 4);
+    } else text = '이미 첫 승리 보상을 받았어요.';
+  }
+  if (win && id === 'season') text = finishSeasonFight(state);
+  if (!win) {
+      const hp = Math.round(state.enemyHp / enemyMaxHp(state) * 100);
+    text = `상대 체력 ${hp}% · ${challengeRule(state).tip}`;
+  }
+  state.dungeonResult = { id, level, win, reason, text, reach, serial: (state.dungeonResult?.serial || 0) + 1 };
+  finishRound(state, win ? 'win' : 'loss', state.map, state.wave, 1.5, emit, null, state.farm);
+  state.roundEnd.leaveDungeon = true;
+}
+function exitChallenge(state) {
+  const saved = state.dungeon.returnTo;
+  state.dungeon = null;
+  Object.assign(state, saved);
+  state.hp = Math.min(maxHp(state), state.hp);
+}
+
+const SEASON_REWARDS = ['gems', 'recruits', 'shardPicks', 'patches', 'title'];
+let seasonCalendar = [];
+function validDayKey(value) {
+  return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
+    && todayKey(new Date(dayStart(value))) === value;
+}
+function validSeason(entry) {
+  if (!entry || typeof entry.id !== 'string' || !/^[a-z0-9][a-z0-9-]{0,39}$/.test(entry.id)
+      || ['constructor', 'prototype'].includes(entry.id) || !Number.isSafeInteger(entry.version) || entry.version < 1
+      || typeof entry.name !== 'string' || !entry.name || entry.name.length > 40
+      || ![entry.starts, entry.ends, entry.claimUntil].every(validDayKey)
+      || !(entry.starts < entry.ends && entry.ends <= entry.claimUntil)
+      || !Array.isArray(entry.matches) || !entry.matches.length || entry.matches.length > 8
+      || !entry.matches.every(rule => Object.hasOwn(CHALLENGE_RULES, rule))
+      || !Array.isArray(entry.tiers) || !entry.tiers.length || entry.tiers.length > 8) return false;
+  return entry.tiers.every((tier, index) => tier && Number.isSafeInteger(tier.points)
+    && tier.points > (index ? entry.tiers[index - 1].points : 0)
+    && tier.reward && typeof tier.reward === 'object' && Object.keys(tier.reward).length > 0
+    && Object.entries(tier.reward).every(([key, value]) => SEASON_REWARDS.includes(key)
+      && (key === 'title' ? typeof value === 'string' && value.length > 0 && value.length <= 40
+        : Number.isSafeInteger(value) && value > 0 && value <= 10000)));
+}
+function setSeasonCalendar(entries) {
+  if (!Array.isArray(entries) || !entries.length || !entries.every(validSeason)) return false;
+  if (new Set(entries.map(entry => entry.id)).size !== entries.length) return false;
+  const sorted = [...entries].sort((a, b) => a.starts.localeCompare(b.starts));
+  if (sorted.some((entry, index) => index > 0 && sorted[index - 1].ends > entry.starts)) return false;
+  seasonCalendar = sorted;
+  return true;
+}
+function seasonList(state) {
+  const seasons = new Map(seasonCalendar.map(entry => [entry.id, entry]));
+  for (const entry of Object.values(state.seasons)) seasons.set(entry.id, entry);
+  return [...seasons.values()].sort((a, b) => a.starts.localeCompare(b.starts));
+}
+function seasonDay(state) { return state.daily?.date || gameDay(state); }
+function activeSeason(state, day = seasonDay(state)) {
+  return seasonList(state).find(entry => entry.starts <= day && day < entry.ends) || null;
+}
+function seasonProgress(state, entry) {
+  if (!state.seasons[entry.id]) state.seasons[entry.id] = { ...entry, points: 0, claimed: [], matchesWon: [] };
+  return state.seasons[entry.id];
+}
+function addSeasonPoints(state, points) {
+  const entry = activeSeason(state);
+  if (!entry) return;
+  seasonProgress(state, entry).points += points;
+}
+function seasonMatch(entry, day) { return Math.min(entry.matches.length - 1, Math.floor(daysBetween(entry.starts, day) / 7)); }
+function enterSeasonFight(state) {
+  const today = seasonDay(state);
+  const entry = activeSeason(state, today);
+  if (!entry || !cupUnlocked(state) || state.dungeon) return false;
+  const match = seasonMatch(entry, today);
+  const rule = entry.matches[match];
+  const level = match + 1;
+  const reach = Math.max(2, bestProgress(state) - 9 + match * 2);
+  seasonProgress(state, entry);
+  return enterChallenge(state, 'season', level, { reach, seasonId: entry.id, rule, opponent: `${CHALLENGE_RULES[rule].name} 챔피언` });
+}
+function finishSeasonFight(state) {
+  const { seasonId, level } = state.dungeon;
+  const entry = state.seasons[seasonId];
+  if (!entry || seasonDay(state) >= entry.ends) return '시즌 대결 기간이 끝났어요.';
+  if (entry.matchesWon.includes(level)) return '이번 주 첫 승리 점수를 이미 받았어요.';
+  entry.matchesWon.push(level);
+  entry.points += 75;
+  return '이번 주 첫 승리 · 시즌 점수 +75';
+}
+function claimSeason(state, id, day = seasonDay(state)) {
+  const entry = Object.hasOwn(state.seasons, id) ? state.seasons[id] : null;
+  if (!entry || day < entry.starts || day >= entry.claimUntil) return null;
+  const ready = entry.tiers.map((tier, index) => ({ ...tier, index }))
+    .filter(tier => entry.points >= tier.points && !entry.claimed.includes(tier.index));
+  if (!ready.length) return null;
+  entry.claimed.push(...ready.map(tier => tier.index));
+  return mergeRewards(ready.map(tier => grantAny(state, tier.reward)));
+}
+if (typeof HAESOL_SEASON_CALENDAR !== 'undefined') setSeasonCalendar(HAESOL_SEASON_CALENDAR);
 function recordTierHp(tier) { return atProgress(dungeonProgress(tier), 'hp') * RECORD.tierHp; }
 // 피해량으로 도달한 보상 구간과 다음 구간까지 남은 피해
 function recordTier(damage) {
@@ -3775,8 +4010,9 @@ function recordReward(state, tier) {
 }
 function recordKeys(state) { return state.daily?.keys?.record ?? DUNGEON_KEYS; }
 function recordUnlocked(state) { return dungeonUnlocked(state, 'coin'); }
-function enterRecord(state) {
-  if (!recordUnlocked(state) || state.dungeon || state.roundEnd?.leaveDungeon || recordKeys(state) <= 0) return false;
+function enterRecord(state, practice = false) {
+  if (!recordUnlocked(state) || state.dungeon || state.roundEnd?.leaveDungeon || (!practice && recordKeys(state) <= 0)) return false;
+  if (practice) return enterChallenge(state, 'record', 1, { practice: true });
   if (state.roundEnd) {
     const end = state.roundEnd;
     state.farm = end.nextFarm;
@@ -3855,10 +4091,20 @@ function sweepDungeon(state, id) {
 }
 function leaveDungeon(state, win, emit, reason = '') {
   const { id, level } = state.dungeon;
+  if (Object.hasOwn(CHALLENGE_INFO, id)) {
+    finishChallenge(state, win, emit, reason);
+    return;
+  }
   if (id === 'record') {
     const dealt = Math.max(0, Math.round((state.front?.max || 0) - Math.max(0, state.enemyHp)));
     const best = Math.max(state.record?.best || 0, dealt);
     const reach = recordTier(dealt);
+    if (state.dungeon.practice) {
+      state.dungeonResult = { id, practice: true, level: reach.tier, win: true, record: dealt, best: state.record.best, next: reach.next, text: '연습 결과', serial: (state.dungeonResult?.serial || 0) + 1 };
+      finishRound(state, 'win', state.map, state.wave, 1.5, emit, null, state.farm);
+      state.roundEnd.leaveDungeon = true;
+      return;
+    }
     state.record = { best, tier: recordTier(best).tier };
     useRecordKey(state);
     const reward = grantDungeon(state, 'record', reach.tier);
@@ -3951,6 +4197,7 @@ function killProgress(state) {
   return { done: state.wave * PACK.length + PACK.length - left, total };
 }
 function bossTimeout(state, emit) {
+  rememberBossFailure(state, 'timeout');
   record(state, `${currentEnemy(state)} 보스전 시간 초과! 같은 맵에서 반복 수련해요.`);
   finishRound(state, 'loss', state.map, 0, 1.65, emit, null, { cap: Math.min(1, Math.max(0, state.wave - 1)), easy: 0, wins: 0 });
   state.roundEnd.timeout = true;
@@ -3969,8 +4216,25 @@ function firstGradeWon(state) { return state.cleared[MAPS_PER_GRADE - 1]; }
 function unlocked(state, map) { return map === 0 || state.cleared[map - 1]; }
 function currentEnemy(state) { return state.front?.name ?? stageNames(state.cycle || 0, state.map)[state.wave]; }
 function isDaon(state) { return !state.dungeon && state.map === DAON_MAP && state.wave === BOSS_WAVE; }
-function guarding(state) { return isDaon(state) && ['guard', 'counter'].includes(state.bossPhase); }
-function opening(state) { return isDaon(state) && ['open', 'broken'].includes(state.bossPhase); }
+function usesGuardPattern(state) { return isDaon(state) || state.dungeon?.rule === 'guard'; }
+function guarding(state) { return usesGuardPattern(state) && ['guard', 'counter'].includes(state.bossPhase); }
+function opening(state) { return usesGuardPattern(state) && ['open', 'broken'].includes(state.bossPhase); }
+function bossRetryReady(state) {
+  const failure = state.bossFailure;
+  return !state.dungeon && failure?.map === state.map && failure?.cycle === state.cycle;
+}
+function rememberBossFailure(state, reason) {
+  if (state.dungeon || state.farm || state.wave !== BOSS_WAVE) return;
+  state.bossFailure = { cycle: state.cycle, map: state.map, hp: Math.ceil(state.enemyHp / enemyMaxHp(state) * 100), reason };
+}
+function retryFarm(state) {
+  if (state.dungeon || !state.farm || state.roundEnd) return false;
+  const wave = bossRetryReady(state) ? BOSS_WAVE : 0;
+  state.farm = null;
+  state.hp = maxHp(state);
+  openFight(state, state.map, wave, 0.35);
+  return true;
+}
 function canSkill(state) { return !state.roundEnd && state.pause <= 0 && !state.playerMove && state.charge >= SKILLS[state.skillId].cost; }
 
 function makeProfile(name, gender) {
@@ -3994,7 +4258,7 @@ function openFight(state, map, wave, delay) {
   state.enemyHp = state.front.max;
   state.bossTime = BOSS_TIME;
   state.nextAttack = 0.55;
-  state.nextEnemy = isDaon(state) ? 0.85 : 1.35;
+  state.nextEnemy = usesGuardPattern(state) ? 0.85 : 1.35;
   state.pause = delay;
   state.playerMove = null;
   state.enemyMove = null;
@@ -4022,6 +4286,7 @@ function win(state, emit) {
   const map = state.map;
   const grade = gradeIndex(map);
   const boss = state.wave === BOSS_WAVE;
+  if (boss && bossRetryReady(state)) state.bossFailure = null;
   const firstBoss = boss && !state.cleared[map];
   const share = state.front?.share ?? 1;
   const coins = Math.round(winCoins(state, firstBoss) * share);
@@ -4067,7 +4332,7 @@ function win(state, emit) {
     const { wins, cap } = state.farm;
     const retry = wins + 1 >= FARM_WINS;
     const nextFarm = retry ? null : { ...state.farm, wins: wins + 1 };
-    const nextWave = retry ? 0 : (state.wave + 1) % (cap + 1);
+    const nextWave = retry ? (bossRetryReady(state) ? BOSS_WAVE : 0) : (state.wave + 1) % (cap + 1);
     state.hp = maxHp(state);
     if (retry) record(state, '같은 맵에서 수련 3승. 다시 도전해요!');
     finishRound(state, 'win', map, nextWave, 0.83, emit, reward, nextFarm);
@@ -4122,7 +4387,7 @@ function strike(state, move, emit) {
   state.enemyHp -= amount;
   if (breaks) {
     changeBossPhase(state, 'broken', emit);
-    record(state, '공 울림 카운터로 다온의 방어를 풀었어요!');
+    record(state, `공 울림 카운터로 ${currentEnemy(state)}의 방어를 풀었어요!`);
   }
   emit?.('impact', { side: 'player', move, amount, blocked, breaks, lucky });
   // 필살기는 뒤에 선 상대까지 맞힌다
@@ -4157,6 +4422,7 @@ function rivalStrike(state, move, emit) {
     return;
   }
   if (state.hp <= 0) {
+    rememberBossFailure(state, 'defeat');
     const farm = state.farm ? { ...state.farm, easy: Math.min(5, state.farm.easy + 1) }
       : { cap: Math.min(1, Math.max(0, state.wave - 1)), easy: state.wave === 0 ? 1 : 0, wins: 0 };
     record(state, `${currentEnemy(state)}에게 졌어요. 같은 맵에서 반복 수련을 시작해요.`);
@@ -4180,7 +4446,7 @@ function activateSkill(state, emit) {
 }
 
 function autoSkillTarget(state) {
-  if (!isDaon(state)) return true;
+  if (!usesGuardPattern(state)) return true;
   if (state.skillId === 'rush') return opening(state) && state.bossTimer >= SKILLS.rush.windup;
   if (!guarding(state)) return false;
   return state.bossPhase === 'guard' || state.bossTimer > SKILLS.bell.windup + STEP;
@@ -4200,6 +4466,11 @@ function step(state, emit) {
     const end = state.roundEnd;
     end.wait -= STEP;
     if (end.wait <= 1e-8) {
+      if (end.leaveDungeon && state.dungeon?.returnTo) {
+        exitChallenge(state);
+        emit?.('enter', {});
+        return;
+      }
       if (end.result === 'loss' || end.leaveDungeon) state.hp = maxHp(state);
       if (end.leaveDungeon) state.dungeon = null;
       if (end.chain) {
@@ -4228,7 +4499,8 @@ function step(state, emit) {
   if (state.dungeon) {
     state.dungeon.time -= STEP;
     if (state.dungeon.time <= 0) {
-      leaveDungeon(state, false, emit, 'timeout');
+      const survived = state.dungeon.rule === 'endure';
+      leaveDungeon(state, survived, emit, survived ? 'survived' : 'timeout');
       return;
     }
   } else if (!state.farm && state.wave === BOSS_WAVE) {
@@ -4269,8 +4541,8 @@ function step(state, emit) {
     if (state.roundEnd || state.pause > 0) return;
   }
 
-  const daon = isDaon(state);
-  if (daon) {
+  const patterned = usesGuardPattern(state);
+  if (patterned) {
     state.bossTimer -= STEP;
     if (state.bossTimer <= 1e-8) {
       const phase = state.bossPhase;
@@ -4282,7 +4554,7 @@ function step(state, emit) {
     }
   }
 
-  if (!daon || state.bossPhase === 'ready') {
+  if (!patterned || state.bossPhase === 'ready') {
     state.nextEnemy -= STEP;
     if (state.enemyMove) {
       state.enemyMove.left -= STEP;
@@ -4292,7 +4564,7 @@ function step(state, emit) {
         if (state.roundEnd) return;
       }
     } else if (state.nextEnemy <= 0) {
-      state.nextEnemy = 1.65 - gradeIndex(state.map) * 0.06;
+      state.nextEnemy = state.dungeon?.rule === 'barrage' ? 0.75 : 1.65 - gradeIndex(state.map) * 0.06;
       state.enemyMove = { move: 'attack', left: 0.25 };
       emit?.('windup', { side: 'rival', move: 'attack', windup: 0.25 });
     }
@@ -4307,6 +4579,7 @@ function step(state, emit) {
 // ── 재입학 빠른 복귀: 재입학 전 최고 기록의 한 지역 앞까지는 이미 지나온 곳이라 RUSH_SPEED배로 달린다 ──
 // 진 순간이나 종료 지점에 닿으면 보통 속도. 이긴 맵은 정상 진행이고 첫 제패 보상은 원래대로 최고 기록 기준. 오프라인에서도 같다
 const RUSH_SPEED = 3;
+const AUTO_TRAIN_INTERVAL = 1;
 function rushEnd(best) {
   const cycle = Math.floor(best / MAPS.length);
   if (cycle < 2) return 0;
@@ -4318,14 +4591,48 @@ function simulate(state, seconds, emit) {
   const elapsed = seconds + state.tickRemainder;
   const ticks = Math.floor((elapsed + 1e-8) / STEP);
   state.tickRemainder = Math.max(0, elapsed - ticks * STEP);
+  let spent = 0;
   for (let index = 0; index < ticks; index++) {
     const times = rushing(state) ? RUSH_SPEED : 1;
     for (let repeat = 0; repeat < times; repeat++) step(state, emit);
+    if (state.autoTrain) {
+      state.autoTrainTime = (state.autoTrainTime || 0) + STEP;
+      if (state.autoTrainTime >= AUTO_TRAIN_INTERVAL - 1e-8) {
+        state.autoTrainTime = 0;
+        const coins = state.coins;
+        trainAutomatically(state);
+        spent += coins - state.coins;
+      }
+    }
     if (state.rush && !state.dungeon && progress(state) >= state.rush.until) {
       state.rush = null;
       record(state, '빠른 복귀 끝! 여기부터는 보통 속도로 겨뤄요.');
     }
   }
+  return spent;
+}
+
+function simulateBetween(state, start, end, emit, speed = 1) {
+  let cursor = Math.min(start, end);
+  let spent = 0;
+  while (cursor < end) {
+    const date = new Date(cursor);
+    const today = gameDay(state, date);
+    if (today !== state.daily?.date) refreshDay(state, today);
+    const next = Math.min(end, dayStart(todayKey(date)) + DAY_MS);
+    spent += simulate(state, (next - cursor) * speed / 1000, emit);
+    cursor = next;
+  }
+  const today = gameDay(state, new Date(end));
+  if (today !== state.daily?.date) refreshDay(state, today);
+  return spent;
+}
+
+function restSnapshot(state) {
+  return {
+    wins: state.wins, coins: state.coins, level: state.level, bag: state.bag.length,
+    tickets: state.tickets, progress: progress(state), training: trainingTotal(state),
+  };
 }
 
 // ── 빠른 휴식: 2시간 동안의 대결을 바로 받는다(오프라인 계산과 같은 방식, 보통 속도) ──
@@ -4345,15 +4652,15 @@ function quickRest(state, today = gameDay(state)) {
   refreshDay(state, today);
   if (restBlocked(state)) return null;
   const cost = restCost(state);
-  const before = { wins: state.wins, coins: state.coins, level: state.level, bag: state.bag.length, tickets: state.tickets, progress: progress(state) };
   state.gems -= cost;
+  const before = restSnapshot(state);
   state.daily.rest = restUsed(state) + 1;
   const speed = state.speed;
   state.speed = 1;
-  simulate(state, QUICK_REST.seconds, null);
+  const spent = simulate(state, QUICK_REST.seconds, null);
   state.speed = speed;
   record(state, `빠른 휴식! 2시간 동안 ${fmt(state.wins - before.wins)}번 이겼어요.`);
-  return { cost, before, seconds: QUICK_REST.seconds };
+  return { cost, before, spent, seconds: QUICK_REST.seconds };
 }
 
 // ── 승급 ──
@@ -4473,14 +4780,14 @@ function recruit(state, count, rng = Math.random) {
   }
   state.stats.recruits += count;
   if (!state.party.some(Boolean)) {
-    const best = Object.keys(state.companions).sort((a, b) => allyPower(state, b) - allyPower(state, a))[0];
+    const best = Object.keys(state.companions).filter(id => state.dispatch?.mate !== id).sort((a, b) => allyPower(state, b) - allyPower(state, a))[0];
     if (best) state.party[0] = best;
   }
   return results;
 }
 function setParty(state, slot, id) {
   if (slot < 0 || slot >= partySlots(state)) return false;
-  if (id && !companionLevel(state, id)) return false;
+  if (id && (!companionLevel(state, id) || state.dispatch?.mate === id)) return false;
   state.party = state.party.map(other => (other === id ? null : other));
   state.party[slot] = id;
   return true;
@@ -4520,6 +4827,59 @@ const MATE_FAMILIES = {
 const FAMILY_ORDER = Object.keys(MATE_FAMILIES);
 const BALANCE_SYNERGY = { 3: 0.04, 4: 0.07 }; // 서로 다른 계열 수 → 크리티컬 확률
 function mateFamily(id) { return FAMILY_ORDER.find(family => MATE_FAMILIES[family].mates.includes(id)) || null; }
+const PARTY_PRESETS = { main: '본편', challenge: '도전' };
+const DISPATCH_HOURS = [4, 8, 12];
+const DISPATCH_SHARDS = { 4: 3, 8: 7, 12: 12 };
+function validParty(state, ids) {
+  return Array.from({ length: PARTY_MAX }, (_, index) => {
+    const id = ids[index];
+    return index < partySlots(state) && Object.hasOwn(COMPANIONS, id) && companionLevel(state, id) > 0
+      && ids.indexOf(id) === index && state.dispatch?.mate !== id ? id : null;
+  });
+}
+function savePartyPreset(state, preset) {
+  if (!Object.hasOwn(PARTY_PRESETS, preset)) return false;
+  state.presets[preset] = { party: [...state.party], skillId: state.skillId };
+  return true;
+}
+function applyPartyPreset(state, preset) {
+  if (!Object.hasOwn(PARTY_PRESETS, preset) || !state.presets[preset]) return false;
+  const saved = state.presets[preset];
+  state.party = validParty(state, saved.party);
+  state.skillId = saved.skillId;
+  return true;
+}
+function dispatchMates(state) {
+  return Object.keys(COMPANIONS).filter(id => companionLevel(state, id) > 0 && !state.party.includes(id));
+}
+function startDispatch(state, mate, hours, now = Date.now()) {
+  if (state.dispatch || state.dungeon || !DISPATCH_HOURS.includes(hours) || !dispatchMates(state).includes(mate)) return false;
+  state.dispatch = { mate, hours, started: now, ready: now + hours * 3600000 };
+  return true;
+}
+function finishDispatch(state, now = Date.now()) {
+  const task = state.dispatch;
+  if (!task || now < task.ready) return null;
+  state.dispatch = null;
+  const shards = DISPATCH_SHARDS[task.hours];
+  const id = task.mate;
+  if (starCost(state, id) > 0) addShards(state, id, shards);
+  else grantAny(state, { shardPicks: shards });
+  return { id, shards, picks: !starCost(state, id) };
+}
+function collectionProgress(state, family) {
+  const ids = MATE_FAMILIES[family].mates;
+  const needed = Math.min(3, ids.length);
+  return { owned: ids.filter(id => companionLevel(state, id) > 0).length,
+    trained: ids.filter(id => companionLevel(state, id) > 0 && allyTrainLevel(state, id) >= 5).length, needed };
+}
+function claimCollection(state, family) {
+  if (!Object.hasOwn(MATE_FAMILIES, family) || state.collection.includes(family)) return null;
+  const { owned, trained, needed } = collectionProgress(state, family);
+  if (owned < needed || trained < needed) return null;
+  state.collection.push(family);
+  return grantAny(state, { shardPicks: 8, title: `${MATE_FAMILIES[family].name} 동료 수련가` });
+}
 let synergyMemo = { key: '', value: null };
 function teamSynergy(state) {
   const ids = (state.party || []).slice(0, partySlots(state)).filter(Boolean);
@@ -4704,6 +5064,14 @@ function autoTrain(state, limit = 200) {
   }
   return bought;
 }
+function trainingTotal(state) {
+  return Object.values(state.training).reduce((sum, level) => sum + level, 0);
+}
+function trainAutomatically(state) {
+  const bought = autoTrain(state);
+  if (state.daily) state.daily.trains += bought;
+  return bought;
+}
 function trainSkill(state, id) {
   if (!skillUnlocked(state, id) || skillLevel(state, id) >= ACTIVE[id].lvCap) return false;
   const cost = skillCost(state, id);
@@ -4856,6 +5224,7 @@ function claimPass(state) {
 function migrateFeatures(s) {
   const count = value => Number.isSafeInteger(value) && value >= 0;
   const amount = value => Number.isFinite(value) && value >= 0;
+  const isObject = value => value && typeof value === 'object' && !Array.isArray(value);
   if (s.training && typeof s.training === 'object') for (const id of Object.keys(TRAINING)) if (s.training[id] === undefined) s.training[id] = 0;
   for (const key of ['allyLv', 'skillLv']) {
     const raw = s[key] && typeof s[key] === 'object' && !Array.isArray(s[key]) ? s[key] : {};
@@ -4864,6 +5233,7 @@ function migrateFeatures(s) {
     s[key] = Object.fromEntries(Object.keys(ids).filter(id => count(levels[id]) && levels[id] > 0).map(id => [id, levels[id]]));
   }
   if (typeof s.autoTrain !== 'boolean') s.autoTrain = false;
+  s.autoTrainTime = Number.isFinite(s.autoTrainTime) ? clamp(s.autoTrainTime, 0, AUTO_TRAIN_INTERVAL) : 0;
   if (!count(s.tickets)) s.tickets = WELCOME_TICKETS;
   const stickers = s.stickers && typeof s.stickers === 'object' ? s.stickers : {};
   s.stickers = Object.fromEntries(Object.keys(STICKERS).filter(id => count(stickers[id]) && stickers[id] > 0).map(id => [id, stickers[id]]));
@@ -4894,11 +5264,11 @@ function migrateFeatures(s) {
   const dungeons = s.dungeons && typeof s.dungeons === 'object' ? s.dungeons : {};
   s.dungeons = Object.fromEntries(Object.keys(DUNGEONS).map(id => [id, count(dungeons[id]) ? dungeons[id] : 0]));
   const active = s.dungeon;
-  if (!(active && (Object.hasOwn(DUNGEONS, active.id) || ['trial', 'record', 'cup'].includes(active.id)) && count(active.level) && active.level >= 1 && Number.isFinite(active.time))) s.dungeon = null;
-  if (!s.dungeonResult || typeof s.dungeonResult !== 'object' || !(Object.hasOwn(DUNGEONS, s.dungeonResult.id) || ['trial', 'record', 'cup'].includes(s.dungeonResult.id))) s.dungeonResult = null;
+  const dungeonIds = ['trial', 'record', 'cup', ...Object.keys(CHALLENGE_INFO), ...Object.keys(DUNGEONS)];
+  if (!(active && dungeonIds.includes(active.id) && count(active.level) && active.level >= 1 && Number.isFinite(active.time))) s.dungeon = null;
+  if (!isObject(s.dungeonResult) || !dungeonIds.includes(s.dungeonResult.id)) s.dungeonResult = null;
   if (!count(s.cycle)) s.cycle = 0;
   const fresh = freshState();
-  const isObject = value => value && typeof value === 'object' && !Array.isArray(value);
   const hadMail = Array.isArray(s.mail);
   for (const key of ['gems', 'recruits', 'tier', 'quest', 'mailSeq']) if (!count(s[key])) s[key] = fresh[key];
   for (const key of ['companions', 'cooldowns', 'buffs']) if (!isObject(s[key])) s[key] = {};
@@ -4961,6 +5331,46 @@ function migrateFeatures(s) {
     best: count(prestige.best) ? prestige.best : 0,
     perks: Object.fromEntries(Object.keys(PERKS).map(id => [id, count(perks[id]) ? Math.min(perks[id], PERKS[id].cap) : 0])),
   };
+  migrateChallenges(s, count, isObject);
+}
+
+function migrateChallenges(state, count, isObject) {
+  const { tower, bossFailure, dispatch, presets, collection, seasons } = state;
+  state.tower = { best: count(tower?.best) ? Math.min(tower.best, TOWER.floors) : 0 };
+  state.bossFailure = count(bossFailure?.cycle) && count(bossFailure.map) && bossFailure.map < MAPS.length
+    && count(bossFailure.hp) && bossFailure.hp <= 100 && ['timeout', 'defeat'].includes(bossFailure.reason) ? bossFailure : null;
+  state.presets = Object.fromEntries(Object.keys(PARTY_PRESETS).flatMap(key => {
+    const saved = presets?.[key];
+    return Array.isArray(saved?.party) && Object.hasOwn(SKILLS, saved.skillId)
+      ? [[key, { party: saved.party.slice(0, PARTY_MAX).map(id => Object.hasOwn(COMPANIONS, id) ? id : null), skillId: saved.skillId }]] : [];
+  }));
+  const validDispatch = dispatch && Object.hasOwn(COMPANIONS, dispatch.mate) && companionLevel(state, dispatch.mate) > 0
+    && DISPATCH_HOURS.includes(dispatch.hours) && count(dispatch.started) && dispatch.ready === dispatch.started + dispatch.hours * 3600000
+    && !state.party.includes(dispatch.mate) && !state.dungeon?.returnTo?.party?.includes?.(dispatch.mate);
+  state.dispatch = validDispatch ? dispatch : null;
+  state.collection = Array.isArray(collection) ? [...new Set(collection.filter(id => Object.hasOwn(MATE_FAMILIES, id)))] : [];
+  state.seasons = Object.fromEntries(Object.values(isObject(seasons) ? seasons : {}).flatMap(entry => {
+    if (!validSeason(entry) || !count(entry.points)) return [];
+    const claimed = Array.isArray(entry.claimed) ? entry.claimed.filter(index => count(index) && index < entry.tiers.length) : [];
+    const matchesWon = Array.isArray(entry.matchesWon) ? entry.matchesWon.filter(index => count(index) && index > 0 && index <= entry.matches.length) : [];
+    return [[entry.id, { ...entry, claimed: [...new Set(claimed)], matchesWon: [...new Set(matchesWon)] }]];
+  }));
+  const active = state.dungeon;
+  if (!active || !(Object.hasOwn(CHALLENGE_INFO, active.id) || active.practice)) return;
+  const saved = active.returnTo;
+  const validReturn = isObject(saved) && saved.map === state.map && saved.wave === state.wave
+    && Number.isFinite(saved.hp) && Number.isFinite(saved.enemyHp) && Array.isArray(saved.pack) && isObject(saved.front)
+    && (saved.front.key === mobKey({ ...state, ...saved, dungeon: null }) || isObject(saved.roundEnd))
+    && Array.isArray(saved.party) && saved.party.length === PARTY_MAX && Array.isArray(saved.allyTimers)
+    && isObject(saved.cooldowns) && isObject(saved.buffs) && isObject(saved.mateBuffs)
+    && Object.hasOwn(SKILLS, saved.skillId) && Object.hasOwn(BOSS_PHASES, saved.bossPhase);
+  if (!validReturn || (active.id !== 'record' && (!count(active.reach) || !Object.hasOwn(CHALLENGE_RULES, active.rule)))) {
+    state.dungeon = null;
+    if (state.roundEnd?.leaveDungeon) state.roundEnd = null;
+    return;
+  }
+  active.returnTo = Object.fromEntries(MAIN_FIGHT_FIELDS.map(key => [key, saved[key] ?? null]));
+  active.returnTo.party = validParty(state, saved.party);
 }
 
 function restore(snapshot) {
@@ -5062,7 +5472,10 @@ if (typeof module !== 'undefined') {
     MATE_FAMILIES, FAMILY_ORDER, BALANCE_SYNERGY, mateFamily, teamSynergy, synergyNext, mateCooldown,
     castMate, useMate, swapParty, RECORD, recordTier, recordTierHp, recordReward, recordKeys, enterRecord, sweepRecord, RUSH_SPEED, rushEnd, rushing, RULES, RULE_ORDER, RULE_BONUS, ruleId, ruleFit, ruleMates, ruleBonus, leaveDungeon, dungeonKeys, mateScale, mateBuff, mateSkillDps, PARTY_MAX, PARTY_UNLOCKS, PARTY_UNLOCK_TEXT, LEGACY_MATES, BOSS_SPRITES, REGION_ROUNDS, REGION_START, regionIndex, regionRound, lastRound, roundTag, stageLabel, skillPower, skillUnlocked, venueMap, stagePlace, stageNames, stageArt, regionConquered, REGIONS, ZONES, ACADEMY, autoTrain, critPower, regenRate, allyTrainLevel, allyTrainCap, allyTrainCost, trainAlly, skillLevel, skillCost, cheerMult, sprintMult, lunchHeal, trainSkill, ALLY_TRAIN, CRIT_BASE,
     CONTESTS, schoolName, gradeLabel, placeLabel, contestId, contest,
-    newGame, simulate, restore, trainingCost, maxHp, attack, enemyMaxHp, openFight, activateSkill, gearStats, nextMission, MAPS, GEAR, SLOTS, MAP_REWARDS, BOSS_REWARDS, TRAINING, SKILLS, makeProfile,
+    newGame, simulate, simulateBetween, restSnapshot, trainingTotal, restore, trainingCost, maxHp, attack, enemyMaxHp, openFight, activateSkill, gearStats, nextMission, MAPS, GEAR, SLOTS, MAP_REWARDS, BOSS_REWARDS, TRAINING, SKILLS, makeProfile,
+    TOWER, CHALLENGE_RULES, towerUnlocked, towerRule, enterTower, bossRetryReady, retryFarm,
+    PARTY_PRESETS, savePartyPreset, applyPartyPreset, DISPATCH_HOURS, startDispatch, finishDispatch, dispatchMates, collectionProgress, claimCollection,
+    setSeasonCalendar, seasonList, activeSeason, seasonMatch, enterSeasonFight, claimSeason,
     trainingCostAt, enemyHit, winCoins, winXp, interval, critChance, prestigeGain, transfer, perkCost, PERKS, pullStickers, pullCost, progress, xpTarget,
     GROWTH, MAX_RANK, BOSS_WAVE, MAPS_PER_GRADE, fmt, STICKERS, DROP_WINS,
     DUNGEONS, DUNGEON_PACK, PACK, SPLASH, GANG_UP, BOSS_TIME, killProgress,
@@ -6379,7 +6792,7 @@ function bindMetaUI() {
   $('auto-train').addEventListener('click', () => {
     state.autoTrain = !state.autoTrain;
     message(state.autoTrain ? '자동 훈련을 켰어요. 코인이 모이면 알아서 올려요.' : '자동 훈련을 껐어요.');
-    if (state.autoTrain) runAutoTrain(true);
+    if (state.autoTrain) runAutoTrain();
     commit();
   });
   $('auto-actives').addEventListener('click', () => {
@@ -7120,6 +7533,285 @@ function bindTestTools() {
   <script>
 'use strict';
 
+function liveText(tag, text, className = '') {
+  const element = document.createElement(tag);
+  element.textContent = text;
+  element.className = className;
+  return element;
+}
+function liveButton(label, action, disabled = false, className = '') {
+  const button = liveText('button', label, className);
+  button.type = 'button';
+  button.disabled = disabled;
+  button.addEventListener('click', action);
+  return button;
+}
+function liveCard(id, name, subtitle) {
+  const card = liveText('article', '', 'live-card');
+  card.id = id;
+  card.append(liveText('h3', name), liveText('p', subtitle));
+  return card;
+}
+function liveActions(...buttons) {
+  const actions = liveText('div', '', 'live-actions');
+  actions.append(...buttons);
+  return actions;
+}
+function launchChallenge(start, label) {
+  refreshDay(state, gameDay(state));
+  if (!start()) return;
+  combatEvent('enter', {});
+  $('panel').scrollTop = 0;
+  message(label);
+  commit();
+}
+function specialStageLabel(state) {
+  const { id, level, practice } = state.dungeon;
+  if (id === 'trial') return `승급 심사 · ${tierName(level)}`;
+  if (id === 'cup') return `주간 전국대회 · ${cupInfo(state).rule.name}`;
+  if (id === 'tower') return `도장 ${level}층 · ${challengeRule(state).name}`;
+  if (id === 'season') return `시즌 ${level}주 · ${challengeRule(state).name}`;
+  return practice ? '30초 기록 연습' : `던전 · Lv.${level}`;
+}
+
+let chosenTowerFloor = 0;
+function towerCard() {
+  const open = towerUnlocked(state);
+  const best = state.tower.best;
+  const next = Math.min(best + 1, TOWER.floors);
+  const card = liveCard('tower-card', TOWER.name, open ? `${best}/${TOWER.floors}층 클리어 · 열쇠 없이 도전` : '1-3 학년 대표를 이기면 열려요.');
+  if (!open) return card;
+  const select = liveText('select', '', 'live-select');
+  select.ariaLabel = '도장 도전층 고르기';
+  for (let level = next; level >= 1; level--) {
+    const label = level > best ? '첫 도전' : '클리어';
+    select.add(new Option(`${level}층 · ${label}`, level));
+  }
+  select.value = Math.min(chosenTowerFloor || next, next);
+  const tip = liveText('p', '', 'live-rule');
+  const reward = liveText('p', '');
+  const button = liveButton('도전', () => {
+    const level = Number(select.value);
+    chosenTowerFloor = 0;
+    launchChallenge(() => enterTower(state, level), `도장 ${level}층 시작 · ${CHALLENGE_RULES[towerRule(level)].name}`);
+  }, Boolean(state.dungeon), 'primary');
+  const showRule = () => {
+    const level = Number(select.value);
+    const rule = CHALLENGE_RULES[towerRule(level)];
+    tip.textContent = `${rule.name} · ${rule.tip}`;
+    reward.replaceChildren(level <= best ? '첫 승리 보상 수령 완료' : '첫 승리 보상');
+    if (level > best) reward.append(' ', rewardChips(towerReward(level), false));
+    button.textContent = `${level}층 도전`;
+  };
+  select.addEventListener('change', () => {
+    chosenTowerFloor = Number(select.value);
+    showRule();
+  });
+  showRule();
+  card.append(tip, reward, liveActions(select, button));
+  return card;
+}
+
+function shortGameDate(day) {
+  const date = day.split('-').slice(1).map(Number);
+  return date.join('/');
+}
+function seasonCard() {
+  const day = gameDay(state);
+  const calendar = seasonList(state);
+  if (!calendar.length) return null;
+  const active = activeSeason(state, day);
+  const upcoming = calendar.find(entry => day < entry.starts);
+  const claiming = Object.values(state.seasons).filter(entry => entry.ends <= day && day < entry.claimUntil);
+  const card = liveCard('season-card', active?.name || '전국 격투 시즌', active
+    ? `대결 ~${shortGameDate(active.ends)} 0시 · 수령 ~${shortGameDate(active.claimUntil)} 0시`
+    : upcoming ? `다음 시즌 ${upcoming.name} · ${shortGameDate(upcoming.starts)} 개막` : '지난 시즌 기록을 볼 수 있어요.');
+  if (active) {
+    const match = seasonMatch(active, day);
+    const rule = CHALLENGE_RULES[active.matches[match]];
+    const points = active.points || 0;
+    const progress = liveText('progress', '', 'live-progress');
+    progress.max = active.tiers.at(-1).points;
+    progress.value = Math.min(points, progress.max);
+    progress.ariaLabel = '시즌 점수';
+    card.append(liveText('p', `${points}/${progress.max}점 · ${match + 1}주 차 ${rule.name}`), progress, liveText('p', rule.tip, 'live-rule'));
+    const tiers = liveText('ul', '', 'live-tiers');
+    for (const [index, tier] of active.tiers.entries()) {
+      const item = liveText('li', `${tier.points}점${active.claimed?.includes(index) ? ' · 수령 완료' : ''}`);
+      item.append(rewardChips(tier.reward, false));
+      tiers.append(item);
+    }
+    card.append(tiers);
+    const entry = liveButton(cupUnlocked(state) ? '이번 주 챔피언 도전' : '1-3 승리 후 해금', () => {
+      launchChallenge(() => enterSeasonFight(state), `${rule.name} 챔피언 도전!`);
+    }, !cupUnlocked(state) || Boolean(state.dungeon), 'primary');
+    card.append(liveActions(entry, seasonClaimButton(active)));
+  }
+  for (const entry of claiming) card.append(liveActions(liveText('span', `${entry.name} · ${entry.points}점`), seasonClaimButton(entry)));
+  const history = Object.values(state.seasons).filter(entry => day >= entry.claimUntil).reverse();
+  if (history.length) {
+    const details = liveText('details', '', 'live-history');
+    details.append(liveText('summary', '지난 시즌 기록'));
+    for (const entry of history) details.append(liveText('p', `${entry.name} · ${entry.points}점 · 보상 ${entry.claimed.length}/${entry.tiers.length}개`));
+    card.append(details);
+  }
+  return card;
+}
+function seasonClaimButton(entry) {
+  const ready = entry.tiers.some((tier, index) => (entry.points || 0) >= tier.points && !entry.claimed?.includes(index));
+  return liveButton('시즌 보상 받기', () => {
+    refreshDay(state, gameDay(state));
+    const reward = claimSeason(state, entry.id);
+    if (!reward) return;
+    message(`${entry.name} · ${giftLine(reward)}`);
+    commit();
+  }, !ready);
+}
+function renderLiveBattle() {
+  const list = $('challenge-list');
+  const fingerprint = JSON.stringify([towerUnlocked(state), state.tower.best, state.daily?.date, Boolean(state.dungeon), cupUnlocked(state), state.seasons, activeSeason(state)?.version]);
+  if (list.dataset.model === fingerprint) return;
+  list.dataset.model = fingerprint;
+  list.replaceChildren(towerCard());
+  const season = seasonCard();
+  if (season) list.append(season);
+}
+
+function presetCard() {
+  const card = liveCard('preset-card', '편성 저장', '도장·시즌·기록전 연습에는 저장한 도전 편성을 불러와요.');
+  for (const [id, label] of Object.entries(PARTY_PRESETS)) {
+    const preset = state.presets[id];
+    card.append(liveActions(
+      liveText('span', label),
+      liveButton(`${label} 저장`, () => {
+        savePartyPreset(state, id);
+        message(`${label} 편성을 저장했어요.`);
+        commit();
+      }, id === 'main' && Boolean(state.dungeon)),
+      liveButton(`${label} 불러오기`, () => {
+        if (!applyPartyPreset(state, id)) return;
+        message(`${label} 편성을 불러왔어요.`);
+        commit();
+      }, !preset),
+    ));
+    if (preset) {
+      const names = preset.party.filter(Boolean).map(mate => COMPANIONS[mate].name);
+      card.append(liveText('p', [...names, SKILLS[preset.skillId].name].join(' · ')));
+    }
+  }
+  return card;
+}
+let dispatchSelection = { mate: '', hours: 8 };
+function dispatchCard() {
+  const task = state.dispatch;
+  const available = dispatchMates(state);
+  const card = liveCard('dispatch-card', '동료 원정', '비출전 동료를 보내면 그 동료의 조각을 모아 와요.');
+  if (task) {
+    const name = COMPANIONS[task.mate].name;
+    const minutes = Math.ceil(Math.max(0, task.ready - Date.now()) / 60000);
+    card.append(liveText('p', minutes ? `${name} · 완료까지 ${Math.floor(minutes / 60)}시간 ${minutes % 60}분` : `${name} · 원정 완료`));
+    card.append(liveActions(liveButton('원정 보상 받기', () => {
+      const result = finishDispatch(state);
+      if (!result) return;
+      message(`원정 완료 · ${result.picks ? '조각 선택권' : COMPANIONS[result.id].name + ' 조각'} +${result.shards}`);
+      commit();
+    }, minutes > 0, 'primary')));
+    return card;
+  }
+  if (!available.length) {
+    card.append(liveText('p', '원정에 보낼 비출전 동료가 필요해요.'));
+    return card;
+  }
+  const mate = liveText('select', '', 'live-select');
+  mate.ariaLabel = '원정에 보낼 동료';
+  for (const id of available) mate.add(new Option(COMPANIONS[id].name, id));
+  mate.value = available.includes(dispatchSelection.mate) ? dispatchSelection.mate : available[0];
+  const hours = liveText('select', '', 'live-select');
+  hours.ariaLabel = '원정 시간';
+  for (const value of DISPATCH_HOURS) hours.add(new Option(`${value}시간 · 조각 ${DISPATCH_SHARDS[value]}개`, value));
+  hours.value = dispatchSelection.hours;
+  const remember = () => { dispatchSelection = { mate: mate.value, hours: Number(hours.value) }; };
+  mate.addEventListener('change', remember);
+  hours.addEventListener('change', remember);
+  card.append(liveActions(mate, hours, liveButton('원정 보내기', () => {
+    remember();
+    if (!startDispatch(state, dispatchSelection.mate, dispatchSelection.hours)) return;
+    message(`${COMPANIONS[dispatchSelection.mate].name} 원정 출발!`);
+    commit();
+  }, Boolean(state.dungeon), 'primary')));
+  return card;
+}
+function collectionCard() {
+  const card = liveCard('collection-card', '무술 동료 도감', '같은 계열의 동료를 영입하고 코인으로 Lv.5까지 훈련하세요.');
+  for (const [family, info] of Object.entries(MATE_FAMILIES)) {
+    const { owned, trained, needed } = collectionProgress(state, family);
+    const claimed = state.collection.includes(family);
+    const button = liveButton(claimed ? '수령 완료' : `${info.name} 보상 받기`, () => {
+      const reward = claimCollection(state, family);
+      if (!reward) return;
+      message(giftLine(reward));
+      commit();
+    }, claimed || trained < needed);
+    card.append(liveActions(liveText('span', `${info.name} · 영입 ${owned}/${info.mates.length} · Lv.5 ${trained}/${needed}`), button));
+  }
+  return card;
+}
+function renderLiveParty() {
+  const list = $('roster-projects');
+  const minutes = state.dispatch ? Math.max(0, Math.ceil((state.dispatch.ready - Date.now()) / 60000)) : null;
+  const fingerprint = JSON.stringify([state.party, state.presets, state.companions, state.allyLv, state.dispatch, minutes, state.collection, Boolean(state.dungeon)]);
+  if (list.dataset.model === fingerprint) return;
+  list.dataset.model = fingerprint;
+  list.replaceChildren(presetCard(), dispatchCard(), collectionCard());
+}
+
+function backupDownload() {
+  const time = Date.now();
+  const file = new Blob([JSON.stringify({ version: 5, when: time, state })], { type: 'application/json' });
+  const url = URL.createObjectURL(file);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `haesol-save-${todayKey(new Date(time))}.json`;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+async function restoreBackup(file) {
+  if (!file) return;
+  try {
+    const snapshot = JSON.parse(await file.text());
+    const restored = restore(snapshot);
+    if (!restored?.profile) throw new Error('Invalid save');
+    const when = Math.min(Date.now(), snapshot.when);
+    localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 5, when, state: restored }));
+    editingProfile = true;
+    location.reload();
+  } catch {
+    window.alert('해솔 저장 파일을 불러올 수 없어요.');
+  }
+}
+function bindLiveUI() {
+  $('save-export').addEventListener('click', backupDownload);
+  for (const id of ['save-import', 'enroll-import']) $(id)?.addEventListener('click', () => $('save-file').click());
+  $('save-file').addEventListener('change', event => {
+    const file = event.currentTarget.files[0];
+    event.currentTarget.value = '';
+    void restoreBackup(file);
+  });
+  if (location.protocol === 'http:' || location.protocol === 'https:') {
+    fetch('season-calendar.json', { cache: 'no-cache' }).then(response => response.ok ? response.json() : null)
+      .then(entries => {
+        if (setSeasonCalendar(entries)) {
+          $('challenge-list').dataset.model = '';
+          render();
+        }
+      }).catch(() => {});
+  }
+}
+
+</script>
+  <script>
+'use strict';
+
 const $ = id => document.getElementById(id);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let state;
@@ -7296,7 +7988,7 @@ function combatEvent(type, event) {
     const target = event.side === 'player' ? 'rival' : 'player';
     const special = event.side === 'player' && heroSkillPose(event.move);
     setPoses(event.side, special ? [[special[1], 180], ['follow', 170]] : [['strike', 110], ['follow', 170]]);
-    animImpact(event.breaks || event.lucky || (event.move !== 'attack' && event.move !== 'crit') || (event.side === 'rival' && isDaon(state) && state.bossPhase === 'counter'));
+    animImpact(event.breaks || event.lucky || (event.move !== 'attack' && event.move !== 'crit') || (event.side === 'rival' && usesGuardPattern(state) && state.bossPhase === 'counter'));
     setPoses(target, [[event.blocked ? 'guard' : 'hit', event.breaks ? 240 : 160]]);
     if (!reducedMotion.matches) flashHit(target, event);
     if (event.side === 'rival' && aliveBehind(state)) packAct('strike', 1 + Math.floor(Math.random() * 2), 260);
@@ -7356,7 +8048,7 @@ let heroWasDown = false;
 let heroGetupUntil = 0;
 function renderMotion() {
   const now = performance.now();
-  const phase = isDaon(state) ? state.bossPhase : '';
+  const phase = usesGuardPattern(state) ? state.bossPhase : '';
   for (const side of ['player', 'rival']) {
     const timed = activePose(poses[side], now);
     const action = timed?.pose;
@@ -7441,34 +8133,29 @@ function displayOffline(seconds) {
 }
 
 // 쉬는 시간 보상·빠른 휴식 결과 줄: 이긴 횟수, 코인, 레벨, 뽑기권, 새 장비, 나아간 곳
-function restLines(before, label) {
-  const lines = [`${label} 동안 ${fmt(state.wins - before.wins)}번 이겼어요.`, `코인 +${fmt(state.coins - before.coins)}`];
+function restLines(before, label, spent = 0) {
+  const gained = Math.max(0, state.coins - before.coins + spent);
+  const lines = [`${label} 동안 ${fmt(state.wins - before.wins)}번 이겼어요.`, `코인 획득 +${fmt(gained)}`];
+  const trained = trainingTotal(state) - before.training;
+  if (trained > 0) lines.push(`자동 훈련 ${fmt(trained)}회 · 코인 ${fmt(spent)} 사용`);
   if (state.level > before.level) lines.push(`레벨 ${before.level} → ${state.level}`);
   if (state.tickets > before.tickets) lines.push(`뽑기권 +${state.tickets - before.tickets}`);
   if (state.bag.length > before.bag) lines.push(`새 장비 ${state.bag.length - before.bag}개가 가방에 있어요.`);
   if (before.progress !== undefined && progress(state) > before.progress) lines.push(`${placeLabel(progress(state))}까지 나아갔어요.`);
+  if (bossRetryReady(state)) lines.push(`${stageNames(state.cycle, state.map)[BOSS_WAVE]}에게 다시 도전할 수 있어요.`);
   return lines;
 }
 
-function catchUp(seconds) {
+function catchUp(seconds, now = Date.now()) {
   const adjusted = Math.min(seconds, offlineLimit(state));
-  const before = { wins: state.wins, coins: state.coins, level: state.level, bag: state.bag.length, tickets: state.tickets, progress: progress(state) };
+  const before = restSnapshot(state);
   const speed = state.speed;
-  const dayBefore = state.daily?.date;
   state.speed = 1;
-  simulate(state, adjusted, null);
+  const spent = simulateBetween(state, now - adjusted * 1000, now, null);
   state.speed = speed;
-  const wins = state.wins - before.wins;
-  // 방치 구간이 운영 날짜를 넘겼으면 오늘 0시 이후에 해당하는 몫만 오늘 목표(대결 이기기)에 넣는다.
-  // 계산한 방치 시간은 지금까지의 마지막 구간으로 본다(최대 시간을 넘긴 앞부분은 계산하지 않음)
-  const today = gameDay(state);
-  if (dayBefore && dayBefore < today) {
-    const share = clamp((Date.now() - dayStart(today)) / 1000 / Math.max(1, adjusted), 0, 1);
-    refreshDay(state, today, Math.round(wins * share));
-  }
-  if (wins === 0 || adjusted < 15) return;
-  const details = restLines(before, displayOffline(adjusted));
-  const gained = state.coins - before.coins;
+  const gained = Math.max(0, state.coins - before.coins + spent);
+  if ((state.wins === before.wins && gained === 0 && spent === 0) || adjusted < 15) return;
+  const details = restLines(before, displayOffline(adjusted), spent);
   queuePopup(() => {
     showDialog('쉬는 시간 보상', details, '#i-gift');
     $('dialog-content').classList.add('reward-lines');
@@ -7480,7 +8167,7 @@ function catchUp(seconds) {
 function onQuickRest() {
   const result = quickRest(state, gameDay(state));
   if (!result) return;
-  showDialog('빠른 휴식 보상', [...restLines(result.before, '2시간'), result.cost ? `보석 ${result.cost}개를 썼어요.` : '오늘 무료 휴식을 썼어요.'], '#i-moon');
+  showDialog('빠른 휴식 보상', [...restLines(result.before, '2시간', result.spent), result.cost ? `보석 ${result.cost}개를 썼어요.` : '오늘 무료 휴식을 썼어요.'], '#i-moon');
   $('dialog-content').classList.add('reward-lines');
   flyCoins(6);
   commit();
@@ -7558,9 +8245,8 @@ function updateClock(animate = true) {
   const now = Date.now();
   const elapsed = Math.max(0, (now - openedAt) / 1000);
   openedAt = now;
-  if (elapsed >= 15) catchUp(elapsed);
-  else simulate(state, elapsed * (state.speed || 1), animate ? combatEvent : null);
-  runAutoTrain();
+  if (elapsed >= 15) catchUp(elapsed, now);
+  else simulateBetween(state, now - elapsed * 1000, now, animate ? combatEvent : null, state.speed || 1);
   if (now - lastSavedAt > 2000) save();
 }
 
@@ -7650,10 +8336,10 @@ function renderDungeonTimer() {
   $('dungeon-timer').hidden = !active;
   if (!active) return;
   const left = Math.max(0, state.dungeon ? state.dungeon.time : state.bossTime);
-  const total = state.dungeon ? DUNGEON_TIME : BOSS_TIME;
+  const total = state.dungeon ? challengeRule(state)?.time ?? DUNGEON_TIME : BOSS_TIME;
   setText('dungeon-timer-title', state.dungeon ? (state.dungeon.id === 'cup' ? `${CUP.name} ${cupStep(state)}단계 · ${cupInfo(state).rule.name}` : `${dungeonInfo(state.dungeon.id).name} Lv.${state.dungeon.level}`) : `보스 도전 · ${currentEnemy(state)}`);
   const left2 = Math.ceil(left);
-  setText('dungeon-timer-text', state.dungeon
+  setText('dungeon-timer-text', state.dungeon?.rule === 'endure' ? `${left2}초 버티기` : state.dungeon
     ? (state.dungeon.id === 'trial' ? `승급 시험 남은 ${left2}초` : `던전 남은 ${left2}초${state.front?.leader ? ' · 보스!' : ` · 참가자 ${aliveBehind(state) + 1}`}`)
     : `보스 도전 · 남은 ${left2}초`);
   $('dungeon-timer-fill').style.width = `${left / total * 100}%`;
@@ -7780,7 +8466,7 @@ function renderBattle() {
   const map = MAPS[state.map];
   const gradeNumber = gradeIndex(state.map) + 1;
   const dungeon = state.dungeon ? dungeonInfo(state.dungeon.id) : null;
-  if (!(travel && state.roundEnd)) setText('stage-number', dungeon ? (state.dungeon.id === 'trial' ? `승급 심사 · ${tierName(state.dungeon.level)}` : state.dungeon.id === 'cup' ? `주간 전국대회 · ${cupInfo(state).rule.name}` : `던전 · Lv.${state.dungeon.level}`) : stageLabel(state.cycle || 0, state.map));
+  if (!(travel && state.roundEnd)) setText('stage-number', dungeon ? specialStageLabel(state) : stageLabel(state.cycle || 0, state.map));
   if (!(travel && state.roundEnd)) setText('battle-title', dungeon ? dungeon.name : stagePlace(state.cycle || 0, state.map));
   $('arena').classList.toggle('dungeon-round', Boolean(dungeon));
   const status = $('battle-status');
@@ -7883,12 +8569,16 @@ function renderRoster() {
 function renderFarm() {
   const afterRound = state.roundEnd ? state.roundEnd.nextFarm : state.farm;
   const farm = afterRound || state.farm;
-  $('farm').hidden = !farm;
-  if (!farm) return;
+  $('farm').hidden = !farm || Boolean(state.dungeon);
+  if (!farm || state.dungeon) return;
   setText('farm-title', `${mapCode(state.map)} 반복 수련`);
-  setText('farm-progress', !afterRound ? '완료!' : `${farm.wins}/${FARM_WINS}승`);
+  const boss = bossRetryReady(state);
+  const count = !afterRound ? '완료!' : `${farm.wins}/${FARM_WINS}승`;
+  const reason = state.bossFailure?.reason === 'timeout' ? '시간 초과' : '패배';
+  setText('farm-progress', boss ? `${count} · ${reason} · 보스 체력 ${state.bossFailure.hp}%` : count);
   $('farm-fill').style.width = `${(!afterRound ? 1 : farm.wins / FARM_WINS) * 100}%`;
   $('retry-map').disabled = Boolean(state.roundEnd || !state.farm);
+  setText('retry-map', boss ? '보스 재도전' : '재도전');
 }
 
 function renderRoundResult() {
@@ -7903,7 +8593,7 @@ function renderRoundResult() {
 }
 
 function renderPattern() {
-  const active = isDaon(state) && !state.roundEnd;
+  const active = usesGuardPattern(state) && !state.roundEnd;
   $('pattern').hidden = !active;
   $('arena').dataset.bossPhase = active ? state.bossPhase : '';
   if (!active) return;
@@ -7928,7 +8618,7 @@ function renderSkill() {
   let detail = state.autoSkill ? '스킬 자동 사용 중' : '대결하며 충전';
   if (ready) {
     detail = '탭해서 발동';
-    if (state.autoSkill && isDaon(state)) {
+    if (state.autoSkill && usesGuardPattern(state)) {
       if (state.skillId === 'bell' && !guarding(state)) detail = '방어할 때 자동 발동';
       if (state.skillId === 'rush' && !opening(state)) detail = '빈틈에 자동 발동';
     }
@@ -8267,7 +8957,7 @@ function todayLinks() {
   const links = [];
   if (freeRestReady()) links.push(['rest', `빠른 휴식 · 2시간치 무료로 받기`]);
   if (state.farm && !state.roundEnd && !state.dungeon) {
-    links.push(['retry', `막힌 보스 재도전 · ${mapCode(state.map)}`]);
+    links.push(['retry', `${bossRetryReady(state) ? '막힌 보스 재도전' : '현재 맵 재도전'} · ${mapCode(state.map)}`]);
   }
   const keys = Object.keys(DUNGEONS).filter(id => dungeonUnlocked(state, id)).reduce((sum, id) => sum + (state.daily.keys[id] || 0), 0);
   if (keys > 0) links.push(['dungeon', `오늘 열린 특별 대회 · 열쇠 ${keys}개`]);
@@ -8275,6 +8965,8 @@ function todayLinks() {
   refreshWeek(state, gameDay(state));
   const cupLeft = cupUnlocked(state) ? cupKeys(state) : 0;
   links.push(['weekly', `주간 전국대회 · ${fmt(state.weekly.points)}/${WEEKLY.tiers.at(-1).points}점${cupLeft ? ` · 챔피언전 ${cupLeft}번` : ''}`]);
+  if (towerUnlocked(state)) links.push(['tower', `도장 도전층 · ${state.tower.best}/${TOWER.floors}층`]);
+  if (activeSeason(state)) links.push(['season', activeSeason(state).name]);
   return links;
 }
 
@@ -8346,7 +9038,7 @@ function onTodayLink(kind) {
   selectView('battle');
   if (kind === 'retry') $('retry-map').click();
   else if (kind === 'rest') onQuickRest();
-  else document.querySelector(kind === 'record' ? '#dungeon-list .dungeon-card.record' : kind === 'weekly' ? '#weekly-card' : '#dungeon-list')?.scrollIntoView({ block: 'center', behavior: reducedMotion.matches ? 'auto' : 'smooth' });
+  else document.querySelector({ record: '#dungeon-list .dungeon-card.record', weekly: '#weekly-card', tower: '#tower-card', season: '#season-card' }[kind] || '#dungeon-list')?.scrollIntoView({ block: 'center', behavior: reducedMotion.matches ? 'auto' : 'smooth' });
 }
 
 function renderMissions() {
@@ -8945,6 +9637,8 @@ function recordCard() {
     commit();
   });
   actions.append(enter, sweep);
+  const practice = liveButton('무료 연습', () => launchChallenge(() => enterRecord(state, true), '30초 기록 연습 시작!'), !open || Boolean(state.dungeon), 'sweep');
+  actions.append(practice);
   card.append(icon, body, actions);
   return card;
 }
@@ -8987,7 +9681,7 @@ function renderRule() {
 function showRunResult(result) {
   const lines = [];
   if (result.id === 'record') {
-    setText('run-result-title', `${RECORD.name} 결과`);
+    setText('run-result-title', result.practice ? '30초 기록 연습 결과' : `${RECORD.name} 결과`);
     lines.push(['이번 기록', `${fmt(result.record)}${result.newBest ? ' · 최고 기록 갱신!' : ''}`]);
     lines.push(['개인 최고', fmt(result.best)]);
     lines.push(['도달한 보상 구간', `${result.level}구간`]);
@@ -9082,6 +9776,8 @@ function render() {
   renderAllies();
   renderPartyBar();
   renderRule();
+  if (currentView === 'battle') renderLiveBattle();
+  if (currentView === 'party') renderLiveParty();
   const viewModels = {
     battle: [state.log, state.dungeons, state.daily?.keys, state.daily?.date, state.daily?.rest, state.gems >= (restCost(state) ?? Infinity), Boolean(state.roundEnd?.leaveDungeon), Boolean(state.dungeon), state.totalClears, state.prestige.count, state.prestige.perks, state.stickers, state.weekly, state.party, state.weeklyLog?.[0], state.titles?.[0]],
     training: [growthTab, Object.keys(TRAINING).map(id => { const plan = trainingPlan(id); return [plan.count, plan.total, state.coins >= plan.total]; }), state.training, firstGradeWon(state), state.classId, buyMode, state.tier, state.level, state.prestige, state.autoSkills, state.autoTrain, state.skillLv, Object.keys(ACTIVE).map(id => state.coins >= skillCost(state, id)), state.skillId, Boolean(state.dungeon), bestProgress(state)],
@@ -9143,16 +9839,10 @@ function flushPowerGain() {
   setTimeout(() => pop.remove(), 1100);
 }
 
-let lastAutoTrain = 0;
-function runAutoTrain(force = false) {
+function runAutoTrain() {
   if (!state.autoTrain || !state.profile) return;
-  const now = Date.now();
-  if (!force && now - lastAutoTrain < 900) return;
-  lastAutoTrain = now;
-  const bought = autoTrain(state);
-  if (!bought) return;
   refreshDay(state, gameDay(state));
-  state.daily.trains += bought;
+  trainAutomatically(state);
 }
 
 function train(id, repeat = false) {
@@ -9295,6 +9985,7 @@ function start() {
   $('cancel-profile').addEventListener('click', enterGame);
   document.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => selectView(button.dataset.view)));
   bindMetaUI();
+  bindLiveUI();
   bindSectionHelp();
   $('skill').addEventListener('click', () => {
     if (!activateSkill(state, combatEvent)) return;
@@ -9338,9 +10029,9 @@ function start() {
   $('transfer-confirm').addEventListener('click', doTransfer);
   $('gacha-again').addEventListener('click', () => { if (lastPull) pull(lastPull.count, lastPull.currency); });
   $('retry-map').addEventListener('click', () => {
-    if (!state.farm || state.roundEnd) return;
-    startMap(state.map);
-    record(state, `${mapCode(state.map)} 맵에 다시 도전해요.`);
+    if (!retryFarm(state)) return;
+    combatEvent('enter', {});
+    record(state, state.wave === BOSS_WAVE ? `${currentEnemy(state)}에게 다시 도전해요.` : `${mapCode(state.map)} 맵에 다시 도전해요.`);
     commit();
   });
   $('sound').addEventListener('click', () => {
