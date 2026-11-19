@@ -155,7 +155,6 @@ function flashHit(target, detail) {
   effect.append(number, sound);
   $(target).append(effect);
   setTimeout(() => effect.remove(), 640);
-  if (game.prop) throwProp(game.prop, target);
 }
 
 function combatEvent(type, event) {
@@ -441,11 +440,14 @@ function updateClock(animate = true) {
 let renderedFront = '';
 let renderedPack = '';
 
-// 뒤에 선 무리: 가까운 줄 2명 + 먼 줄 3명(작게, 위쪽)
-const PACK_SLOTS = [
-  { x: 4, y: 0, s: 0.84, z: 3 }, { x: 52, y: 4, s: 0.82, z: 3 },
-  { x: 24, y: 34, s: 0.7, z: 1 }, { x: 70, y: 38, s: 0.68, z: 1 }, { x: 114, y: 34, s: 0.68, z: 0 },
-];
+// v55 Wave1의 최전방 X=.2를 원점으로, 다음 세 줄의 X 간격 .9와 Y 간격 .8을 사용한다.
+const PACK_SLOTS = [[0.9, -0.8], [1.8, 0.8], [1.8, -1.6], [2.7, 0], [2.7, 1.6]];
+function placeBattleActor(element, [x, depth]) {
+  element.style.setProperty('--slot-forward', x);
+  element.style.setProperty('--slot-depth', depth);
+  element.style.setProperty('--depth-scale', Math.min(1, 1 - depth * 0.055));
+  element.style.zIndex = Math.round(5 - depth * 2);
+}
 const packPoses = new Map();
 
 function protectiveSprite(id) {
@@ -456,18 +458,16 @@ function protectiveSprite(id) {
 
 function renderPack() {
   const pack = (state.pack || []).filter(mob => mob.hp > 0);
-  const key = pack.map(mob => `${mob.name}:${mob.sprite}`).join('|');
+  const key = pack.map(mob => `${mob.key}:${mob.formationSlot}:${mob.name}:${mob.sprite}`).join('|');
   const box = $('pack');
   if (key !== renderedPack) {
     renderedPack = key;
     box.replaceChildren(...pack.slice(0, PACK_SLOTS.length).map((mob, index) => {
-      const place = PACK_SLOTS[index];
       const slot = document.createElement('span');
       slot.className = 'pack-mob';
-      slot.style.setProperty('--x', `${place.x}px`);
-      slot.style.setProperty('--y', `${place.y}px`);
-      slot.style.setProperty('--s', place.s);
-      slot.style.zIndex = place.z;
+      const stableSlot = Number.isInteger(mob.formationSlot) ? mob.formationSlot - 1 : index;
+      slot.dataset.formationSlot = stableSlot;
+      placeBattleActor(slot, PACK_SLOTS[stableSlot] || PACK_SLOTS[index]);
       const meter = document.createElement('span');
       meter.className = 'pack-hp';
       meter.append(document.createElement('i'));
@@ -548,17 +548,6 @@ function renderContest() {
   $('contest-chip').dataset.contest = id;
   $('arena').dataset.contest = id;
   $('arena').dataset.motion = CONTESTS[id].motion;
-}
-
-// 종목 도구는 해당 놀이의 높이와 방향을 따라 움직인다.
-function throwProp(prop, target) {
-  const fight = document.querySelector('.fight');
-  if (!fight) return;
-  const item = document.createElement('span');
-  item.className = `prop prop-${prop} ${target === 'rival' ? 'to-right' : 'to-left'}`;
-  item.setAttribute('aria-hidden', 'true');
-  fight.append(item);
-  setTimeout(() => item.remove(), 420);
 }
 
 function renderKills() {
@@ -679,14 +668,16 @@ function renderBattle() {
     renderedFront = frontKey;
     const front = state.front;
     const leader = front?.leader;
-    // 상대 크기 = 주인공·동료 한 칸(--unit) 배수: 대장 1 · 졸개 0.9 · 보스 1.12, 학년마다 2%씩 커진다(style.css .fighter.rival .sprite)
-    const size = (1 + (gradeNumber - 1) * 0.02) * (boss || (dungeon && leader) ? 1.12 : leader ? 1 : 0.9);
+    const size = boss || (dungeon && leader) ? 1.15 : leader ? 1.04 : 1;
     const sprite = $('rival-sprite');
     sprite.dataset.sprite = front?.sprite || rivalSprite(state.map, state.wave, state.cycle || 0);
     sprite.dataset.spar = protectiveSprite(sprite.dataset.sprite);
     $('rival').style.setProperty('--size', size.toFixed(2));
     $('rival').classList.toggle('minion', Boolean(front) && !leader);
     if (stepIn && !reducedMotion.matches) {
+      const place = PACK_SLOTS[(front?.formationSlot || 1) - 1] || PACK_SLOTS[0];
+      sprite.style.setProperty('--arrive-x', `${place[0] * 7 + place[1] * 3}cqw`);
+      sprite.style.setProperty('--arrive-depth', place[1]);
       $('rival').classList.remove('step-in');
       void $('rival').offsetWidth;
       $('rival').classList.add('step-in');

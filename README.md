@@ -1,52 +1,53 @@
 # 쉬는 시간의 왕!
 
-스무 살, **해솔 격투 아카데미** 신입생(남자 주인공)이 쉬는 시간마다 스파링으로 실력을 키워 1~4학년을 졸업하고, 시골부터 한국 24개 지역의 격투 대회를 하나씩 제패하는 **세로형 방치 RPG** 시제품입니다. 등장인물은 전원 성인이고, 대결은 복싱·유도·태권도 같은 스포츠 격투입니다.
+해솔 격투 아카데미의 스무 살 신입생이 여성 동료들과 성장하며 전국 24지역에 도전하는 세로형 방치 RPG입니다. 등장인물은 모두 성인입니다.
 
-![미리보기](outputs/recess-king-preview.png)
+## 실행
 
-## 바로 해 보기
+[실행용 HTML](outputs/recess-king.html)을 내려받아 브라우저로 열면 됩니다. 그림·글꼴·코드가 들어 있는 파일 하나이며 진행은 해당 브라우저에 저장됩니다. 설정에서 저장 파일을 내려받고 새 기기의 첫 화면에서 이어 할 수 있습니다.
 
-[`outputs/recess-king.html`](outputs/recess-king.html)을 내려받아 브라우저로 열면 됩니다. 그림·글꼴·코드가 모두 들어 있는 파일 하나라 인터넷 연결이 없어도 됩니다. 진행 상황은 그 브라우저에 저장됩니다.
+![전투 화면](outputs/recess-king-preview.png)
 
-## 들어 있는 것
+## 현재 기능
 
-- **자동 대결**: 선수 다섯과 팀 대장으로 된 팀 셋(18명)을 이긴 뒤 1:1 보스 도전(40초)을 합니다. 넘친 파워는 다음 상대로 이어지고, 스킬은 뒤에 선 팀까지 닿습니다.
-- **아카데미와 지역 제패**: 아카데미 4학년(경기장 12곳)을 졸업하면 정선 산골 마을 → … → 서울 강남까지 24개 지역을 차례로 제패하고, 그 뒤는 전국 챔피언 방어전 시즌이 끝없이 이어집니다. 지역마다 동네 도장 → 상가 체육관 → 시민 체육관 → 챔피언전 4구역(1-1~4-3)이고, 시골은 3바퀴, 지방 도시는 2바퀴, 광역시는 1바퀴, 서울은 2바퀴를 돌아야 제패합니다. 시뮬레이션 기준 첫날 3곳, 일주일에 시골 8곳, 2년에 서울 강남입니다. 종목은 복싱·킥복싱·무에타이·태권도·레슬링·유도·씨름·주짓수·종합격투 9가지입니다.
-- **성장(코인)**: 훈련 6종(힘·체력은 끝없이, 25레벨마다 ×2), 자동 훈련, 동료 레벨업, 스킬 레벨업, 장비 착용·강화, 스티커 뽑기와 도감, 간식 버프, 전공 선택, 2배속, 일괄 강화가 있습니다.
-- **재입학(환생)**: 처음부터 다시 시작하는 대신 명예 배지를 받고, 명예 코칭에서 영구 능력치를 올립니다.
-- **매일 할 거리**: 특별 대회 3종(하루 열쇠 2개·소탕), 7일 출석, 일일 미션, 오프라인 보상(최대 8시간)이 있습니다.
-- **동료**: 무술이 모두 다른 여성 파이터 16명(지금은 전원 S급)을 모집합니다. 등급은 S·A·B·C·D·F이고, S·A는 조각으로 별 5개까지 성급업합니다. 최대 4명이 주인공과 같은 크기로 함께 싸우고, 각자 고유 스킬을 자동으로 씁니다. 출전 칸은 처음 1칸이고 지역을 제패하면 늘어납니다.
-- **테스트 모드**: 설정 → 테스트 모드(주소 끝 `?test`). 진짜 저장과 따로 놀면서 동료·재화·장소·종목을 바로 바꿔 볼 수 있습니다.
-- **승급·스킬**: 승급 심사로 선수 등급(연습생 → 아마추어 → … → 전설)을 올려 크게 강해지고, 액티브 스킬 4종을 자동으로 씁니다.
-- **보석·상점·우편·퀘스트·성장 패스**: 유료 재화 자리(보석)와 상점, 캐시 상품 자리(결제 연결 전 '준비 중'), 우편함, 퀘스트 가이드, 무료·프리미엄 성장 패스가 있습니다.
+- 자동 전투와 반복 수련, 보스 바로 재도전, 장비 장착·강화와 외형 색 적용
+- 아카데미 12경기장, 전국 24지역, 전국 제패 후 방어전
+- 여성 동료 16명, 최대 4명 편성, 고유 스킬과 무술 계열 시너지
+- 방치 보상 기본 12시간·코칭 최대 16시간, 방치 중 자동 훈련, 하루 첫 빠른 휴식 무료
+- 일일 목표·출석, 재화 던전·소탕, 주간 대회, 도장 30층, 기록전 무료 연습
+- 동료 원정·무술 도감, 편성 저장, 달력형 시즌과 기간별 보상 기록
 
-## 폴더
+## 작업 위치
 
-| 경로 | 내용 |
-|---|---|
-| `work/recess/` | 게임 소스(`index.html`, `style.css`, `game.js`, `ui.js`, `wardrobe.js`, 그림·글꼴). 수치 조절법은 [work/recess/README.md](work/recess/README.md) |
-| `work/package_recess.py` | 소스를 `outputs/recess-king.html` 한 파일과 소스 압축본으로 묶습니다 |
-| `work/check_recess*.py` | Playwright 검사 7종(진행·대결·옷장·그림·졸업/재입학/던전·승급/동료/상점/우편/패스·동작 그림) |
-| `work/tools/balance-sim.cjs` | 1~2년 진행 시뮬레이터. 결과는 `work/tools/balance-sim-result.txt` |
-| `work/build_recess_*.py`, `work/*.jpg` | 그림 시트를 잘라 게임 그림으로 만드는 스크립트와 원본 시트 |
-| `work/codex-art-request.md`, `-2.md`, `-3.md`, `-4.md` | 그림 작업 요청서. **지금 유효한 것은 4차(성인 격투 아카데미 전면 재작업)** 이고 1~3차는 기록용입니다 |
+| 폴더 | 내용 |
+| --- | --- |
+| [work/recess](work/recess/) | 현재 게임 소스 |
+| [work/recess/assets](work/recess/assets/) | 게임에서 사용하는 원화·전투 그림·배경·아이콘 |
+| [work/gemini-art-brief.md](work/gemini-art-brief.md) | Gemini용 그림 요청 |
+| [work/tools/art](work/tools/art/) | 현재 원화와 모션 제작 도구 |
+| [work/tests](work/tests/) | 진행·전투·장비·그림·운영 검사 |
+| [work/docs/art](work/docs/art/) | 현재 원화·모션의 규격과 인수인계 |
+| [work/docs/research](work/docs/research/) | APK 분석과 콘텐츠 조사 |
+| [outputs](outputs/) | 실행 파일과 전달용 최신 묶음 |
 
 ## 개발
 
+```powershell
+py -I work/package_recess.py
+node work/tools/check-liveops.cjs
+py -X utf8 work/tests/check_recess.py
+py -X utf8 work/tests/check_recess_combat.py
+py -X utf8 work/tests/check_recess_meta.py
+py -X utf8 work/tests/check_recess_longterm.py
+py -X utf8 work/tests/check_recess_wardrobe.py
+py -X utf8 work/tests/check_recess_art.py
+py -X utf8 work/tests/check_recess_play_art.py
 ```
-cd work
-py -I package_recess.py
-py -I check_recess.py
-py -I check_recess_combat.py
-py -I check_recess_wardrobe.py
-py -I check_recess_longterm.py
-py -I check_recess_meta.py
-node tools/balance-sim.cjs 730 16
-```
 
-검사에는 Python Playwright와 설치된 Chrome이 필요합니다.
+화면 검사는 Python Playwright와 설치된 Chrome을 사용합니다. 검사 중 만드는 화면과 압축본 테스트 폴더는 운영체제 임시 폴더의 `haesol-qa`에 저장됩니다.
 
-## 저작권
+## 그림
 
-- 글꼴: 넥슨 메이플스토리체(넥슨 무료 배포 서체)
-- 게임 코드·설정·그림은 이 시제품을 위해 만든 것입니다.
+여성 캐릭터 제작에는 Nikke DB 원화의 피부·머리카락·의상 질감을 참고하며, 귀여움·예쁨·청순함·섹시함을 인물별로 다양하게 구성합니다. [Nikke DB](https://nikke-db.pages.dev/)
+
+글꼴은 넥슨 메이플스토리체를 사용합니다. 게임의 캐릭터·설정·그림은 이 프로젝트용으로 제작합니다.

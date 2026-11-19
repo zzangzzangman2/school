@@ -1,17 +1,7 @@
-# 공개 저장소에서 제외: 다른 게임 화면·영상 참고 자료(저작권)와 그것을 모으던 도구
-work/idle-reference/
-work/reference*.vtt
-work/sample_idle_videos.py
-work/review_storyboards.py
-
-# 작업 중 백업·검사 스크린숏·임시 산출물
-work/backup-before-claude-ui/
-work/wardrobe-zip-qa/
-work/*.png
-work/*-inspect.jpg
-outputs/recess-king-source.zip
+# Python cache
 __pycache__/
 *.pyc
 
-# 그림 작업 검토용 시트(용량 큼)
-work/art*-review-*.jpg
+# Rebuilt source archive and temporary art staging
+/outputs/recess-king-source.zip
+/work/scratch/

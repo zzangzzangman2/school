@@ -139,12 +139,9 @@ function onActive(event) {
   playSound(event.id === 'lunch' ? 'win' : 'bell');
 }
 
-// ── 동료 표시: 주인공과 같은 크기(--unit)로 2줄 대형, 몸이 서로 겹치지 않게 ──
-// d = 주인공 몸 중심에서 왼쪽으로 떨어진 거리, y = 바닥에서 띄운 높이(둘 다 --unit 배수), s = 크기
-// 출전 번호가 곧 자리: 1·2번 = 전열(주인공 옆), 3·4번 = 후열. 빈 번호는 자리를 비워 둔다
-// 후열은 땅을 딛고 앞줄 사이 뒤쪽에 조금 작게 선다(바닥 0.14칸 위 = 멀리 선 자리, 0.86배, 앞줄보다 뒤). 예전처럼 머리 높이에 띄우면
-// 배경의 창문·벽 위에 올라선 것처럼 보였다
-const ALLY_SLOTS = [{ d: 0.52, y: 0, s: 1 }, { d: 1.04, y: 0, s: 1 }, { d: 0.26, y: 0.14, s: 0.86, back: true }, { d: 0.78, y: 0.14, s: 0.86, back: true }];
+// v55 PlayerSlots의 군주 앞 X=3, 깊이 Y=±1.5·±0.75를 사용한다.
+// 해솔 출전 카드 순서에 맞춰 가까운 자리부터 배정한다.
+const ALLY_SLOTS = [[3, -1.5], [3, -0.75], [3, 0.75], [3, 1.5]];
 
 function renderAllies() {
   const entries = state.party.slice(0, partySlots(state)).map((id, slot) => [slot, id]).filter(([, id]) => id);
@@ -153,14 +150,10 @@ function renderAllies() {
   if (key !== renderedAllies) {
     renderedAllies = key;
     box.replaceChildren(...entries.map(([slot, id]) => {
-      const place = ALLY_SLOTS[slot];
       const ally = document.createElement('span');
-      ally.className = `ally${place.back ? ' back' : ''}`;
+      ally.className = `ally${slot >= 2 ? ' back' : ''}`;
       ally.dataset.slot = slot;
-      ally.style.setProperty('--d', place.d);
-      ally.style.setProperty('--y', place.y);
-      ally.style.setProperty('--s', place.s);
-      ally.style.zIndex = 4 - slot;
+      placeBattleActor(ally, ALLY_SLOTS[slot]);
       const sprite = document.createElement('span');
       sprite.className = 'sprite';
       sprite.dataset.sprite = COMPANIONS[id].sprite;
@@ -198,8 +191,6 @@ function floatText(target, text, kind) {
 
 // ── 동료 공격 연출: 출전 자리(대기점)에서 상대 앞까지 달려가 치고, 뒷걸음으로 돌아온다 ──
 // 화면 연출만 바꾼다. 피해·쿨타임·오프라인 계산은 엔진(allyStrike·castMate) 그대로이고, 피해 숫자만 타격 순간에 띄운다.
-// 여럿이 한꺼번에 달려와도 겹치지 않게 출전 번호마다 접근 지점을 다르게 둔다(x: 앞뒤, y: 높이, px)
-const ALLY_APPROACH = [{ x: 0, y: 0 }, { x: -46, y: 10 }, { x: -22, y: -26 }, { x: -68, y: -14 }];
 const ALLY_RUN = { out: 170, back: 210 };
 const allyRuns = new Map();
 
@@ -207,11 +198,13 @@ function allyApproach(ally, slot) {
   const from = ally.getBoundingClientRect();
   const target = $('rival-sprite').getBoundingClientRect();
   if (!from.width || !target.width) return null;
-  const lane = ALLY_APPROACH[slot] || ALLY_APPROACH[0];
+  const lane = ALLY_SLOTS[slot][1];
+  const homeX = from.left + from.width / 2;
+  const rivalX = target.left + target.width / 2;
   // 동료 몸 앞쪽(그림 폭의 0.68)이 상대 몸 앞쪽(상대 그림 폭의 0.36)에 닿을 만큼
-  const x = target.left + target.width * 0.36 - (from.left + from.width * 0.68) + lane.x;
-  const y = target.bottom - from.bottom + lane.y;
-  return { x: Math.round(Math.max(0, x)), y: Math.round(y) };
+  const x = rivalX - homeX - target.width * (0.16 + (slot % 2) * 0.12) - from.width * 0.18;
+  const y = target.bottom - from.bottom - lane * target.width * 0.10;
+  return { x: Math.round(x), y: Math.round(y) };
 }
 
 // poses: [[pose, ms], ...] 제자리 동작. dash면 앞뒤로 달리기(step)를 붙인다. hitAt = 제자리 동작 시작부터 타격까지(ms)

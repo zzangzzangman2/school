@@ -22,8 +22,11 @@ def embed_images(css):
 
 
 html = (source / 'index.html').read_text(encoding='utf-8')
-for filename in ('style.css', 'assets.css', 'motion.css', 'wardrobe.css', 'anim.css'):
-    css = embed_images((source / filename).read_text(encoding='utf-8'))
+styles = {name: (source / name).read_text(encoding='utf-8')
+          for name in ('style.css', 'assets.css', 'motion.css', 'wardrobe.css', 'anim.css')}
+asset_paths = {path for css in styles.values() for path in re.findall(r"url\('([^']+\.(?:webp|woff2))'\)", css)}
+for filename, original_css in styles.items():
+    css = embed_images(original_css)
     html = html.replace(f'<link rel="stylesheet" href="{filename}">', f'<style>\n{css}\n</style>')
 scripts = ('season-calendar.js', 'game.js', 'wardrobe.js', 'anim.js', 'meta-ui.js', 'live-ui.js', 'ui.js')
 for filename in scripts:
@@ -32,11 +35,9 @@ for filename in scripts:
 (output / 'recess-king.html').write_text(html, encoding='utf-8')
 
 with ZipFile(output / 'recess-king-source.zip', 'w', compression=ZIP_DEFLATED) as archive:
-    for name in ('index.html', 'style.css', 'assets.css', 'motion.css', 'anim.css', *scripts, 'hero.webp', 'README.md'):
+    for name in ('index.html', 'style.css', 'assets.css', 'motion.css', 'anim.css', *scripts, 'README.md'):
         archive.write(source / name, f'recess-king/{name}')
     # Inline canvas inputs so the editable game also works when opened via file://.
     archive.writestr('recess-king/wardrobe.css', embed_images((source / 'wardrobe.css').read_text(encoding='utf-8')))
-    for image in sorted((source / 'assets').glob('*.webp')):
-        archive.write(image, f'recess-king/assets/{image.name}')
-    for font in sorted((source / 'assets' / 'fonts').glob('*.woff2')):
-        archive.write(font, f'recess-king/assets/fonts/{font.name}')
+    for name in sorted(asset_paths):
+        archive.write(source / name, f'recess-king/{name}')

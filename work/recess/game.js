@@ -209,15 +209,15 @@ const ZONE_LEADERS = ['골목 행동대장', '시장 깡패 대장', '번화가 
 const ZONE_BOSSES = ['동네 건달 두목', '시장 건달 두목', '번화가 큰형님'];
 const FIGHTERS = ['강훈', '서진', '태호', '민혁', '지성', '현우', '도겸', '승철', '용팔', '만수', '덕배', '창식', '병철', '두식', '상철', '봉구', '건우', '시혁', '재윤', '칠성', '무진', '대길', '철민', '광수'];
 const CONTESTS = {
-  boxing: { name: '복싱', prop: null, sound: '퍽!', fx: 'spark', motion: 'strike' },
-  kickboxing: { name: '킥복싱', prop: null, sound: '팡!', fx: 'spark', motion: 'kick' },
-  muaythai: { name: '무에타이', prop: null, sound: '쾅!', fx: 'spark', motion: 'knee' },
-  taekwondo: { name: '태권도', prop: null, sound: '얍!', fx: 'spark', motion: 'spar' },
-  wrestling: { name: '레슬링', prop: null, sound: '쿵!', fx: 'cloud', motion: 'throw' },
-  judo: { name: '유도', prop: null, sound: '한판!', fx: 'cloud', motion: 'throw' },
-  ssireum: { name: '씨름', prop: null, sound: '영차!', fx: 'cloud', motion: 'throw' },
-  jiujitsu: { name: '주짓수', prop: null, sound: '꽉!', fx: 'dust', motion: 'hold' },
-  mma: { name: '종합격투', prop: null, sound: '쾅!', fx: 'spark', motion: 'strike' },
+  boxing: { name: '복싱', sound: '퍽!', fx: 'spark', motion: 'strike' },
+  kickboxing: { name: '킥복싱', sound: '팡!', fx: 'spark', motion: 'kick' },
+  muaythai: { name: '무에타이', sound: '쾅!', fx: 'spark', motion: 'knee' },
+  taekwondo: { name: '태권도', sound: '얍!', fx: 'spark', motion: 'spar' },
+  wrestling: { name: '레슬링', sound: '쿵!', fx: 'cloud', motion: 'throw' },
+  judo: { name: '유도', sound: '한판!', fx: 'cloud', motion: 'throw' },
+  ssireum: { name: '씨름', sound: '영차!', fx: 'cloud', motion: 'throw' },
+  jiujitsu: { name: '주짓수', sound: '꽉!', fx: 'dust', motion: 'hold' },
+  mma: { name: '종합격투', sound: '쾅!', fx: 'spark', motion: 'strike' },
 };
 // 아카데미는 경기장마다, 지역은 구역마다 종목이 정해져 있다
 const ACADEMY_PLAN = ['boxing', 'boxing', 'boxing', 'kickboxing', 'muaythai', 'boxing', 'wrestling', 'jiujitsu', 'ssireum', 'taekwondo', 'judo', 'mma'];
@@ -836,7 +836,7 @@ function mobKey(state) {
 function makeMobs(state) {
   const full = waveHp(state);
   const key = mobKey(state);
-  const make = (slot, name, sprite) => ({ name, share: slot.share, hit: slot.hit, sprite, leader: Boolean(slot.leader), key, max: Math.max(1, Math.round(full * slot.share * ruleHp(state, slot.leader))) });
+  const make = (slot, name, sprite, formationSlot = 0) => ({ name, share: slot.share, hit: slot.hit, sprite, formationSlot, leader: Boolean(slot.leader), key, max: Math.max(1, Math.round(full * slot.share * ruleHp(state, slot.leader))) });
   if (state.dungeon?.id === 'trial') {
     const [name, sprite] = EXAMINERS[(state.dungeon.level - 1) % EXAMINERS.length];
     return [make({ share: 1, hit: 1, leader: true }, name, sprite)];
@@ -846,7 +846,7 @@ function makeMobs(state) {
   }
   if (state.dungeon?.id === 'cup') {
     const cup = cupInfo(state);
-    return DUNGEON_PACK.map((slot, index) => make(slot, slot.leader ? cup.boss : `${CUP.minion} ${index + 1}`, slot.leader ? cup.sprite : CUP.minionSprites[index % CUP.minionSprites.length]));
+    return DUNGEON_PACK.map((slot, index) => make(slot, slot.leader ? cup.boss : `${CUP.minion} ${index + 1}`, slot.leader ? cup.sprite : CUP.minionSprites[index % CUP.minionSprites.length], index));
   }
   if (state.dungeon && Object.hasOwn(CHALLENGE_INFO, state.dungeon.id)) {
     const info = CHALLENGE_INFO[state.dungeon.id];
@@ -855,7 +855,7 @@ function makeMobs(state) {
   }
   if (state.dungeon) {
     const dungeon = DUNGEONS[state.dungeon.id];
-    return DUNGEON_PACK.map((slot, index) => make(slot, slot.leader ? dungeon.boss : `${dungeon.minion} ${index + 1}`, slot.leader ? dungeon.sprite : dungeon.minionSprites[index % dungeon.minionSprites.length]));
+    return DUNGEON_PACK.map((slot, index) => make(slot, slot.leader ? dungeon.boss : `${dungeon.minion} ${index + 1}`, slot.leader ? dungeon.sprite : dungeon.minionSprites[index % dungeon.minionSprites.length], index));
   }
   const { map, wave } = state;
   const cycle = state.cycle || 0;
@@ -864,7 +864,7 @@ function makeMobs(state) {
   if (wave === BOSS_WAVE) return [make({ share: 1, hit: 1, leader: true }, names[wave], leader)];
   return PACK.map((slot, index) => make(slot,
     slot.leader ? names[wave] : CLASSMATES[(cycle * 5 + map * 7 + wave * 3 + index) % CLASSMATES.length],
-    slot.leader ? leader : MOB_SPRITES[(map + wave * 2 + index) % MOB_SPRITES.length]));
+    slot.leader ? leader : MOB_SPRITES[(map + wave * 2 + index) % MOB_SPRITES.length], index));
 }
 function aliveBehind(state) { return state.pack?.filter(mob => mob.hp > 0).length || 0; }
 function atProgress(reached, kind) {
@@ -2134,7 +2134,7 @@ function mateSkillDps(state, crowd = false) {
 
 function skillUnlocked(state, id) { return state.tier >= ACTIVE[id].tier; }
 function skillPower(state) { return 2 * (1 + 0.15 * Math.max(0, state.tier - 1)) * (1 + 0.05 * skillLevel(state, 'pencil')); }
-// 스킬 레벨업(코인): 딱지 연타 피해 +5%, 응원 함성·체육 대장 배율 +0.01, 급식 충전 회복 +1%p
+// 스킬 레벨업(코인): 연속 스트레이트 피해 +5%, 응원 함성·체육 대장 배율 +0.01, 급식 충전 회복 +1%p
 function skillLevel(state, id) { return state.skillLv?.[id] || 0; }
 function skillCost(state, id) { return Math.ceil(ACTIVE[id].lvBase * ACTIVE[id].lvScale ** skillLevel(state, id)); }
 function cheerMult(state) { return 1.5 + 0.01 * skillLevel(state, 'cheer'); }
@@ -2549,7 +2549,10 @@ function restore(snapshot) {
     const roster = makeMobs(s);
     for (const mob of [s.front, ...s.pack]) {
       const art = roster.find(entry => entry.name === mob.name && entry.leader === mob.leader);
-      if (art) mob.sprite = art.sprite;
+      if (art) {
+        mob.sprite = art.sprite;
+        mob.formationSlot = art.formationSlot;
+      }
     }
   }
   s.enemyHp = clamp(s.enemyHp, end?.result === 'win' ? 0 : 1, enemyMaxHp(s));

@@ -7,121 +7,9 @@
 [data-sprite='boy'][data-pose='down'] { --pose-image: url('assets/motion-boy-down.webp'); }
 [data-sprite='boy'][data-pose='victory'] { --pose-image: url('assets/motion-boy-victory.webp'); }
 [data-sprite='boy'][data-pose='run'] { --pose-image: url('assets/motion-boy-run.webp'); }
-[data-sprite='girl'][data-pose='ready'] { --pose-image: url('assets/motion-girl-ready.webp'); }
-[data-sprite='girl'][data-pose='step'] { --pose-image: url('assets/motion-girl-step.webp'); }
-[data-sprite='girl'][data-pose='windup'] { --pose-image: url('assets/motion-girl-windup.webp'); }
-[data-sprite='girl'][data-pose='strike'] { --pose-image: url('assets/motion-girl-strike.webp'); }
-[data-sprite='girl'][data-pose='follow'] { --pose-image: url('assets/motion-girl-follow.webp'); }
-[data-sprite='girl'][data-pose='hit'] { --pose-image: url('assets/motion-girl-hit.webp'); }
-[data-sprite='girl'][data-pose='down'] { --pose-image: url('assets/motion-girl-down.webp'); }
-[data-sprite='girl'][data-pose='victory'] { --pose-image: url('assets/motion-girl-victory.webp'); }
-[data-sprite='girl'][data-pose='run'] { --pose-image: url('assets/motion-girl-run.webp'); }
-[data-sprite='boss1'][data-pose='ready'] { --pose-image: url('assets/motion-boss1-ready.webp'); }
-[data-sprite='boss1'][data-pose='step'] { --pose-image: url('assets/motion-boss1-step.webp'); }
-[data-sprite='boss1'][data-pose='windup'] { --pose-image: url('assets/motion-boss1-windup.webp'); }
-[data-sprite='boss1'][data-pose='strike'], [data-sprite='boss1'][data-pose='launch'] { --pose-image: url('assets/motion-boss1-strike.webp'); }
-[data-sprite='boss1'][data-pose='follow'] { --pose-image: url('assets/motion-boss1-follow.webp'); }
-[data-sprite='boss1'][data-pose='hit'] { --pose-image: url('assets/motion-boss1-hit.webp'); }
-[data-sprite='boss1'][data-pose='down'] { --pose-image: url('assets/motion-boss1-down.webp'); }
-[data-sprite='boss1'][data-pose='guard'] { --pose-image: url('assets/motion-boss1-guard.webp'); }
-[data-sprite='boss1'][data-pose='open'] { --pose-image: url('assets/motion-boss1-open.webp'); }
-[data-sprite='rival1'][data-pose='windup'] { --pose-image: url('assets/motion-rival1-windup.webp'); }
-[data-sprite='rival1'][data-pose='strike'], [data-sprite='rival1'][data-pose='launch'], [data-sprite='rival1'][data-pose='follow'] { --pose-image: url('assets/motion-rival1-strike.webp'); }
-[data-sprite='rival1'][data-pose='hit'] { --pose-image: url('assets/motion-rival1-hit.webp'); }
-[data-sprite='rival1'][data-pose='down'] { --pose-image: url('assets/motion-rival1-down.webp'); }
-[data-sprite='rival2'][data-pose='windup'] { --pose-image: url('assets/motion-rival2-windup.webp'); }
-[data-sprite='rival2'][data-pose='strike'], [data-sprite='rival2'][data-pose='launch'], [data-sprite='rival2'][data-pose='follow'] { --pose-image: url('assets/motion-rival2-strike.webp'); }
-[data-sprite='rival2'][data-pose='hit'] { --pose-image: url('assets/motion-rival2-hit.webp'); }
-[data-sprite='rival2'][data-pose='down'] { --pose-image: url('assets/motion-rival2-down.webp'); }
-[data-sprite='rival3'][data-pose='windup'] { --pose-image: url('assets/motion-rival3-windup.webp'); }
-[data-sprite='rival3'][data-pose='strike'], [data-sprite='rival3'][data-pose='launch'], [data-sprite='rival3'][data-pose='follow'] { --pose-image: url('assets/motion-rival3-strike.webp'); }
-[data-sprite='rival3'][data-pose='hit'] { --pose-image: url('assets/motion-rival3-hit.webp'); }
-[data-sprite='rival3'][data-pose='down'] { --pose-image: url('assets/motion-rival3-down.webp'); }
-[data-sprite='rival4'][data-pose='windup'] { --pose-image: url('assets/motion-rival4-windup.webp'); }
-[data-sprite='rival4'][data-pose='strike'], [data-sprite='rival4'][data-pose='launch'], [data-sprite='rival4'][data-pose='follow'] { --pose-image: url('assets/motion-rival4-strike.webp'); }
-[data-sprite='rival4'][data-pose='hit'] { --pose-image: url('assets/motion-rival4-hit.webp'); }
-[data-sprite='rival4'][data-pose='down'] { --pose-image: url('assets/motion-rival4-down.webp'); }
-
-/* Classmates and after-school dungeons */
-[data-sprite='mob1'][data-pose='windup'] { --pose-image: url('assets/motion-mob1-windup.webp'); }
-[data-sprite='mob1'][data-pose='strike'], [data-sprite='mob1'][data-pose='launch'], [data-sprite='mob1'][data-pose='follow'] { --pose-image: url('assets/motion-mob1-strike.webp'); }
-[data-sprite='mob1'][data-pose='hit'] { --pose-image: url('assets/motion-mob1-hit.webp'); }
-[data-sprite='mob1'][data-pose='down'] { --pose-image: url('assets/motion-mob1-down.webp'); }
-[data-sprite='mob2'][data-pose='windup'] { --pose-image: url('assets/motion-mob2-windup.webp'); }
-[data-sprite='mob2'][data-pose='strike'], [data-sprite='mob2'][data-pose='launch'], [data-sprite='mob2'][data-pose='follow'] { --pose-image: url('assets/motion-mob2-strike.webp'); }
-[data-sprite='mob2'][data-pose='hit'] { --pose-image: url('assets/motion-mob2-hit.webp'); }
-[data-sprite='mob2'][data-pose='down'] { --pose-image: url('assets/motion-mob2-down.webp'); }
-[data-sprite='mob3'][data-pose='windup'] { --pose-image: url('assets/motion-mob3-windup.webp'); }
-[data-sprite='mob3'][data-pose='strike'], [data-sprite='mob3'][data-pose='launch'], [data-sprite='mob3'][data-pose='follow'] { --pose-image: url('assets/motion-mob3-strike.webp'); }
-[data-sprite='mob3'][data-pose='hit'] { --pose-image: url('assets/motion-mob3-hit.webp'); }
-[data-sprite='mob3'][data-pose='down'] { --pose-image: url('assets/motion-mob3-down.webp'); }
-[data-sprite='mob4'][data-pose='windup'] { --pose-image: url('assets/motion-mob4-windup.webp'); }
-[data-sprite='mob4'][data-pose='strike'], [data-sprite='mob4'][data-pose='launch'], [data-sprite='mob4'][data-pose='follow'] { --pose-image: url('assets/motion-mob4-strike.webp'); }
-[data-sprite='mob4'][data-pose='hit'] { --pose-image: url('assets/motion-mob4-hit.webp'); }
-[data-sprite='mob4'][data-pose='down'] { --pose-image: url('assets/motion-mob4-down.webp'); }
-[data-sprite='mob5'][data-pose='windup'] { --pose-image: url('assets/motion-mob5-windup.webp'); }
-[data-sprite='mob5'][data-pose='strike'], [data-sprite='mob5'][data-pose='launch'], [data-sprite='mob5'][data-pose='follow'] { --pose-image: url('assets/motion-mob5-strike.webp'); }
-[data-sprite='mob5'][data-pose='hit'] { --pose-image: url('assets/motion-mob5-hit.webp'); }
-[data-sprite='mob5'][data-pose='down'] { --pose-image: url('assets/motion-mob5-down.webp'); }
-[data-sprite='mob6'][data-pose='windup'] { --pose-image: url('assets/motion-mob6-windup.webp'); }
-[data-sprite='mob6'][data-pose='strike'], [data-sprite='mob6'][data-pose='launch'], [data-sprite='mob6'][data-pose='follow'] { --pose-image: url('assets/motion-mob6-strike.webp'); }
-[data-sprite='mob6'][data-pose='hit'] { --pose-image: url('assets/motion-mob6-hit.webp'); }
-[data-sprite='mob6'][data-pose='down'] { --pose-image: url('assets/motion-mob6-down.webp'); }
-[data-sprite='mob7'][data-pose='windup'] { --pose-image: url('assets/motion-mob7-windup.webp'); }
-[data-sprite='mob7'][data-pose='strike'], [data-sprite='mob7'][data-pose='launch'], [data-sprite='mob7'][data-pose='follow'] { --pose-image: url('assets/motion-mob7-strike.webp'); }
-[data-sprite='mob7'][data-pose='hit'] { --pose-image: url('assets/motion-mob7-hit.webp'); }
-[data-sprite='mob7'][data-pose='down'] { --pose-image: url('assets/motion-mob7-down.webp'); }
-[data-sprite='mob8'][data-pose='windup'] { --pose-image: url('assets/motion-mob8-windup.webp'); }
-[data-sprite='mob8'][data-pose='strike'], [data-sprite='mob8'][data-pose='launch'], [data-sprite='mob8'][data-pose='follow'] { --pose-image: url('assets/motion-mob8-strike.webp'); }
-[data-sprite='mob8'][data-pose='hit'] { --pose-image: url('assets/motion-mob8-hit.webp'); }
-[data-sprite='mob8'][data-pose='down'] { --pose-image: url('assets/motion-mob8-down.webp'); }
-[data-sprite='dboss-store'][data-pose='ready'] { --pose-image: url('assets/motion-dboss-store-ready.webp'); }
-[data-sprite='dboss-store'][data-pose='step'] { --pose-image: url('assets/motion-dboss-store-step.webp'); }
-[data-sprite='dboss-store'][data-pose='windup'] { --pose-image: url('assets/motion-dboss-store-windup.webp'); }
-[data-sprite='dboss-store'][data-pose='strike'], [data-sprite='dboss-store'][data-pose='launch'] { --pose-image: url('assets/motion-dboss-store-strike.webp'); }
-[data-sprite='dboss-store'][data-pose='follow'] { --pose-image: url('assets/motion-dboss-store-follow.webp'); }
-[data-sprite='dboss-store'][data-pose='hit'] { --pose-image: url('assets/motion-dboss-store-hit.webp'); }
-[data-sprite='dboss-store'][data-pose='down'] { --pose-image: url('assets/motion-dboss-store-down.webp'); }
-[data-sprite='dboss-store'][data-pose='guard'] { --pose-image: url('assets/motion-dboss-store-guard.webp'); }
-[data-sprite='dboss-store'][data-pose='open'] { --pose-image: url('assets/motion-dboss-store-open.webp'); }
-[data-sprite='dboss-quiz'][data-pose='ready'] { --pose-image: url('assets/motion-dboss-quiz-ready.webp'); }
-[data-sprite='dboss-quiz'][data-pose='step'] { --pose-image: url('assets/motion-dboss-quiz-step.webp'); }
-[data-sprite='dboss-quiz'][data-pose='windup'] { --pose-image: url('assets/motion-dboss-quiz-windup.webp'); }
-[data-sprite='dboss-quiz'][data-pose='strike'], [data-sprite='dboss-quiz'][data-pose='launch'] { --pose-image: url('assets/motion-dboss-quiz-strike.webp'); }
-[data-sprite='dboss-quiz'][data-pose='follow'] { --pose-image: url('assets/motion-dboss-quiz-follow.webp'); }
-[data-sprite='dboss-quiz'][data-pose='hit'] { --pose-image: url('assets/motion-dboss-quiz-hit.webp'); }
-[data-sprite='dboss-quiz'][data-pose='down'] { --pose-image: url('assets/motion-dboss-quiz-down.webp'); }
-[data-sprite='dboss-quiz'][data-pose='guard'] { --pose-image: url('assets/motion-dboss-quiz-guard.webp'); }
-[data-sprite='dboss-quiz'][data-pose='open'] { --pose-image: url('assets/motion-dboss-quiz-open.webp'); }
-[data-sprite='dboss-sports'][data-pose='ready'] { --pose-image: url('assets/motion-dboss-sports-ready.webp'); }
-[data-sprite='dboss-sports'][data-pose='step'] { --pose-image: url('assets/motion-dboss-sports-step.webp'); }
-[data-sprite='dboss-sports'][data-pose='windup'] { --pose-image: url('assets/motion-dboss-sports-windup.webp'); }
-[data-sprite='dboss-sports'][data-pose='strike'], [data-sprite='dboss-sports'][data-pose='launch'] { --pose-image: url('assets/motion-dboss-sports-strike.webp'); }
-[data-sprite='dboss-sports'][data-pose='follow'] { --pose-image: url('assets/motion-dboss-sports-follow.webp'); }
-[data-sprite='dboss-sports'][data-pose='hit'] { --pose-image: url('assets/motion-dboss-sports-hit.webp'); }
-[data-sprite='dboss-sports'][data-pose='down'] { --pose-image: url('assets/motion-dboss-sports-down.webp'); }
-[data-sprite='dboss-sports'][data-pose='guard'] { --pose-image: url('assets/motion-dboss-sports-guard.webp'); }
-[data-sprite='dboss-sports'][data-pose='open'] { --pose-image: url('assets/motion-dboss-sports-open.webp'); }
-
-/* Playground contest poses */
-.arena[data-motion='toss'] [data-sprite='boy'][data-pose='windup'] { --pose-image: url('assets/motion-boy-toss-windup.webp'); }
-.arena[data-motion='toss'] [data-sprite='boy'][data-pose='strike'] { --pose-image: url('assets/motion-boy-toss-strike.webp'); }
-.arena[data-motion='toss'] [data-sprite='boy'][data-pose='follow'] { --pose-image: url('assets/motion-boy-toss-follow.webp'); }
-.arena[data-motion='push'] [data-sprite='boy'][data-pose='windup'] { --pose-image: url('assets/motion-boy-push-windup.webp'); }
-.arena[data-motion='push'] [data-sprite='boy'][data-pose='strike'] { --pose-image: url('assets/motion-boy-push-strike.webp'); }
-.arena[data-motion='push'] [data-sprite='boy'][data-pose='follow'] { --pose-image: url('assets/motion-boy-push-follow.webp'); }
 .arena[data-motion='spar'] [data-sprite='boy'][data-pose='windup'] { --pose-image: url('assets/motion-boy-spar-windup.webp'); }
 .arena[data-motion='spar'] [data-sprite='boy'][data-pose='strike'] { --pose-image: url('assets/motion-boy-spar-strike.webp'); }
 .arena[data-motion='spar'] [data-sprite='boy'][data-pose='follow'] { --pose-image: url('assets/motion-boy-spar-follow.webp'); }
-.arena[data-motion='toss'] [data-sprite='girl'][data-pose='windup'] { --pose-image: url('assets/motion-girl-toss-windup.webp'); }
-.arena[data-motion='toss'] [data-sprite='girl'][data-pose='strike'] { --pose-image: url('assets/motion-girl-toss-strike.webp'); }
-.arena[data-motion='toss'] [data-sprite='girl'][data-pose='follow'] { --pose-image: url('assets/motion-girl-toss-follow.webp'); }
-.arena[data-motion='push'] [data-sprite='girl'][data-pose='windup'] { --pose-image: url('assets/motion-girl-push-windup.webp'); }
-.arena[data-motion='push'] [data-sprite='girl'][data-pose='strike'] { --pose-image: url('assets/motion-girl-push-strike.webp'); }
-.arena[data-motion='push'] [data-sprite='girl'][data-pose='follow'] { --pose-image: url('assets/motion-girl-push-follow.webp'); }
-.arena[data-motion='spar'] [data-sprite='girl'][data-pose='windup'] { --pose-image: url('assets/motion-girl-spar-windup.webp'); }
-.arena[data-motion='spar'] [data-sprite='girl'][data-pose='strike'] { --pose-image: url('assets/motion-girl-spar-strike.webp'); }
-.arena[data-motion='spar'] [data-sprite='girl'][data-pose='follow'] { --pose-image: url('assets/motion-girl-spar-follow.webp'); }
 [data-sprite='rival1'][data-pose='ready'] { --pose-image: url('assets/motion-rival1-ready.webp'); }
 [data-sprite='rival1'][data-pose='windup'] { --pose-image: url('assets/motion-rival1-windup.webp'); }
 [data-sprite='rival1'][data-pose='strike'], [data-sprite='rival1'][data-pose='launch'] { --pose-image: url('assets/motion-rival1-strike.webp'); }
@@ -131,15 +19,6 @@
 [data-sprite='rival1'][data-pose='follow'] { --pose-image: url('assets/motion-rival1-follow.webp'); }
 [data-sprite='rival1'][data-pose='guard'] { --pose-image: url('assets/motion-rival1-guard.webp'); }
 [data-sprite='rival1'][data-pose='open'] { --pose-image: url('assets/motion-rival1-open.webp'); }
-[data-sprite='rival2'][data-pose='ready'] { --pose-image: url('assets/motion-rival2-ready.webp'); }
-[data-sprite='rival2'][data-pose='windup'] { --pose-image: url('assets/motion-rival2-windup.webp'); }
-[data-sprite='rival2'][data-pose='strike'], [data-sprite='rival2'][data-pose='launch'] { --pose-image: url('assets/motion-rival2-strike.webp'); }
-[data-sprite='rival2'][data-pose='hit'] { --pose-image: url('assets/motion-rival2-hit.webp'); }
-[data-sprite='rival2'][data-pose='down'] { --pose-image: url('assets/motion-rival2-down.webp'); }
-[data-sprite='rival2'][data-pose='step'] { --pose-image: url('assets/motion-rival2-step.webp'); }
-[data-sprite='rival2'][data-pose='follow'] { --pose-image: url('assets/motion-rival2-follow.webp'); }
-[data-sprite='rival2'][data-pose='guard'] { --pose-image: url('assets/motion-rival2-guard.webp'); }
-[data-sprite='rival2'][data-pose='open'] { --pose-image: url('assets/motion-rival2-open.webp'); }
 [data-sprite='rival3'][data-pose='ready'] { --pose-image: url('assets/motion-rival3-ready.webp'); }
 [data-sprite='rival3'][data-pose='windup'] { --pose-image: url('assets/motion-rival3-windup.webp'); }
 [data-sprite='rival3'][data-pose='strike'], [data-sprite='rival3'][data-pose='launch'] { --pose-image: url('assets/motion-rival3-strike.webp'); }
@@ -149,15 +28,6 @@
 [data-sprite='rival3'][data-pose='follow'] { --pose-image: url('assets/motion-rival3-follow.webp'); }
 [data-sprite='rival3'][data-pose='guard'] { --pose-image: url('assets/motion-rival3-guard.webp'); }
 [data-sprite='rival3'][data-pose='open'] { --pose-image: url('assets/motion-rival3-open.webp'); }
-[data-sprite='rival4'][data-pose='ready'] { --pose-image: url('assets/motion-rival4-ready.webp'); }
-[data-sprite='rival4'][data-pose='windup'] { --pose-image: url('assets/motion-rival4-windup.webp'); }
-[data-sprite='rival4'][data-pose='strike'], [data-sprite='rival4'][data-pose='launch'] { --pose-image: url('assets/motion-rival4-strike.webp'); }
-[data-sprite='rival4'][data-pose='hit'] { --pose-image: url('assets/motion-rival4-hit.webp'); }
-[data-sprite='rival4'][data-pose='down'] { --pose-image: url('assets/motion-rival4-down.webp'); }
-[data-sprite='rival4'][data-pose='step'] { --pose-image: url('assets/motion-rival4-step.webp'); }
-[data-sprite='rival4'][data-pose='follow'] { --pose-image: url('assets/motion-rival4-follow.webp'); }
-[data-sprite='rival4'][data-pose='guard'] { --pose-image: url('assets/motion-rival4-guard.webp'); }
-[data-sprite='rival4'][data-pose='open'] { --pose-image: url('assets/motion-rival4-open.webp'); }
 [data-sprite='mob1'][data-pose='ready'] { --pose-image: url('assets/motion-mob1-ready.webp'); }
 [data-sprite='mob1'][data-pose='windup'] { --pose-image: url('assets/motion-mob1-windup.webp'); }
 [data-sprite='mob1'][data-pose='strike'], [data-sprite='mob1'][data-pose='launch'] { --pose-image: url('assets/motion-mob1-strike.webp'); }
@@ -167,15 +37,6 @@
 [data-sprite='mob1'][data-pose='follow'] { --pose-image: url('assets/motion-mob1-follow.webp'); }
 [data-sprite='mob1'][data-pose='guard'] { --pose-image: url('assets/motion-mob1-guard.webp'); }
 [data-sprite='mob1'][data-pose='open'] { --pose-image: url('assets/motion-mob1-open.webp'); }
-[data-sprite='mob2'][data-pose='ready'] { --pose-image: url('assets/motion-mob2-ready.webp'); }
-[data-sprite='mob2'][data-pose='windup'] { --pose-image: url('assets/motion-mob2-windup.webp'); }
-[data-sprite='mob2'][data-pose='strike'], [data-sprite='mob2'][data-pose='launch'] { --pose-image: url('assets/motion-mob2-strike.webp'); }
-[data-sprite='mob2'][data-pose='hit'] { --pose-image: url('assets/motion-mob2-hit.webp'); }
-[data-sprite='mob2'][data-pose='down'] { --pose-image: url('assets/motion-mob2-down.webp'); }
-[data-sprite='mob2'][data-pose='step'] { --pose-image: url('assets/motion-mob2-step.webp'); }
-[data-sprite='mob2'][data-pose='follow'] { --pose-image: url('assets/motion-mob2-follow.webp'); }
-[data-sprite='mob2'][data-pose='guard'] { --pose-image: url('assets/motion-mob2-guard.webp'); }
-[data-sprite='mob2'][data-pose='open'] { --pose-image: url('assets/motion-mob2-open.webp'); }
 [data-sprite='mob3'][data-pose='ready'] { --pose-image: url('assets/motion-mob3-ready.webp'); }
 [data-sprite='mob3'][data-pose='windup'] { --pose-image: url('assets/motion-mob3-windup.webp'); }
 [data-sprite='mob3'][data-pose='strike'], [data-sprite='mob3'][data-pose='launch'] { --pose-image: url('assets/motion-mob3-strike.webp'); }
@@ -185,15 +46,6 @@
 [data-sprite='mob3'][data-pose='follow'] { --pose-image: url('assets/motion-mob3-follow.webp'); }
 [data-sprite='mob3'][data-pose='guard'] { --pose-image: url('assets/motion-mob3-guard.webp'); }
 [data-sprite='mob3'][data-pose='open'] { --pose-image: url('assets/motion-mob3-open.webp'); }
-[data-sprite='mob4'][data-pose='ready'] { --pose-image: url('assets/motion-mob4-ready.webp'); }
-[data-sprite='mob4'][data-pose='windup'] { --pose-image: url('assets/motion-mob4-windup.webp'); }
-[data-sprite='mob4'][data-pose='strike'], [data-sprite='mob4'][data-pose='launch'] { --pose-image: url('assets/motion-mob4-strike.webp'); }
-[data-sprite='mob4'][data-pose='hit'] { --pose-image: url('assets/motion-mob4-hit.webp'); }
-[data-sprite='mob4'][data-pose='down'] { --pose-image: url('assets/motion-mob4-down.webp'); }
-[data-sprite='mob4'][data-pose='step'] { --pose-image: url('assets/motion-mob4-step.webp'); }
-[data-sprite='mob4'][data-pose='follow'] { --pose-image: url('assets/motion-mob4-follow.webp'); }
-[data-sprite='mob4'][data-pose='guard'] { --pose-image: url('assets/motion-mob4-guard.webp'); }
-[data-sprite='mob4'][data-pose='open'] { --pose-image: url('assets/motion-mob4-open.webp'); }
 [data-sprite='mob5'][data-pose='ready'] { --pose-image: url('assets/motion-mob5-ready.webp'); }
 [data-sprite='mob5'][data-pose='windup'] { --pose-image: url('assets/motion-mob5-windup.webp'); }
 [data-sprite='mob5'][data-pose='strike'], [data-sprite='mob5'][data-pose='launch'] { --pose-image: url('assets/motion-mob5-strike.webp'); }
@@ -203,42 +55,6 @@
 [data-sprite='mob5'][data-pose='follow'] { --pose-image: url('assets/motion-mob5-follow.webp'); }
 [data-sprite='mob5'][data-pose='guard'] { --pose-image: url('assets/motion-mob5-guard.webp'); }
 [data-sprite='mob5'][data-pose='open'] { --pose-image: url('assets/motion-mob5-open.webp'); }
-[data-sprite='mob6'][data-pose='ready'] { --pose-image: url('assets/motion-mob6-ready.webp'); }
-[data-sprite='mob6'][data-pose='windup'] { --pose-image: url('assets/motion-mob6-windup.webp'); }
-[data-sprite='mob6'][data-pose='strike'], [data-sprite='mob6'][data-pose='launch'] { --pose-image: url('assets/motion-mob6-strike.webp'); }
-[data-sprite='mob6'][data-pose='hit'] { --pose-image: url('assets/motion-mob6-hit.webp'); }
-[data-sprite='mob6'][data-pose='down'] { --pose-image: url('assets/motion-mob6-down.webp'); }
-[data-sprite='mob6'][data-pose='step'] { --pose-image: url('assets/motion-mob6-step.webp'); }
-[data-sprite='mob6'][data-pose='follow'] { --pose-image: url('assets/motion-mob6-follow.webp'); }
-[data-sprite='mob6'][data-pose='guard'] { --pose-image: url('assets/motion-mob6-guard.webp'); }
-[data-sprite='mob6'][data-pose='open'] { --pose-image: url('assets/motion-mob6-open.webp'); }
-[data-sprite='mob7'][data-pose='ready'] { --pose-image: url('assets/motion-mob7-ready.webp'); }
-[data-sprite='mob7'][data-pose='windup'] { --pose-image: url('assets/motion-mob7-windup.webp'); }
-[data-sprite='mob7'][data-pose='strike'], [data-sprite='mob7'][data-pose='launch'] { --pose-image: url('assets/motion-mob7-strike.webp'); }
-[data-sprite='mob7'][data-pose='hit'] { --pose-image: url('assets/motion-mob7-hit.webp'); }
-[data-sprite='mob7'][data-pose='down'] { --pose-image: url('assets/motion-mob7-down.webp'); }
-[data-sprite='mob7'][data-pose='step'] { --pose-image: url('assets/motion-mob7-step.webp'); }
-[data-sprite='mob7'][data-pose='follow'] { --pose-image: url('assets/motion-mob7-follow.webp'); }
-[data-sprite='mob7'][data-pose='guard'] { --pose-image: url('assets/motion-mob7-guard.webp'); }
-[data-sprite='mob7'][data-pose='open'] { --pose-image: url('assets/motion-mob7-open.webp'); }
-[data-sprite='mob8'][data-pose='ready'] { --pose-image: url('assets/motion-mob8-ready.webp'); }
-[data-sprite='mob8'][data-pose='windup'] { --pose-image: url('assets/motion-mob8-windup.webp'); }
-[data-sprite='mob8'][data-pose='strike'], [data-sprite='mob8'][data-pose='launch'] { --pose-image: url('assets/motion-mob8-strike.webp'); }
-[data-sprite='mob8'][data-pose='hit'] { --pose-image: url('assets/motion-mob8-hit.webp'); }
-[data-sprite='mob8'][data-pose='down'] { --pose-image: url('assets/motion-mob8-down.webp'); }
-[data-sprite='mob8'][data-pose='step'] { --pose-image: url('assets/motion-mob8-step.webp'); }
-[data-sprite='mob8'][data-pose='follow'] { --pose-image: url('assets/motion-mob8-follow.webp'); }
-[data-sprite='mob8'][data-pose='guard'] { --pose-image: url('assets/motion-mob8-guard.webp'); }
-[data-sprite='mob8'][data-pose='open'] { --pose-image: url('assets/motion-mob8-open.webp'); }
-[data-sprite='boss1'][data-pose='ready'] { --pose-image: url('assets/motion-boss1-ready.webp'); }
-[data-sprite='boss1'][data-pose='windup'] { --pose-image: url('assets/motion-boss1-windup.webp'); }
-[data-sprite='boss1'][data-pose='strike'], [data-sprite='boss1'][data-pose='launch'] { --pose-image: url('assets/motion-boss1-strike.webp'); }
-[data-sprite='boss1'][data-pose='hit'] { --pose-image: url('assets/motion-boss1-hit.webp'); }
-[data-sprite='boss1'][data-pose='down'] { --pose-image: url('assets/motion-boss1-down.webp'); }
-[data-sprite='boss1'][data-pose='step'] { --pose-image: url('assets/motion-boss1-step.webp'); }
-[data-sprite='boss1'][data-pose='follow'] { --pose-image: url('assets/motion-boss1-follow.webp'); }
-[data-sprite='boss1'][data-pose='guard'] { --pose-image: url('assets/motion-boss1-guard.webp'); }
-[data-sprite='boss1'][data-pose='open'] { --pose-image: url('assets/motion-boss1-open.webp'); }
 [data-sprite='boss2'][data-pose='ready'] { --pose-image: url('assets/motion-boss2-ready.webp'); }
 [data-sprite='boss2'][data-pose='windup'] { --pose-image: url('assets/motion-boss2-windup.webp'); }
 [data-sprite='boss2'][data-pose='strike'], [data-sprite='boss2'][data-pose='launch'] { --pose-image: url('assets/motion-boss2-strike.webp'); }
@@ -248,15 +64,6 @@
 [data-sprite='boss2'][data-pose='follow'] { --pose-image: url('assets/motion-boss2-follow.webp'); }
 [data-sprite='boss2'][data-pose='guard'] { --pose-image: url('assets/motion-boss2-guard.webp'); }
 [data-sprite='boss2'][data-pose='open'] { --pose-image: url('assets/motion-boss2-open.webp'); }
-[data-sprite='boss3'][data-pose='ready'] { --pose-image: url('assets/motion-boss3-ready.webp'); }
-[data-sprite='boss3'][data-pose='windup'] { --pose-image: url('assets/motion-boss3-windup.webp'); }
-[data-sprite='boss3'][data-pose='strike'], [data-sprite='boss3'][data-pose='launch'] { --pose-image: url('assets/motion-boss3-strike.webp'); }
-[data-sprite='boss3'][data-pose='hit'] { --pose-image: url('assets/motion-boss3-hit.webp'); }
-[data-sprite='boss3'][data-pose='down'] { --pose-image: url('assets/motion-boss3-down.webp'); }
-[data-sprite='boss3'][data-pose='step'] { --pose-image: url('assets/motion-boss3-step.webp'); }
-[data-sprite='boss3'][data-pose='follow'] { --pose-image: url('assets/motion-boss3-follow.webp'); }
-[data-sprite='boss3'][data-pose='guard'] { --pose-image: url('assets/motion-boss3-guard.webp'); }
-[data-sprite='boss3'][data-pose='open'] { --pose-image: url('assets/motion-boss3-open.webp'); }
 [data-sprite='boss4'][data-pose='ready'] { --pose-image: url('assets/motion-boss4-ready.webp'); }
 [data-sprite='boss4'][data-pose='windup'] { --pose-image: url('assets/motion-boss4-windup.webp'); }
 [data-sprite='boss4'][data-pose='strike'], [data-sprite='boss4'][data-pose='launch'] { --pose-image: url('assets/motion-boss4-strike.webp'); }
@@ -293,15 +100,6 @@
 [data-sprite='dboss-store'][data-pose='follow'] { --pose-image: url('assets/motion-dboss-store-follow.webp'); }
 [data-sprite='dboss-store'][data-pose='guard'] { --pose-image: url('assets/motion-dboss-store-guard.webp'); }
 [data-sprite='dboss-store'][data-pose='open'] { --pose-image: url('assets/motion-dboss-store-open.webp'); }
-[data-sprite='dboss-quiz'][data-pose='ready'] { --pose-image: url('assets/motion-dboss-quiz-ready.webp'); }
-[data-sprite='dboss-quiz'][data-pose='windup'] { --pose-image: url('assets/motion-dboss-quiz-windup.webp'); }
-[data-sprite='dboss-quiz'][data-pose='strike'], [data-sprite='dboss-quiz'][data-pose='launch'] { --pose-image: url('assets/motion-dboss-quiz-strike.webp'); }
-[data-sprite='dboss-quiz'][data-pose='hit'] { --pose-image: url('assets/motion-dboss-quiz-hit.webp'); }
-[data-sprite='dboss-quiz'][data-pose='down'] { --pose-image: url('assets/motion-dboss-quiz-down.webp'); }
-[data-sprite='dboss-quiz'][data-pose='step'] { --pose-image: url('assets/motion-dboss-quiz-step.webp'); }
-[data-sprite='dboss-quiz'][data-pose='follow'] { --pose-image: url('assets/motion-dboss-quiz-follow.webp'); }
-[data-sprite='dboss-quiz'][data-pose='guard'] { --pose-image: url('assets/motion-dboss-quiz-guard.webp'); }
-[data-sprite='dboss-quiz'][data-pose='open'] { --pose-image: url('assets/motion-dboss-quiz-open.webp'); }
 [data-sprite='dboss-sports'][data-pose='ready'] { --pose-image: url('assets/motion-dboss-sports-ready.webp'); }
 [data-sprite='dboss-sports'][data-pose='windup'] { --pose-image: url('assets/motion-dboss-sports-windup.webp'); }
 [data-sprite='dboss-sports'][data-pose='strike'], [data-sprite='dboss-sports'][data-pose='launch'] { --pose-image: url('assets/motion-dboss-sports-strike.webp'); }
@@ -316,11 +114,6 @@
 .arena[data-motion='spar'] [data-sprite='boy'][data-pose='down'] { --pose-image: url('assets/motion-boy-spar-down.webp'); }
 .arena[data-motion='spar'] [data-sprite='boy'][data-pose='victory'] { --pose-image: url('assets/motion-boy-spar-victory.webp'); }
 .arena[data-motion='spar'] [data-sprite='boy'] { --wardrobe-base: none; --wardrobe-mask: none; }
-.arena[data-motion='spar'] [data-sprite='girl'][data-pose='ready'], .arena[data-motion='spar'] [data-sprite='girl'][data-pose='step'], .arena[data-motion='spar'] [data-sprite='girl'][data-pose='run'], .arena[data-motion='spar'] [data-sprite='girl'][data-pose='guard'] { --pose-image: url('assets/motion-girl-spar-ready.webp'); }
-.arena[data-motion='spar'] [data-sprite='girl'][data-pose='hit'] { --pose-image: url('assets/motion-girl-spar-hit.webp'); }
-.arena[data-motion='spar'] [data-sprite='girl'][data-pose='down'] { --pose-image: url('assets/motion-girl-spar-down.webp'); }
-.arena[data-motion='spar'] [data-sprite='girl'][data-pose='victory'] { --pose-image: url('assets/motion-girl-spar-victory.webp'); }
-.arena[data-motion='spar'] [data-sprite='girl'] { --wardrobe-base: none; --wardrobe-mask: none; }
 .arena[data-motion='spar'] [data-spar='sport-blue'][data-pose='ready'], .arena[data-motion='spar'] [data-spar='sport-blue'][data-pose='step'], .arena[data-motion='spar'] [data-spar='sport-blue'][data-pose='open'], .arena[data-motion='spar'] [data-spar='sport-blue'][data-pose='victory'] { --pose-image: url('assets/motion-sport-blue-ready.webp'); }
 .arena[data-motion='spar'] [data-spar='sport-blue'][data-pose='windup'], .arena[data-motion='spar'] [data-spar='sport-blue'][data-pose='guard'] { --pose-image: url('assets/motion-sport-blue-windup.webp'); }
 .arena[data-motion='spar'] [data-spar='sport-blue'][data-pose='strike'], .arena[data-motion='spar'] [data-spar='sport-blue'][data-pose='launch'], .arena[data-motion='spar'] [data-spar='sport-blue'][data-pose='follow'] { --pose-image: url('assets/motion-sport-blue-strike.webp'); }
@@ -336,8 +129,6 @@
 .arena[data-motion='spar'] [data-spar='sport-green'][data-pose='strike'], .arena[data-motion='spar'] [data-spar='sport-green'][data-pose='launch'], .arena[data-motion='spar'] [data-spar='sport-green'][data-pose='follow'] { --pose-image: url('assets/motion-sport-green-strike.webp'); }
 .arena[data-motion='spar'] [data-spar='sport-green'][data-pose='hit'] { --pose-image: url('assets/motion-sport-green-hit.webp'); }
 .arena[data-motion='spar'] [data-spar='sport-green'][data-pose='down'] { --pose-image: url('assets/motion-sport-green-down.webp'); }
-
-/* ════ Codex 6차: 동료 16명 대결 9장 + 스킬 2장(준비 skill-a → 터지는 순간 skill-b) ════ */
 [data-sprite='mate1'][data-pose='ready'] { --pose-image: url('assets/motion-mate1-ready.webp'); }
 [data-sprite='mate1'][data-pose='step'] { --pose-image: url('assets/motion-mate1-step.webp'); }
 [data-sprite='mate1'][data-pose='windup'] { --pose-image: url('assets/motion-mate1-windup.webp'); }
@@ -514,7 +305,6 @@
 [data-sprite='mate16'][data-pose='open'] { --pose-image: url('assets/motion-mate16-open.webp'); }
 [data-sprite='mate16'][data-pose='skill-a'] { --pose-image: url('assets/motion-mate16-skill-a.webp'); }
 [data-sprite='mate16'][data-pose='skill-b'] { --pose-image: url('assets/motion-mate16-skill-b.webp'); }
-/* 건달 졸개 8종·두목 4명 */
 [data-sprite='thug1'][data-pose='ready'] { --pose-image: url('assets/motion-thug1-ready.webp'); }
 [data-sprite='thug1'][data-pose='step'] { --pose-image: url('assets/motion-thug1-step.webp'); }
 [data-sprite='thug1'][data-pose='windup'] { --pose-image: url('assets/motion-thug1-windup.webp'); }
@@ -623,7 +413,6 @@
 [data-sprite='thug-boss4'][data-pose='down'] { --pose-image: url('assets/motion-thug-boss4-down.webp'); }
 [data-sprite='thug-boss4'][data-pose='guard'] { --pose-image: url('assets/motion-thug-boss4-guard.webp'); }
 [data-sprite='thug-boss4'][data-pose='open'] { --pose-image: url('assets/motion-thug-boss4-open.webp'); }
-/* ════ Codex 5차: 주인공 종목별 공격(kick·knee·throw·hold), 필살기·액티브 스킬, 방어·숨 고르기·패배 ════ */
 .arena[data-motion='kick'] [data-sprite='boy'][data-pose='windup'], .arena[data-motion='knee'] [data-sprite='boy'][data-pose='windup'] { --pose-image: url('assets/motion-boy-kick-windup.webp'); }
 .arena[data-motion='kick'] [data-sprite='boy'][data-pose='strike'] { --pose-image: url('assets/motion-boy-kick-strike.webp'); }
 .arena[data-motion='kick'] [data-sprite='boy'][data-pose='follow'], .arena[data-motion='knee'] [data-sprite='boy'][data-pose='follow'] { --pose-image: url('assets/motion-boy-kick-follow.webp'); }
@@ -646,59 +435,18 @@
 [data-sprite='boy'][data-pose='skill-step-windup'] { --pose-image: url('assets/motion-boy-skill-step-windup.webp'); }
 [data-sprite='boy'][data-pose='skill-step-follow'] { --pose-image: url('assets/motion-boy-skill-step-follow.webp'); }
 .arena[data-motion='spar'] [data-sprite='boy'][data-pose='lose'] { --pose-image: url('assets/motion-boy-spar-down.webp'); }
-.arena[data-motion='kick'] [data-sprite='girl'][data-pose='windup'], .arena[data-motion='knee'] [data-sprite='girl'][data-pose='windup'] { --pose-image: url('assets/motion-girl-kick-windup.webp'); }
-.arena[data-motion='kick'] [data-sprite='girl'][data-pose='strike'] { --pose-image: url('assets/motion-girl-kick-strike.webp'); }
-.arena[data-motion='kick'] [data-sprite='girl'][data-pose='follow'], .arena[data-motion='knee'] [data-sprite='girl'][data-pose='follow'] { --pose-image: url('assets/motion-girl-kick-follow.webp'); }
-.arena[data-motion='knee'] [data-sprite='girl'][data-pose='strike'] { --pose-image: url('assets/motion-girl-knee-strike.webp'); }
-.arena[data-motion='throw'] [data-sprite='girl'][data-pose='windup'], .arena[data-motion='hold'] [data-sprite='girl'][data-pose='windup'] { --pose-image: url('assets/motion-girl-throw-windup.webp'); }
-.arena[data-motion='throw'] [data-sprite='girl'][data-pose='strike'] { --pose-image: url('assets/motion-girl-throw-strike.webp'); }
-.arena[data-motion='throw'] [data-sprite='girl'][data-pose='follow'] { --pose-image: url('assets/motion-girl-throw-follow.webp'); }
-.arena[data-motion='hold'] [data-sprite='girl'][data-pose='strike'], .arena[data-motion='hold'] [data-sprite='girl'][data-pose='follow'] { --pose-image: url('assets/motion-girl-hold-strike.webp'); }
-[data-sprite='girl'][data-pose='guard'] { --pose-image: url('assets/motion-girl-guard.webp'); }
-[data-sprite='girl'][data-pose='ready-b'] { --pose-image: url('assets/motion-girl-ready-b.webp'); }
-[data-sprite='girl'][data-pose='lose'] { --pose-image: url('assets/motion-girl-lose.webp'); }
-[data-sprite='girl'][data-pose='skill-rush-windup'] { --pose-image: url('assets/motion-girl-skill-rush-windup.webp'); }
-[data-sprite='girl'][data-pose='skill-rush-strike'] { --pose-image: url('assets/motion-girl-skill-rush-strike.webp'); }
-[data-sprite='girl'][data-pose='skill-counter-guard'] { --pose-image: url('assets/motion-girl-skill-counter-guard.webp'); }
-[data-sprite='girl'][data-pose='skill-counter-strike'] { --pose-image: url('assets/motion-girl-skill-counter-strike.webp'); }
-[data-sprite='girl'][data-pose='skill-combo-windup'] { --pose-image: url('assets/motion-girl-skill-combo-windup.webp'); }
-[data-sprite='girl'][data-pose='skill-combo-strike'] { --pose-image: url('assets/motion-girl-skill-combo-strike.webp'); }
-[data-sprite='girl'][data-pose='skill-cheer'] { --pose-image: url('assets/motion-girl-skill-cheer.webp'); }
-[data-sprite='girl'][data-pose='skill-drink'] { --pose-image: url('assets/motion-girl-skill-drink.webp'); }
-[data-sprite='girl'][data-pose='skill-step-windup'] { --pose-image: url('assets/motion-girl-skill-step-windup.webp'); }
-[data-sprite='girl'][data-pose='skill-step-follow'] { --pose-image: url('assets/motion-girl-skill-step-follow.webp'); }
-.arena[data-motion='spar'] [data-sprite='girl'][data-pose='lose'] { --pose-image: url('assets/motion-girl-spar-down.webp'); }
-/* 잡기 종목에서 맞는 쪽: throw = 메쳐져 뜸 → 매트에 눌림, hold = 눌림. 그림이 있는 상대만(건달은 기본 hit·down) */
 .arena[data-motion='throw'] [data-sprite='rival1'][data-pose='hit'] { --pose-image: url('assets/motion-rival1-thrown.webp'); }
 .arena[data-motion='throw'] [data-sprite='rival1'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='rival1'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='rival1'][data-pose='down'] { --pose-image: url('assets/motion-rival1-pinned.webp'); }
-.arena[data-motion='throw'] [data-sprite='rival2'][data-pose='hit'] { --pose-image: url('assets/motion-rival2-thrown.webp'); }
-.arena[data-motion='throw'] [data-sprite='rival2'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='rival2'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='rival2'][data-pose='down'] { --pose-image: url('assets/motion-rival2-pinned.webp'); }
 .arena[data-motion='throw'] [data-sprite='rival3'][data-pose='hit'] { --pose-image: url('assets/motion-rival3-thrown.webp'); }
 .arena[data-motion='throw'] [data-sprite='rival3'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='rival3'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='rival3'][data-pose='down'] { --pose-image: url('assets/motion-rival3-pinned.webp'); }
-.arena[data-motion='throw'] [data-sprite='rival4'][data-pose='hit'] { --pose-image: url('assets/motion-rival4-thrown.webp'); }
-.arena[data-motion='throw'] [data-sprite='rival4'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='rival4'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='rival4'][data-pose='down'] { --pose-image: url('assets/motion-rival4-pinned.webp'); }
 .arena[data-motion='throw'] [data-sprite='mob1'][data-pose='hit'] { --pose-image: url('assets/motion-mob1-thrown.webp'); }
 .arena[data-motion='throw'] [data-sprite='mob1'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='mob1'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='mob1'][data-pose='down'] { --pose-image: url('assets/motion-mob1-pinned.webp'); }
-.arena[data-motion='throw'] [data-sprite='mob2'][data-pose='hit'] { --pose-image: url('assets/motion-mob2-thrown.webp'); }
-.arena[data-motion='throw'] [data-sprite='mob2'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='mob2'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='mob2'][data-pose='down'] { --pose-image: url('assets/motion-mob2-pinned.webp'); }
 .arena[data-motion='throw'] [data-sprite='mob3'][data-pose='hit'] { --pose-image: url('assets/motion-mob3-thrown.webp'); }
 .arena[data-motion='throw'] [data-sprite='mob3'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='mob3'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='mob3'][data-pose='down'] { --pose-image: url('assets/motion-mob3-pinned.webp'); }
-.arena[data-motion='throw'] [data-sprite='mob4'][data-pose='hit'] { --pose-image: url('assets/motion-mob4-thrown.webp'); }
-.arena[data-motion='throw'] [data-sprite='mob4'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='mob4'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='mob4'][data-pose='down'] { --pose-image: url('assets/motion-mob4-pinned.webp'); }
 .arena[data-motion='throw'] [data-sprite='mob5'][data-pose='hit'] { --pose-image: url('assets/motion-mob5-thrown.webp'); }
 .arena[data-motion='throw'] [data-sprite='mob5'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='mob5'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='mob5'][data-pose='down'] { --pose-image: url('assets/motion-mob5-pinned.webp'); }
-.arena[data-motion='throw'] [data-sprite='mob6'][data-pose='hit'] { --pose-image: url('assets/motion-mob6-thrown.webp'); }
-.arena[data-motion='throw'] [data-sprite='mob6'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='mob6'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='mob6'][data-pose='down'] { --pose-image: url('assets/motion-mob6-pinned.webp'); }
-.arena[data-motion='throw'] [data-sprite='mob7'][data-pose='hit'] { --pose-image: url('assets/motion-mob7-thrown.webp'); }
-.arena[data-motion='throw'] [data-sprite='mob7'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='mob7'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='mob7'][data-pose='down'] { --pose-image: url('assets/motion-mob7-pinned.webp'); }
-.arena[data-motion='throw'] [data-sprite='mob8'][data-pose='hit'] { --pose-image: url('assets/motion-mob8-thrown.webp'); }
-.arena[data-motion='throw'] [data-sprite='mob8'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='mob8'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='mob8'][data-pose='down'] { --pose-image: url('assets/motion-mob8-pinned.webp'); }
-.arena[data-motion='throw'] [data-sprite='boss1'][data-pose='hit'] { --pose-image: url('assets/motion-boss1-thrown.webp'); }
-.arena[data-motion='throw'] [data-sprite='boss1'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='boss1'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='boss1'][data-pose='down'] { --pose-image: url('assets/motion-boss1-pinned.webp'); }
 .arena[data-motion='throw'] [data-sprite='boss2'][data-pose='hit'] { --pose-image: url('assets/motion-boss2-thrown.webp'); }
 .arena[data-motion='throw'] [data-sprite='boss2'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='boss2'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='boss2'][data-pose='down'] { --pose-image: url('assets/motion-boss2-pinned.webp'); }
-.arena[data-motion='throw'] [data-sprite='boss3'][data-pose='hit'] { --pose-image: url('assets/motion-boss3-thrown.webp'); }
-.arena[data-motion='throw'] [data-sprite='boss3'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='boss3'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='boss3'][data-pose='down'] { --pose-image: url('assets/motion-boss3-pinned.webp'); }
 .arena[data-motion='throw'] [data-sprite='boss4'][data-pose='hit'] { --pose-image: url('assets/motion-boss4-thrown.webp'); }
 .arena[data-motion='throw'] [data-sprite='boss4'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='boss4'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='boss4'][data-pose='down'] { --pose-image: url('assets/motion-boss4-pinned.webp'); }
 .arena[data-motion='throw'] [data-sprite='boss5'][data-pose='hit'] { --pose-image: url('assets/motion-boss5-thrown.webp'); }
@@ -707,8 +455,6 @@
 .arena[data-motion='throw'] [data-sprite='boss6'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='boss6'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='boss6'][data-pose='down'] { --pose-image: url('assets/motion-boss6-pinned.webp'); }
 .arena[data-motion='throw'] [data-sprite='dboss-store'][data-pose='hit'] { --pose-image: url('assets/motion-dboss-store-thrown.webp'); }
 .arena[data-motion='throw'] [data-sprite='dboss-store'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='dboss-store'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='dboss-store'][data-pose='down'] { --pose-image: url('assets/motion-dboss-store-pinned.webp'); }
-.arena[data-motion='throw'] [data-sprite='dboss-quiz'][data-pose='hit'] { --pose-image: url('assets/motion-dboss-quiz-thrown.webp'); }
-.arena[data-motion='throw'] [data-sprite='dboss-quiz'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='dboss-quiz'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='dboss-quiz'][data-pose='down'] { --pose-image: url('assets/motion-dboss-quiz-pinned.webp'); }
 .arena[data-motion='throw'] [data-sprite='dboss-sports'][data-pose='hit'] { --pose-image: url('assets/motion-dboss-sports-thrown.webp'); }
 .arena[data-motion='throw'] [data-sprite='dboss-sports'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='dboss-sports'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='dboss-sports'][data-pose='down'] { --pose-image: url('assets/motion-dboss-sports-pinned.webp'); }
 .arena[data-motion='throw'] [data-sprite='sport-blue'][data-pose='hit'] { --pose-image: url('assets/motion-sport-blue-thrown.webp'); }
@@ -717,13 +463,9 @@
 .arena[data-motion='throw'] [data-sprite='sport-red'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='sport-red'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='sport-red'][data-pose='down'] { --pose-image: url('assets/motion-sport-red-pinned.webp'); }
 .arena[data-motion='throw'] [data-sprite='sport-green'][data-pose='hit'] { --pose-image: url('assets/motion-sport-green-thrown.webp'); }
 .arena[data-motion='throw'] [data-sprite='sport-green'][data-pose='down'], .arena[data-motion='hold'] [data-sprite='sport-green'][data-pose='hit'], .arena[data-motion='hold'] [data-sprite='sport-green'][data-pose='down'] { --pose-image: url('assets/motion-sport-green-pinned.webp'); }
-/* 주인공이 졌을 때 보스가 이긴 모습 */
-[data-sprite='boss1'][data-pose='victory'] { --pose-image: url('assets/motion-boss1-victory.webp'); }
 [data-sprite='boss2'][data-pose='victory'] { --pose-image: url('assets/motion-boss2-victory.webp'); }
-[data-sprite='boss3'][data-pose='victory'] { --pose-image: url('assets/motion-boss3-victory.webp'); }
 [data-sprite='boss4'][data-pose='victory'] { --pose-image: url('assets/motion-boss4-victory.webp'); }
 [data-sprite='boss5'][data-pose='victory'] { --pose-image: url('assets/motion-boss5-victory.webp'); }
 [data-sprite='boss6'][data-pose='victory'] { --pose-image: url('assets/motion-boss6-victory.webp'); }
 [data-sprite='dboss-store'][data-pose='victory'] { --pose-image: url('assets/motion-dboss-store-victory.webp'); }
-[data-sprite='dboss-quiz'][data-pose='victory'] { --pose-image: url('assets/motion-dboss-quiz-victory.webp'); }
 [data-sprite='dboss-sports'][data-pose='victory'] { --pose-image: url('assets/motion-dboss-sports-victory.webp'); }

@@ -112,7 +112,7 @@ svg { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2
 .boss-round #round-label { padding: 1px 7px; border-radius: 6px; background: linear-gradient(#ff7a45, #d8452c); color: #fff; text-shadow: none; }
 
 /* 전투 캐릭터 */
-.fight { display: grid; grid-template-columns: 1fr 12px 1fr; align-items: end; flex: 1 1 auto; min-height: 64px; padding: 0 14px 4px; }
+.fight { position: relative; flex: 1 1 auto; min-height: 64px; }
 .fighter { --side: 1; position: relative; display: flex; align-items: flex-end; justify-content: center; height: 100%; min-width: 0; }
 .fighter.rival { --side: -1; }
 .sprite { display: block; background: var(--sprite-image) center bottom / contain no-repeat; }
@@ -389,7 +389,6 @@ h1 { margin-top: 4px; font-size: clamp(30px, 9vw, 44px); font-weight: 1000; line
 p, small, .item-body p, .muted { font-weight: 400; }
 
 /* ── 매점 간식 버프 ─────────────────────── */
-.fight { position: relative; }
 .snacks { position: absolute; z-index: 4; left: 8px; top: 6px; display: grid; gap: 9px; }
 .snack { position: relative; display: grid; justify-items: center; width: 40px; padding: 0 0 4px; border: 0; background: none; color: #fff; }
 .snack-icon { position: relative; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 12px; border: 2px solid rgba(255, 255, 255, .9); background: linear-gradient(160deg, var(--snack-hi), var(--snack)); box-shadow: inset 0 -3px rgba(0, 0, 0, .2), 0 2px 6px rgba(0, 0, 0, .3); filter: saturate(.45) brightness(.82); transition: filter .2s; }
@@ -558,7 +557,6 @@ p, small, .item-body p, .muted { font-weight: 400; }
   .round-button { width: 31px; height: 31px; }
   .stage-row, .health-row { padding-inline: 8px; }
   .versus { min-width: 46px; }
-  .fight { padding-inline: 8px; }
   .battle-actions { grid-template-columns: minmax(0, 1fr) 44px 44px 44px; padding-inline: 8px; gap: 4px; }
   .advance { font-size: 9px; }
   .skill-icon { flex-basis: 34px; height: 34px; }
@@ -608,12 +606,7 @@ p, small, .item-body p, .muted { font-weight: 400; }
 
 /* ── 무리 전투: 뒤에 선 상대들(가까운 줄 2명 + 먼 줄 3명) ── */
 .pack .sprite { filter: drop-shadow(0 3px 2px rgba(30, 16, 50, .5)); }
-.pack { position: absolute; z-index: 0; right: 0; bottom: 2px; width: 170px; height: 150px; pointer-events: none; }
-.pack-mob { position: absolute; right: var(--x); bottom: var(--y); display: grid; justify-items: center; width: 70px; transform: scale(var(--s)); transform-origin: center bottom; }
-.pack-mob .sprite { --side: -1; width: 70px; height: 100px; background-image: var(--pose-image, var(--sprite-image)); transform: scaleX(-1); animation: breath 1.1s ease-in-out infinite alternate; }
-.pack-mob:nth-child(2) .sprite { animation-delay: -.4s; }
-.pack-mob:nth-child(3) .sprite { animation-delay: -.7s; }
-.pack-mob:nth-child(4) .sprite { animation-delay: -.2s; }
+.pack-mob .sprite { --side: -1; background-image: var(--pose-image, var(--sprite-image)); transform: scaleX(-1); }
 .pack-mob .sprite[data-pose='strike'] { transform: scaleX(-1) translateX(14px); animation: none; }
 .pack-mob .sprite[data-pose='windup'] { transform: scaleX(-1) translateX(-4px) rotate(-4deg); animation: none; }
 .pack-mob .sprite[data-pose='hit'] { transform: scaleX(-1) translateX(-8px); filter: brightness(1.7) drop-shadow(0 3px 2px rgba(30, 16, 50, .5)); animation: none; }
@@ -629,7 +622,7 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .dungeon-strip.hurry { border-color: #ff9a6b; box-shadow: 0 0 16px rgba(255, 120, 60, .45); }
 .dungeon-strip.hurry i { background: #ff9a6b; }
 @keyframes pack-hit { 30% { filter: brightness(1.8); translate: 6px 0; } }
-@keyframes step-in { from { opacity: 0; translate: 40px 0; } to { opacity: 1; translate: 0 0; } }
+@keyframes step-in { from { opacity: .65; translate: var(--arrive-x, 0px) calc(-1 * var(--arrive-depth, 0) * var(--lane-step)); } to { opacity: 1; translate: 0 0; } }
 
 /* ── 방과 후 던전 카드 ───────────────────── */
 .dungeon-card { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px; border-radius: 16px; border: 1px solid var(--line); background: var(--card); box-shadow: 0 2px 0 var(--card-shadow); }
@@ -649,8 +642,6 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .dungeon-actions button:not(:disabled):active { transform: translateY(2px); }
 .reward-chip .cur.badge { width: 16px; height: 16px; }
 @media (max-height: 700px) {
-  .pack-mob { width: 52px; margin-left: -16px; }
-  .pack-mob .sprite { width: 52px; height: 70px; }
 }
 
 /* 처치 진행 바 · 보스 제한시간 */
@@ -662,13 +653,10 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .boss-timer { border-color: #ff9a6b; }
 .boss-timer .pattern-icon { background: #d0553a; }
 .boss-timer i { background: linear-gradient(90deg, #ff9a6b, #ffd27a); }
-@media (max-height: 700px) { .kill-bar { height: 13px; width: 140px; } .pack { height: 120px; } }
-@media (max-width: 360px) { .kill-bar { width: 132px; } .pack { width: 140px; } .pack-mob { width: 58px; } .pack-mob .sprite { width: 58px; height: 84px; } }
+@media (max-height: 700px) { .kill-bar { height: 13px; width: 140px; } }
+@media (max-width: 360px) { .kill-bar { width: 132px; } }
 
 /* 앞에 선 친구는 대장·보스보다 작게, 무리와 비슷한 크기로 */
-.fighter.rival.minion .sprite { max-height: 122px; }
-.fighter.rival.minion { justify-content: flex-start; }
-@media (max-height: 700px) { .fighter.rival.minion .sprite { max-height: 96px; } }
 
 /* ── 상태 줄: 캐릭터를 가리지 않게 제목 아래 한 줄로 ── */
 .status-line { display: flex; align-items: center; gap: 6px; min-width: 0; padding: 5px 10px 0; }
@@ -739,12 +727,8 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .skill-pop.lunch { color: #a8ffcb; }
 @keyframes skill-pop { 0% { opacity: 0; transform: translateY(10px) scale(.7); } 18% { opacity: 1; transform: none; } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-16px); } }
 
-/* 동료(주인공 뒤) */
-.fighter.player { justify-content: flex-end; }
-.fighter.player .sprite { max-width: 150px; }
-.allies { position: absolute; z-index: 0; left: 44px; bottom: 2px; width: 120px; height: 130px; pointer-events: none; }
-.ally { position: absolute; left: var(--x); bottom: var(--y); transform: scale(var(--s)); transform-origin: left bottom; }
-.ally .sprite { width: 72px; height: 104px; background-image: var(--pose-image, var(--sprite-image)); filter: drop-shadow(0 3px 2px rgba(30, 16, 50, .5)); animation: breath 1.05s ease-in-out infinite alternate; }
+/* 동료 공격 */
+.ally .sprite { background-image: var(--pose-image, var(--sprite-image)); filter: drop-shadow(0 3px 2px rgba(30, 16, 50, .5)); }
 .ally .sprite[data-pose="strike"] { transform: translateX(16px); animation: none; }
 .ally .sprite[data-pose="windup"] { transform: translateX(-4px) rotate(-4deg); animation: none; }
 .ally-hit .damage { top: 34%; color: #bfe8ff; font-size: 17px; }
@@ -860,7 +844,7 @@ p, small, .item-body p, .muted { font-weight: 400; }
   .mate-grid, .shop-grid { gap: 6px; }
 }
 
-/* 놀이 대결 효과와 종목 도구 */
+/* 격투 타격 효과 */
 .impact.fx-dust::before, .impact.fx-cloud::before {
   width: 88px; height: 66px; clip-path: none; border-radius: 0;
   background: url('assets/fx-dust.webp') 0 50% / 600% 100% no-repeat;
@@ -869,56 +853,17 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .impact.fx-cloud::before { width: 112px; height: 84px; background-image: url('assets/fx-cloud.webp'); }
 .impact.fx-dust.strong::before, .impact.fx-cloud.strong::before { width: 128px; height: 96px; }
 .impact.fx-dust.strong::after, .impact.fx-cloud.strong::after { display: none; }
-.arena[data-motion='toss'] .impact.fx-dust::before { top: 88%; }
 @keyframes dust-puff { from { background-position-x: 0; } to { background-position-x: 120%; } }
 .onomatopoeia { position: absolute; left: 50%; top: 4%; translate: -50% 0; rotate: -8deg; color: #fff; font-size: 21px; font-weight: 700; white-space: nowrap; text-shadow: 0 2px 0 #c2412a, 1.5px 0 0 #c2412a, -1.5px 0 0 #c2412a, 0 -1.5px 0 #c2412a, 1px 1px 0 #c2412a, -1px -1px 0 #c2412a; animation: sound-pop .6s ease-out both; }
 .fx-spark .onomatopoeia { text-shadow: var(--ol-purple); }
 .strong .onomatopoeia { font-size: 27px; }
 @keyframes sound-pop { 0% { opacity: 0; scale: .5; } 25% { opacity: 1; scale: 1.15; } 70% { opacity: 1; scale: 1; } 100% { opacity: 0; translate: -50% -10px; } }
 
-/* 공은 호를 그리며 움직이고 딱지와 지우개는 바닥 놀이판에 놓인다. */
-.prop { position: absolute; z-index: 5; bottom: 46%; width: 32px; height: 32px; background: var(--contest-prop) center / contain no-repeat; pointer-events: none; }
-.prop.to-right { animation: prop-right .38s cubic-bezier(.3, .2, .6, 1) both; }
-.prop.to-left { animation: prop-left .38s cubic-bezier(.3, .2, .6, 1) both; }
-@keyframes prop-right { 0% { left: 34%; translate: 0 0; rotate: 0deg; } 50% { translate: 0 -34px; } 100% { left: 66%; translate: 0 6px; rotate: 300deg; } }
-@keyframes prop-left { 0% { left: 62%; translate: 0 0; rotate: 0deg; } 50% { translate: 0 -34px; } 100% { left: 30%; translate: 0 6px; rotate: -300deg; } }
-.prop-ddakji, .arena[data-contest='ddakji'], .contest-chip[data-contest='ddakji'] { --contest-prop: url('assets/prop-ddakji.webp'); }
-.prop-eraser, .arena[data-contest='eraser'], .contest-chip[data-contest='eraser'] { --contest-prop: url('assets/prop-eraser.webp'); }
-.prop-dodgeball, .contest-chip:is([data-contest='dodge'], [data-contest='dodgeLeague']) { --contest-prop: url('assets/prop-dodgeball.webp'); }
-.prop-basketball, .contest-chip:is([data-contest='basket'], [data-contest='basketLeague']) { --contest-prop: url('assets/prop-basketball.webp'); }
-.prop-eraser { height: 19px; }
-.prop:is(.prop-ddakji, .prop-eraser).to-right { --from-x: 29%; --turn: 145deg; animation-name: prop-floor; }
-.prop:is(.prop-ddakji, .prop-eraser).to-left { --from-x: 64%; --turn: -145deg; animation-name: prop-floor; }
-@keyframes prop-floor {
-  0% { left: var(--from-x); bottom: 38%; rotate: 0deg; }
-  62% { left: 47%; bottom: 11%; rotate: var(--turn); }
-  82% { left: 47%; bottom: 16%; }
-  100% { left: 49%; bottom: 11%; rotate: 12deg; opacity: 0; }
-}
-.arena:is([data-contest='ddakji'], [data-contest='eraser']) .fight::before {
-  content: ''; position: absolute; z-index: 0; left: 50%; bottom: 9%; translate: -50% 0;
-  width: 49px; height: 25px; border: 1px dashed #fff0beab; border-radius: 50%; background-color: #dfbb6c20;
-}
-.arena:is([data-contest='ddakji'], [data-contest='eraser']) .fight::after {
-  content: ''; position: absolute; left: 50%; bottom: 10%; translate: -50% 0; rotate: 8deg;
-  width: 20px; height: 18px; background: var(--contest-prop) center / contain no-repeat;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .arena[data-motion='toss'] .fighter .sprite[data-pose='strike'] { --shift: 14px; }
-  .arena[data-motion='toss'] .fighter .sprite:is([data-pose='follow'], [data-pose='launch']) { --shift: 9px; }
-  .arena[data-motion='push'] .fighter .sprite[data-pose='strike'] { --shift: clamp(18px, 9vw, 41px); }
-}
-
 /* 지금 종목 칩 */
 .contest-chip { flex: 0 0 auto; padding-right: 8px; border-color: #ffd27a; background: rgba(90, 50, 10, .78); }
 .contest-chip b { color: #fff3c2; }
-.contest-mark { display: inline-block; width: 15px; height: 15px; background: var(--contest-prop, none) center / contain no-repeat; }
-.contest-chip[data-contest='scuffle'] .contest-mark, .contest-chip[data-contest='ssireum'] .contest-mark, .contest-chip[data-contest='judo'] .contest-mark { border-radius: 50%; background: #f4efe3; }
-.contest-chip[data-contest='ssireum'] .contest-mark { border-radius: 0; background: url('assets/prop-satba.webp') center / contain no-repeat; }
-.contest-chip[data-contest='arm'] .contest-mark { border-radius: 6px 6px 2px 2px; background: #ffcf9a; }
-.contest-chip[data-contest='taekwondo'] { --contest-prop: url('assets/prop-headgear.webp'); }
-.contest-chip[data-contest='sparring'] { --contest-prop: url('assets/prop-glove.webp'); }
+.contest-mark { display: inline-block; width: 15px; height: 15px; background: var(--contest-icon, none) center / contain no-repeat; }
+.contest-chip[data-contest='ssireum'] .contest-mark, .contest-chip[data-contest='judo'] .contest-mark { border-radius: 50%; background: #f4efe3; }
 .status-line .kill-bar { min-width: 0; }
 @media (max-width: 360px) { .contest-chip b { font-size: 9px; } }
 
@@ -937,7 +882,7 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .school-art { display: grid; place-items: end center; height: 150px; margin: -6px auto 6px; border-radius: 18px; background: radial-gradient(ellipse at 50% 85%, #ffe7a8 0 34%, transparent 35%), linear-gradient(#cfe8ff, #fff6dc); }
 .school-art .portrait-figure { width: 90px; height: 148px; }
 .school-dialog p { margin: 6px 0 14px; color: var(--muted); font-size: 13px; line-height: 1.5; }
-.contest-chip[data-contest] > .contest-mark { width: 19px; height: 19px; border-radius: 0; background: var(--contest-icon, var(--contest-prop, none)) center / contain no-repeat; }
+.contest-chip[data-contest] > .contest-mark { width: 19px; height: 19px; border-radius: 0; background: var(--contest-icon, none) center / contain no-repeat; }
 .sticker[data-sticker]::before { content: ''; width: 91%; height: 91%; background: var(--sticker-image) center / contain no-repeat; }
 .active-icon[data-active-art] { display: block; width: 27px; height: 27px; margin: auto; background: var(--skill-art) center / contain no-repeat; }
 #view-shop > [data-open-portrait] { margin-bottom: 8px; }
@@ -963,11 +908,9 @@ p, small, .item-body p, .muted { font-weight: 400; }
 /* ════ 성인 비율 캐릭터에 맞춘 대결 화면: 무대를 더 크게, 겹치는 띠 정리 ════ */
 .game { grid-template-rows: minmax(292px, 1.75fr) auto minmax(150px, 1fr) auto; }
 .fighter .sprite { max-height: 230px; }
-.fighter.rival.minion .sprite { max-height: 82%; }
 .ally .sprite { width: 84px; height: 122px; }
 .quest-bar:has(.loot-offer:not([hidden])) > :not(.loot-offer) { visibility: hidden; }
 /* ════ 동료 시스템: 4명이 함께 싸우고, 스킬을 쓰면 컷인 ════ */
-.allies { left: 0; width: 170px; height: 172px; }
 .ally .sprite { width: 88px; height: 128px; }
 .mate-cutin { position: absolute; z-index: 8; left: 0; top: 63%; display: flex; align-items: center; gap: 8px; max-width: 72%; padding: 4px 14px 4px 4px; border-radius: 0 14px 14px 0; background: linear-gradient(90deg, rgba(30, 16, 60, .92), rgba(60, 30, 110, .82)); box-shadow: 0 4px 14px rgba(0, 0, 0, .35); pointer-events: none; animation: cutin 1.15s cubic-bezier(.2, .8, .3, 1) both; }
 .mate-cutin > span { flex: 0 0 auto; width: 46px; height: 46px; border-radius: 10px; background-color: rgba(255, 255, 255, .12); background-position: center 12%; background-size: 180% auto; }
@@ -995,8 +938,6 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .snack-icon { width: 28px; height: 28px; border-radius: 9px; }
 .snack-icon svg { width: 16px; height: 16px; }
 .snack small { font-size: 8px; line-height: 12px; }
-.fighter.player .sprite { max-width: 128px; }
-.allies { width: 150px; }
 
 /* ════ 동료 등급(S~F)·별·조각, 테스트 도구 ════ */
 .grade-badge { position: absolute; right: 4px; top: 4px; z-index: 2; display: grid; place-items: center; min-width: 22px; height: 22px; padding: 0 4px; border-radius: 7px; color: #fff; font-size: 13px; font-weight: 900; font-style: italic; text-shadow: 0 1px 0 rgba(0, 0, 0, .35); box-shadow: 0 2px 4px rgba(0, 0, 0, .25); }
@@ -1035,17 +976,47 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .test-move select { flex: 1; min-width: 0; min-height: 34px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: inherit; font-size: 12px; }
 .test-move button { flex: 0 0 64px; }
 .mate-cutin { top: 64px; z-index: 12; }
-/* ════ 주인공·동료 같은 크기(--unit), 앞줄 3명 + 뒷줄 2명, 몸이 겹치지 않게 ════ */
-/* --unit = 대결 그림 한 칸의 폭(인물 키는 그 약 0.78배). 대결 칸 높이에 맞춰 줄어들고, 뒷줄까지 1.46칸 높이에 들어간다 */
-.fight { container-type: size; }
-.fight > * { --unit: min(112px, 29.5cqw, 64cqh); }
-/* 팀 전체를 0.2칸 오른쪽으로(왼쪽 끝 동료가 화면 밖으로 잘리지 않게) */
-.fighter.player .sprite { flex: 0 0 auto; max-width: var(--unit); margin-right: calc(var(--unit) * -.2); }
-.allies { left: 0; bottom: 4px; width: calc(50% - 6px + var(--unit) * .2); height: 100%; }
-.ally { left: auto; right: calc(var(--unit) * var(--d)); bottom: calc(var(--unit) * var(--y)); width: var(--unit); transform: scale(var(--s)); transform-origin: center bottom; }
-.ally .sprite { width: var(--unit); height: calc(var(--unit) * .91); }
-/* 간식 버튼은 주인공 머리 위쪽에서 오른쪽으로(뒷줄 동료는 그 왼쪽, 상대 머리는 그 오른쪽) */
-.snacks { left: calc(50% - 6px - var(--unit) * .35); top: 2px; translate: none; gap: 3px; }
+/* 앞쪽 X와 바닥 깊이 Y를 세로 화면에 투영한다. 모든 스프라이트 칸은 280×255다. */
+.fight { container-type: size; --player-x: 20; --rival-x: 64; }
+.boss-round .fight { --rival-x: 70; }
+.fight > * {
+  --unit: min(132px, 34cqw, calc(100cqh - 52px));
+  --lane-step: min(14px, 11cqh);
+  --reach: max(12px, calc((var(--rival-x) - var(--player-x)) * 1cqw - .60 * var(--unit)));
+}
+.allies, .pack { position: absolute; inset: 0; width: auto; height: auto; pointer-events: none; }
+.fight .fighter, .fight .ally, .fight .pack-mob {
+  position: absolute;
+  left: calc(var(--slot-x) * 1%);
+  bottom: calc(5px + (1.6 + var(--slot-depth, 0)) * var(--lane-step));
+  width: calc(var(--unit) * var(--size, 1) * var(--depth-scale, 1));
+  height: auto;
+  aspect-ratio: 280 / 255;
+  transform: translateX(-50%);
+}
+.fight .fighter { z-index: 5; }
+.fight .fighter.player { --slot-x: var(--player-x); }
+.fight .fighter.rival { --slot-x: var(--rival-x); }
+.fight .ally { --slot-x: calc(var(--player-x) + var(--slot-forward) * 6.7 + var(--slot-depth) * 9); }
+.fight .pack-mob { --slot-x: min(88, calc(var(--rival-x) + var(--slot-forward) * 7 + var(--slot-depth) * 3)); }
+.fight .sprite { width: 100%; height: 100%; max-width: none; max-height: none; }
+.fight .sprite[data-pose='ready'] { animation: none; }
+.fight .pack-hp { position: absolute; z-index: 1; top: 1%; left: 50%; width: 27%; transform: translateX(-50%); }
+.fight .shadow, .fight :is(.ally, .pack-mob)::before {
+  position: absolute;
+  width: 45%;
+  height: 7%;
+  bottom: -1%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: rgba(20, 10, 40, .36);
+}
+.fight :is(.ally, .pack-mob)::before { content: ''; }
+.fight .fighter .sprite:is([data-pose='strike'], [data-pose$='-strike']) { --shift: var(--reach); }
+.fight .fighter .sprite:is([data-pose='run'], [data-pose='launch']) { --shift: calc(var(--reach) * .46); }
+.fight .fighter .sprite:is([data-pose='follow'], [data-pose$='-follow']) { --shift: calc(var(--reach) * .25); }
+.snacks { left: 50%; top: 2px; translate: -50% 0; gap: 3px; z-index: 10; }
 .snacks .snack { width: 30px; }
 /* 출전 번호 = 자리. 공격할 때 대기점에서 상대 앞으로 달려갔다 돌아온다(translate는 JS) */
 .ally.running .sprite { animation: none; }
@@ -1053,8 +1024,6 @@ p, small, .item-body p, .muted { font-weight: 400; }
 .party-slot .slot-tag { position: absolute; left: 6px; top: 4px; z-index: 3; padding: 0 6px; border-radius: 6px; background: rgba(60, 40, 100, .1); color: #6d5f86; font-size: 9px; font-weight: 800; line-height: 15px; }
 .party-slot.filled .slot-tag { background: var(--gold); color: #5a3b00; }
 .party-slot.filled .mate-style { top: 22px; }
-/* 달려간 동료가 상대 그림 뒤로 숨지 않게 동료 줄을 앞에 그린다(대기 자리는 주인공과 몸이 겹치지 않음) */
-.allies { z-index: 2; }
 /* ════ 대결 화면 출전 카드 4칸(초상·전열/후열·스킬 쿨타임), 편성 모드, 동료 정보 창 ════ */
 /* 새 줄 높이만큼 아래 목록이 양보해서 대결 칸 크기는 그대로(대결 2.1 : 목록 1) */
 .game { grid-template-rows: minmax(292px, 2.1fr) auto auto minmax(150px, 1fr) auto; }
@@ -1354,12 +1323,13 @@ p, small, .item-body p, .muted { font-weight: 400; }
 @keyframes hero-trail { to { opacity: 0; translate: -10px 0; } }
 @media (prefers-reduced-motion: reduce) { .hero-trail { display: none; } }
 
-/* 상대 크기: 열 폭을 꽉 채우고 가로만 줄이던 것(scaleX)을 주인공·동료와 같은 칸(--unit) 기준으로 위아래 함께.
-   --size(ui.js) = 대장 1 · 졸개 0.9 · 보스 1.12, 학년마다 조금씩. 대장 키가 주인공과 같다 */
-.fighter.rival .sprite { flex: 0 0 auto; width: calc(var(--unit) * var(--size, 1)); max-width: none; transform: translate(calc(var(--side) * var(--shift)), var(--rise)) rotate(calc(var(--side) * var(--tilt))) scaleX(var(--side)); }
-.fighter.rival.minion .sprite { max-height: none; }
+.fighter.rival .sprite { transform: translate(calc(var(--side) * var(--shift)), var(--rise)) rotate(calc(var(--side) * var(--tilt))) scaleX(var(--side)); }
 
 /* 후열 동료: 앞줄 뒤에 서 있는 느낌(조금 어둡게). 주인공·앞줄보다 뒤에 그린다 */
-.ally.back { z-index: 0 !important; }
-.ally.back .sprite { filter: brightness(.88) saturate(.92) drop-shadow(0 3px 2px rgba(30, 16, 50, .45)); }
+.ally.back .sprite { filter: brightness(.92) saturate(.96) drop-shadow(0 3px 2px rgba(30, 16, 50, .45)); }
+
+.game { grid-template-rows: minmax(292px, 2.8fr) auto auto minmax(150px, 1fr) auto; }
+@media (min-height: 620px) and (max-height: 700px) {
+  .game { grid-template-rows: minmax(340px, 2.8fr) auto auto minmax(150px, 1fr) auto; }
+}
 

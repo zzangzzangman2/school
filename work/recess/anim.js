@@ -10,7 +10,7 @@
 const ANIM_CELL = { w: 280, h: 255 };
 const ANIM_CLIPS = ['idle', 'run', 'punch', 'hit', 'down', 'victory', 'kick', 'knee', 'throw', 'hold', 'guard', 'rush', 'counter', 'combo', 'cheer', 'drink', 'step', 'getup', 'attack', 'skill'];
 // 타격 칸(0부터). 이 칸이 엔진의 타격 순간(impact)에 보이도록 앞은 준비, 뒤는 마무리로 나눈다
-// Codex 9차(work/codex-motion-handoff-9.md)에서 중간 칸이 들어가 발차기·무릎·반격·연타 4번째, 메치기·돌진 5번째, 굳히기 6번째로 밀렸다
+// Codex 9차(work/docs/art/codex-motion-handoff-9.md)에서 중간 칸이 들어가 발차기·무릎·반격·연타 4번째, 메치기·돌진 5번째, 굳히기 6번째로 밀렸다
 const ANIM_IMPACT = { punch: 2, kick: 3, knee: 3, throw: 4, hold: 5, rush: 4, counter: 3, combo: 3, step: 2 };
 // 종목 동작(arena data-motion) → 주인공 공격 띠. 태권도(spar)는 보호구 정지 그림을 쓰므로 띠 없음
 const HERO_CONTEST_CLIP = { strike: 'punch', kick: 'kick', knee: 'knee', throw: 'throw', hold: 'hold' };

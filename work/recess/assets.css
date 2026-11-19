@@ -1,34 +1,19 @@
 :root { --cover-image: url('assets/cover.webp'); }
 [data-sprite='boy'] { --sprite-image: url('assets/boy.webp'); }
-[data-sprite='girl'] { --sprite-image: url('assets/girl.webp'); }
 [data-sprite='rival1'] { --sprite-image: url('assets/rival1.webp'); }
-[data-sprite='rival2'] { --sprite-image: url('assets/rival2.webp'); }
 [data-sprite='rival3'] { --sprite-image: url('assets/rival3.webp'); }
-[data-sprite='rival4'] { --sprite-image: url('assets/rival4.webp'); }
-[data-sprite='boss1'] { --sprite-image: url('assets/boss1.webp'); }
 [data-sprite='boss2'] { --sprite-image: url('assets/boss2.webp'); }
-[data-sprite='boss3'] { --sprite-image: url('assets/boss3.webp'); }
 [data-sprite='boss4'] { --sprite-image: url('assets/boss4.webp'); }
 [data-sprite='boss5'] { --sprite-image: url('assets/boss5.webp'); }
 [data-sprite='boss6'] { --sprite-image: url('assets/boss6.webp'); }
-
-/* Classmates and after-school dungeons */
 [data-sprite='mob1'] { --sprite-image: url('assets/mob1.webp'); }
-[data-sprite='mob2'] { --sprite-image: url('assets/mob2.webp'); }
 [data-sprite='mob3'] { --sprite-image: url('assets/mob3.webp'); }
-[data-sprite='mob4'] { --sprite-image: url('assets/mob4.webp'); }
 [data-sprite='mob5'] { --sprite-image: url('assets/mob5.webp'); }
-[data-sprite='mob6'] { --sprite-image: url('assets/mob6.webp'); }
-[data-sprite='mob7'] { --sprite-image: url('assets/mob7.webp'); }
-[data-sprite='mob8'] { --sprite-image: url('assets/mob8.webp'); }
 [data-sprite='dboss-store'] { --sprite-image: url('assets/dboss-store.webp'); }
-[data-sprite='dboss-quiz'] { --sprite-image: url('assets/dboss-quiz.webp'); }
 [data-sprite='dboss-sports'] { --sprite-image: url('assets/dboss-sports.webp'); }
 [data-map='d-coin'] { --map-image: url('assets/dungeon-store.webp'); }
 [data-map='d-ticket'] { --map-image: url('assets/dungeon-quiz.webp'); }
 [data-map='d-badge'] { --map-image: url('assets/dungeon-sports.webp'); }
-/* 중·고교 대결장 배경과 교복 모습(진학 축하) */
-
 [data-map='a01'] { --map-image: url('assets/map-a01.webp'); }
 [data-map='a02'] { --map-image: url('assets/map-a02.webp'); }
 [data-map='a03'] { --map-image: url('assets/map-a03.webp'); }
@@ -52,19 +37,6 @@
 [data-map='d-exam'] { --map-image: url('assets/exam-hall.webp'); }
 [data-track='academy-entry'] { --map-image: url('assets/map-academy-entry.webp'); }
 [data-portrait='boy'] { --portrait-image: url('assets/stand-boy.webp'); }
-[data-portrait='girl'] { --portrait-image: url('assets/stand-girl.webp'); }
-[data-portrait='mob1'] { --portrait-image: url('assets/stand-mob1.webp'); }
-[data-portrait='mob2'] { --portrait-image: url('assets/stand-mob2.webp'); }
-[data-portrait='mob3'] { --portrait-image: url('assets/stand-mob3.webp'); }
-[data-portrait='mob4'] { --portrait-image: url('assets/stand-mob4.webp'); }
-[data-portrait='mob5'] { --portrait-image: url('assets/stand-mob5.webp'); }
-[data-portrait='mob6'] { --portrait-image: url('assets/stand-mob6.webp'); }
-[data-portrait='mob7'] { --portrait-image: url('assets/stand-mob7.webp'); }
-[data-portrait='mob8'] { --portrait-image: url('assets/stand-mob8.webp'); }
-[data-portrait='boss1'] { --portrait-image: url('assets/stand-boss1.webp'); }
-[data-portrait='boss2'] { --portrait-image: url('assets/stand-boss2.webp'); }
-[data-portrait='boss3'] { --portrait-image: url('assets/stand-boss3.webp'); }
-[data-portrait='boss4'] { --portrait-image: url('assets/stand-boss4.webp'); }
 .contest-chip[data-contest='boxing'] { --contest-icon: url('assets/icon-boxing.webp'); }
 .contest-chip[data-contest='kickboxing'] { --contest-icon: url('assets/icon-kickboxing.webp'); }
 .contest-chip[data-contest='muaythai'] { --contest-icon: url('assets/icon-muaythai.webp'); }
@@ -90,12 +62,6 @@
 [data-active-art='cheer'] { --skill-art: url('assets/skill-cheer.webp'); }
 [data-active-art='lunch'] { --skill-art: url('assets/skill-lunch.webp'); }
 [data-active-art='sprint'] { --skill-art: url('assets/skill-sprint.webp'); }
-[data-sprite='boy-middle'] { --sprite-image: url('assets/boy-middle.webp'); }
-[data-sprite='boy-high'] { --sprite-image: url('assets/boy-high.webp'); }
-[data-sprite='girl-middle'] { --sprite-image: url('assets/girl-middle.webp'); }
-[data-sprite='girl-high'] { --sprite-image: url('assets/girl-high.webp'); }
-
-/* Codex 6차: 여성 동료 16명(S급)과 남자 건달·두목 */
 [data-sprite='mate1'] { --sprite-image: url('assets/mate1.webp'); }
 [data-sprite='mate2'] { --sprite-image: url('assets/mate2.webp'); }
 [data-sprite='mate3'] { --sprite-image: url('assets/mate3.webp'); }
@@ -140,5 +106,4 @@
 [data-portrait='mate14'] { --portrait-image: url('assets/stand-mate14.webp'); }
 [data-portrait='mate15'] { --portrait-image: url('assets/stand-mate15.webp'); }
 [data-portrait='mate16'] { --portrait-image: url('assets/stand-mate16.webp'); }
-/* Codex 5차: 챔피언 벨트를 든 주인공(졸업·지역 제패 축하) */
 [data-portrait='boy-win'] { --portrait-image: url('assets/stand-boy-win.webp'); }
