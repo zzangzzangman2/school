@@ -30,7 +30,7 @@
 
 ## 현재 작업 폴더
 
-- 프로젝트 루트는 `C:/Users/godho/Documents/Codex/2026-11-16/new-chat/`입니다.
+- 프로젝트 루트는 `C:/Users/godho/Downloads/bang/`입니다.
 - 게임 소스는 `work/recess/`, 게임에 연결된 이미지는 `work/recess/assets/`에 있습니다.
 - 현재 그림과 설정 안내는 `work/recess/README.md`에 있습니다.
 - 같은 인물의 기준 그림으로 `stand-mate1.webp`~`stand-mate16.webp`, 전투 그림으로 `mate1.webp`~`mate16.webp`를 확인할 수 있습니다.
