@@ -107,8 +107,9 @@ with sync_playwright() as playwright:
     page.clock.run_for(100)
     expect(page.locator('#party-bar .party-card').nth(3).locator('.pc-cd')).to_have_text(re.compile(r'^[56]$'))
     page.get_by_role('button', name='출전 자리 편성').click()
-    page.locator('#party-bar .party-card').nth(3).click()
-    page.locator('#party-bar .party-card').nth(0).click()
+    # 편성 모드의 카드는 계속 흔들려(pc-wiggle) '움직이지 않을 때' 클릭을 기다리면 가끔 멈춘다 → 강제 클릭
+    page.locator('#party-bar .party-card').nth(3).click(force=True)
+    page.locator('#party-bar .party-card').nth(0).click(force=True)
     swapped = page.evaluate("[state.party[0], state.party[3], state.cooldowns.mate0, state.cooldowns.mate3 || 0]")
     assert swapped[:2] == ["mate8", None] and swapped[2] > 4 and swapped[3] == 0, swapped
     page.get_by_role('button', name='출전 자리 편성').click()
